@@ -1,18 +1,17 @@
 package org.jeecg.common.util;
 
-
 import org.jeecg.common.exception.JeecgBootAssertException;
 
 /**
- * 断言检查工具
- * for for [QQYUN-10990]AIRAG
+ * * 断言检查工具
+ * 
  * @author chenrui
  * @date 2017-06-22 10:05:56
  */
 public class AssertUtils {
 
     /**
-     * 确保对象为空,如果不为空抛出异常
+     * * 断言对象为空
      *
      * @param msg
      * @param obj
@@ -26,9 +25,8 @@ public class AssertUtils {
         }
     }
 
-
     /**
-     * 确保对象不为空,如果为空抛出异常
+     * * 断言对象不为空
      *
      * @param msg
      * @param obj
@@ -42,9 +40,8 @@ public class AssertUtils {
         }
     }
 
-
     /**
-     * 验证对象是否相同
+     * * 断言对象相等
      *
      * @param message
      * @param expected
@@ -52,8 +49,7 @@ public class AssertUtils {
      * @author chenrui
      * @date 2018/9/12 15:45
      */
-    public static void assertEquals(String message, Object expected,
-                                    Object actual) {
+    public static void assertEquals(String message, Object expected, Object actual) {
         if (oConvertUtils.isEqual(expected, actual)) {
             return;
         }
@@ -61,7 +57,7 @@ public class AssertUtils {
     }
 
     /**
-     * 验证不相同
+     * * 断言对象不相等
      *
      * @param message
      * @param expected
@@ -69,16 +65,14 @@ public class AssertUtils {
      * @author chenrui
      * @date 2018/9/12 15:45
      */
-    public static void assertNotEquals(String message, Object expected,
-                                       Object actual) {
+    public static void assertNotEquals(String message, Object expected, Object actual) {
         if (oConvertUtils.isEqual(expected, actual)) {
             throw new JeecgBootAssertException(message);
         }
-
     }
 
     /**
-     * 验证是否相等
+     * * 断言为同一个内存地址的对象
      *
      * @param message
      * @param expected
@@ -86,8 +80,7 @@ public class AssertUtils {
      * @author chenrui
      * @date 2018/9/12 15:45
      */
-    public static void assertSame(String message, Object expected,
-                                  Object actual) {
+    public static void assertSame(String message, Object expected, Object actual) {
         if (expected == actual) {
             return;
         }
@@ -95,7 +88,7 @@ public class AssertUtils {
     }
 
     /**
-     * 验证不相等
+     * * 断言为不同一个内存地址的对象
      *
      * @param message
      * @param unexpected
@@ -103,15 +96,14 @@ public class AssertUtils {
      * @author chenrui
      * @date 2018/9/12 15:45
      */
-    public static void assertNotSame(String message, Object unexpected,
-                                     Object actual) {
+    public static void assertNotSame(String message, Object unexpected, Object actual) {
         if (unexpected == actual) {
             throw new JeecgBootAssertException(message);
         }
     }
 
     /**
-     * 验证是否为真
+     * * 断言为真
      *
      * @param message
      * @param condition
@@ -123,7 +115,7 @@ public class AssertUtils {
     }
 
     /**
-     * 验证 condition是否为false
+     * * 断言为假
      *
      * @param message
      * @param condition
@@ -132,9 +124,8 @@ public class AssertUtils {
         assertTrue(message, !condition);
     }
 
-
     /**
-     * 验证是否存在
+     * * 断言存在
      *
      * @param message
      * @param obj
@@ -153,7 +144,7 @@ public class AssertUtils {
     }
 
     /**
-     * 验证是否不存在
+     * * 断言不存在
      *
      * @param message
      * @param obj
@@ -163,7 +154,6 @@ public class AssertUtils {
      * @author chenrui
      * @date 2018/1/31 22:14
      */
-
     public static <T> void assertNotIn(String message, T obj, T... objs) {
         assertNotEmpty(message, obj);
         assertNotEmpty(message, objs);
@@ -172,9 +162,8 @@ public class AssertUtils {
         }
     }
 
-
     /**
-     * 确保src大于des
+     * * 断言 src 大于 des
      *
      * @param message
      * @param src
@@ -190,7 +179,7 @@ public class AssertUtils {
     }
 
     /**
-     * 确保src大于等于des
+     * * 断言 src 大于等于 des
      *
      * @param message
      * @param src
@@ -205,9 +194,8 @@ public class AssertUtils {
         throw new JeecgBootAssertException(message);
     }
 
-
     /**
-     * 确保src小于des
+     * * 断言 src 小于 des
      *
      * @param message
      * @param src
@@ -222,7 +210,7 @@ public class AssertUtils {
     }
 
     /**
-     * 确保src小于等于des
+     * * 断言 src 小于等于 des
      *
      * @param message
      * @param src

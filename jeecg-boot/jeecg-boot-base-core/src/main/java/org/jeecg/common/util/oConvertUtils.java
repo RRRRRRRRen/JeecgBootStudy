@@ -886,14 +886,6 @@ public class oConvertUtils {
 		}
 	}
 
-//	public static void main(String[] args) {
-////		String[] a = new String[]{"1", "2"};
-////		String[] b = new String[]{"2", "1"};
-//		Integer a = null;
-//		Integer b = 1;
-//		System.out.println(oConvertUtils.isEqual(a, b));
-//	}
-	
 	/**
 	 * 判断 list 是否不为空
 	 *
@@ -1070,8 +1062,8 @@ public class oConvertUtils {
 
 
 	/**
-	 * 判断对象是否不为空
-	 * for for [QQYUN-10990]AIRAG
+	 * * 判断对象是否不为空
+	 * 
 	 * @param object
 	 * @return
 	 * @author chenrui
@@ -1082,8 +1074,10 @@ public class oConvertUtils {
 	}
 
 	/**
-	 * 如果src大于des返回true
-	 * for [QQYUN-10990]AIRAG
+	 * * 判断 src 是否大于 des
+	 * 
+	 * * 所有的包装类（Integer、Long、Byte、Double、Float、Short）都是抽象类 Number 的子类。
+	 * 
 	 * @param src
 	 * @param des
 	 * @return
@@ -1094,6 +1088,11 @@ public class oConvertUtils {
 		if (null == src || null == des) {
 			throw new IllegalArgumentException("参数不能为空");
 		}
+		/**
+		 * * Number类的doubleValue()方法返回此Number对象的值作为double类型
+		 * 
+		 * * 本质就是强制转换
+		 */
 		if (src.doubleValue() > des.doubleValue()) {
 			return true;
 		}
@@ -1101,8 +1100,8 @@ public class oConvertUtils {
 	}
 
 	/**
-	 * 如果src大于等于des返回true
-	 * for [QQYUN-10990]AIRAG
+	 * * 判断 src 是否大于等于 des
+	 * 
 	 * @param src
 	 * @param des
 	 * @return
