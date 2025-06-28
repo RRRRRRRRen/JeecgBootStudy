@@ -14,19 +14,21 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class BrowserUtils {
 
-    /**
-     * 判断是否是IE
-     * @param request
-     * @return
-     */
+	/**
+	 * * 判断是否是IE
+	 * * 考虑特殊情况 IE11 需要使用 rv:11.0 判断
+	 * 
+	 * @param request
+	 * @return
+	 */
 	public static boolean isIe(HttpServletRequest request) {
 		return (request.getHeader("USER-AGENT").toLowerCase().indexOf("msie") > 0 || request
 				.getHeader("USER-AGENT").toLowerCase().indexOf("rv:11.0") > 0) ? true
-				: false;
+						: false;
 	}
 
 	/**
-	 * 获取IE版本
+	 * * 获取IE版本
 	 * 
 	 * @param request
 	 * @return
@@ -50,10 +52,10 @@ public class BrowserUtils {
 	}
 
 	/**
-	 * 获取浏览器类型
+	 * * 获取浏览器类型
 	 * 
 	 * @param request
-	 * @return
+	 * @return BrowserType
 	 */
 	public static BrowserType getBrowserType(HttpServletRequest request) {
 		BrowserType browserType = null;
@@ -93,12 +95,23 @@ public class BrowserUtils {
 		return browserType;
 	}
 
+	/**
+	 * * 根据 HttpServletRequest header USER-AGENT 判断浏览器是否为某种类型
+	 * 
+	 * @param request
+	 * @param brosertype
+	 * @return
+	 */
 	private static boolean getBrowserType(HttpServletRequest request,
 			String brosertype) {
 		return request.getHeader("USER-AGENT").toLowerCase()
 				.indexOf(brosertype) > 0 ? true : false;
 	}
 
+	/**
+	 * * 浏览器标志常量
+	 * * 用于区分不同浏览器类型的标志，依然是根据USER-AGENT是否包含来区分
+	 */
 	private final static String IE11 = "rv:11.0";
 	private final static String IE10 = "MSIE 10.0";
 	private final static String IE9 = "MSIE 9.0";
@@ -116,6 +129,12 @@ public class BrowserUtils {
 	private final static String OTHER = "其它";
 	private final static String CAMINO = "Camino";
 
+	/**
+	 * * 根据 HttpServletRequest header USER-AGENT 获取浏览器标志符
+	 * 
+	 * @param request
+	 * @return 浏览器类型字符串
+	 */
 	public static String checkBrowse(HttpServletRequest request) {
 		String userAgent = request.getHeader("USER-AGENT");
 		if (regex(OPERA, userAgent)) {
@@ -163,50 +182,97 @@ public class BrowserUtils {
 		return OTHER;
 	}
 
+	/**
+	 * * 判断给定的字符串 str 是否包含与指定正则表达式 regex 相匹配的内容。
+	 * 
+	 * @param regex
+	 * @param str
+	 * @return
+	 */
 	public static boolean regex(String regex, String str) {
+		/**
+		 * * 将给定的正则表达式 regex 编译成一个 Pattern 对象
+		 * 
+		 * * Pattern.compile 方法将给定的正则表达式 regex 编译成一个 Pattern 对象
+		 */
 		Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
+		/**
+		 * * 创建了一个 Matcher 对象
+		 * 
+		 * * 将用于在字符串 str 中查找与 Pattern 对象 p 匹配的子序列
+		 */
 		Matcher m = p.matcher(str);
+		/**
+		 * * 尝试找到与模式匹配的下一个子序列
+		 * 
+		 * * 如果找到了匹配项，则返回 true；否则返回 false
+		 */
 		return m.find();
 	}
 
-	
+	/**
+	 * * 获取浏览器语言
+	 * * 根据请求的语言设置返回对应的语言标识符
+	 * 
+	 * @param request
+	 * @return 语言标识符
+	 */
 	private static Map<String, String> langMap = new HashMap<String, String>();
 	private final static String ZH = "zh";
 	private final static String ZH_CN = "zh-cn";
-	
+
 	private final static String EN = "en";
 	private final static String EN_US = "en";
-	
-	
-	static 
-	{
+
+	/**
+	 * * 初始化语言映射表
+	 * * 将语言代码映射到对应的语言标识符
+	 * * 例如，将 "zh" 映射到 "zh-cn"，将 "en" 映射到 "en-us"
+	 */
+	static {
 		langMap.put(ZH, ZH_CN);
 		langMap.put(EN, EN_US);
 	}
-	
+
+	/**
+	 * * 获取浏览器语言
+	 * * 根据请求的语言设置返回对应的语言标识符
+	 * 
+	 * @param request HttpServletRequest 对象
+	 * @return 语言标识符
+	 */
 	public static String getBrowserLanguage(HttpServletRequest request) {
-		
+
 		String browserLang = request.getLocale().getLanguage();
-		String browserLangCode = (String)langMap.get(browserLang);
-		
-		if(browserLangCode == null)
-		{
+		String browserLangCode = (String) langMap.get(browserLang);
+
+		if (browserLangCode == null) {
 			browserLangCode = EN_US;
 		}
 		return browserLangCode;
 	}
 
-    /** 判断请求是否来自电脑端 */
-    public static boolean isDesktop(HttpServletRequest request) {
-        return !isMobile(request);
-    }
+	/**
+	 * * 判断请求是否来自PC端
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isDesktop(HttpServletRequest request) {
+		return !isMobile(request);
+	}
 
-    /** 判断请求是否来自移动端 */
-    public static boolean isMobile(HttpServletRequest request) {
-        String ua = request.getHeader("User-Agent").toLowerCase();
-        String type = "(phone|pad|pod|iphone|ipod|ios|ipad|android|mobile|blackberry|iemobile|mqqbrowser|juc|fennec|wosbrowser|browserng|webos|symbian|windows phone)";
-        Pattern pattern = Pattern.compile(type);
-        return pattern.matcher(ua).find();
-    }
+	/**
+	 * * 判断请求是否来自移动端
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isMobile(HttpServletRequest request) {
+		String ua = request.getHeader("User-Agent").toLowerCase();
+		String type = "(phone|pad|pod|iphone|ipod|ios|ipad|android|mobile|blackberry|iemobile|mqqbrowser|juc|fennec|wosbrowser|browserng|webos|symbian|windows phone)";
+		Pattern pattern = Pattern.compile(type);
+		return pattern.matcher(ua).find();
+	}
 
 }

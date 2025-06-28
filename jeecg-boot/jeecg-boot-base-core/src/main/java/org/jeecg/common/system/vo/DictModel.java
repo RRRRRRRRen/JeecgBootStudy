@@ -14,17 +14,8 @@ import com.alibaba.fastjson.JSONObject;
  */
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/**
- * * 自动生成常用的 getter、setter、toString、equals 和 hashCode 方法，简化代码。
- */
 import lombok.Data;
-/**
- * * 扩展 equals 和 hashCode 方法支持 callSuper 属性
- */
 import lombok.EqualsAndHashCode;
-/**
- * * 支持链式调用（如 setXxx().setYyy()）
- */
 import lombok.experimental.Accessors;
 
 /**
@@ -32,48 +23,20 @@ import lombok.experimental.Accessors;
  * @author: jeecg-boot
  */
 @Data
-/**
- * * 不考虑父类字段的比较
- */
 @EqualsAndHashCode(callSuper = false)
-/**
- * * 开启链式调用
- */
 @Accessors(chain = true)
-/**
- * * 反序列化时忽略未知属性
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DictModel implements Serializable {
-	/**
-	 * * 序列化ID
-	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * * 无参构造函数
-	 */
 	public DictModel() {
 	}
 
-	/**
-	 * * 带参数的构造函数
-	 * 
-	 * @param value 字典值
-	 * @param text  字典文本
-	 */
 	public DictModel(String value, String text) {
 		this.value = value;
 		this.text = text;
 	}
 
-	/**
-	 * * 带参数的构造函数
-	 * 
-	 * @param value 字典值
-	 * @param text  字典文本
-	 * @param color 字典颜色
-	 */
 	public DictModel(String value, String text, String color) {
 		this.value = value;
 		this.text = text;
@@ -81,21 +44,20 @@ public class DictModel implements Serializable {
 	}
 
 	/**
-	 * * 字典value
+	 * 字典value
 	 */
 	private String value;
 	/**
-	 * * 字典文本
+	 * 字典文本
 	 */
 	private String text;
 	/**
-	 * * 字典颜色
+	 * 字典颜色
 	 */
 	private String color;
 
 	/**
-	 * * 获取字典文本
-	 * * 特殊用途： JgEditableTable
+	 * 特殊用途： JgEditableTable
 	 * 
 	 * @return
 	 */
@@ -104,15 +66,13 @@ public class DictModel implements Serializable {
 	}
 
 	/**
-	 * * 获取字典文本
-	 * * 特殊用途： vue3 Select组件
+	 * 特殊用途： vue3 Select组件
 	 */
 	public String getLabel() {
 		return this.text;
 	}
 
 	/**
-	 * TODO 未知的使用方法
 	 * * 用于表单设计器 关联记录表数据存储
 	 * 
 	 * * 特殊用途： 存储与字典相关的额外结构化数据（如扩展属性、动态配置等）。
