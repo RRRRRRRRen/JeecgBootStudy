@@ -1,23 +1,22 @@
 package org.jeecg.modules.system.model;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * 登录表单
+ * * 登录表单
  *
  * @Author scott
- * @since  2019-01-18
+ * @since 2019-01-18
  */
-@Schema(description="登录对象")
+@Schema(description = "登录对象")
 public class SysLoginModel {
-	@Schema(description = "账号")
+    @Schema(description = "账号")
     private String username;
-	@Schema(description = "密码")
+    @Schema(description = "密码")
     private String password;
-	@Schema(description = "验证码")
+    @Schema(description = "验证码")
     private String captcha;
-	@Schema(description = "验证码key")
+    @Schema(description = "验证码key")
     private String checkKey;
 
     public String getUsername() {
@@ -44,12 +43,12 @@ public class SysLoginModel {
         this.captcha = captcha;
     }
 
-	public String getCheckKey() {
-		return checkKey;
-	}
+    public String getCheckKey() {
+        return checkKey;
+    }
 
-	public void setCheckKey(String checkKey) {
-		this.checkKey = checkKey;
-	}
-    
+    public void setCheckKey(String checkKey) {
+        this.checkKey = checkKey;
+    }
+
 }
