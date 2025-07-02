@@ -50,6 +50,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/sys")
 @Tag(name = "用户登录")
+/**
+ * * @Slf4j 注解将在类中生成一个log方法
+ */
 @Slf4j
 public class LoginController {
 	@Autowired
@@ -125,44 +128,87 @@ public class LoginController {
 		 * * 读取 redis 中的验证码
 		 */
 		Object checkCode = redisUtil.get(realKey);
-		// 当进入登录页时，有一定几率出现验证码错误 #1714
+
+		/**
+		 * * redis 中的验证码 checkCode 为空 或者 验证码不匹配
+		 * * 则返回错误提示, code 返回 412 (Precondition Failed)，专用于验证失败的状态码
+		 */
 		if (checkCode == null || !checkCode.toString().equals(lowerCaseCaptcha)) {
 			log.warn("验证码错误，key= {} , Ui checkCode= {}, Redis checkCode = {}", sysLoginModel.getCheckKey(), lowerCaseCaptcha,
 					checkCode);
 			result.error500("验证码错误");
-			// 改成特殊的code 便于前端判断
 			result.setCode(HttpStatus.PRECONDITION_FAILED.value());
 			return result;
 		}
 
-		// step.2 校验用户是否存在且有效
+		/**
+		 * * ==================== step.2 校验用户是否存在且有效 ====================
+		 */
+		/**
+		 * * 这行创建了一个查询构造器对象 queryWrapper，用于封装数据库查询条件。
+		 * * - SysUser 是你要查询的实体类（对应数据库的用户表）。
+		 */
 		LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+		/**
+		 * * 设置一个查询条件
+		 * * • SysUser::getUsername 是一个方法引用，指向 SysUser 类中的 getUsername() 方法。
+		 * * • username 是要比对的值（应该是一个变量，代表某个用户输入的用户名）。
+		 * * • eq 表示 “等于”，也就是 = 条件。
+		 * * 生成sql： WHERE username = 'xxx'
+		 */
 		queryWrapper.eq(SysUser::getUsername, username);
+		/**
+		 * * 同过 mybatis 调用 sysUserService 进行查询
+		 */
 		SysUser sysUser = sysUserService.getOne(queryWrapper);
+		/**
+		 * * 校验用户是否有效
+		 * * * 如果用户不存在，则返回错误提示
+		 */
 		result = sysUserService.checkUserIsEffective(sysUser);
 		if (!result.isSuccess()) {
 			return result;
 		}
 
-		// step.3 校验用户名或密码是否正确
+		/**
+		 * * ==================== step.3 校验用户名或密码是否正确 ====================
+		 */
+		// * 加密密码
 		String userpassword = PasswordUtil.encrypt(username, password, sysUser.getSalt());
+		// * 数据库中的密码
 		String syspassword = sysUser.getPassword();
+		/**
+		 * * 如果数据库中的密码与加密后的密码不一致
+		 * * - 增加登录失败次数
+		 * * - 返回错误提示
+		 */
 		if (!syspassword.equals(userpassword)) {
 			addLoginFailOvertimes(username);
 			result.error500("用户名或密码错误");
 			return result;
 		}
 
-		// step.4 登录成功获取用户信息
+		/**
+		 * * ==================== step.4 登录成功获取用户信息 ====================
+		 */
 		userInfo(sysUser, result, request);
 
-		// step.5 登录成功删除验证码
+		/**
+		 * * ==================== step.5 登录成功删除验证码 ====================
+		 */
+		// * 删除验证码
 		redisUtil.del(realKey);
+		// * 删除登录失败次数
 		redisUtil.del(CommonConstant.LOGIN_FAIL + username);
 
-		// step.6 记录用户登录日志
+		/**
+		 * * ==================== step.6 记录用户登录日志 ====================
+		 */
+		// * 创建登录用户对象
 		LoginUser loginUser = new LoginUser();
+		// * 复制用户信息到登录用户对象
 		BeanUtils.copyProperties(sysUser, loginUser);
+		// * 记录用户登录日志
 		baseCommonService.addLog("用户名: " + username + ",登录成功！", CommonConstant.LOG_TYPE_1, null, loginUser);
 		return result;
 	}
