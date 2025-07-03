@@ -258,7 +258,7 @@ public class LoginController {
 	}
 
 	/**
-	 * 退出登录
+	 * * 退出登录
 	 * 
 	 * @param request
 	 * @param response
@@ -266,28 +266,33 @@ public class LoginController {
 	 */
 	@RequestMapping(value = "/logout")
 	public Result<Object> logout(HttpServletRequest request, HttpServletResponse response) {
-		// 用户退出逻辑
+		// * 获取用户token
 		String token = request.getHeader(CommonConstant.X_ACCESS_TOKEN);
+		// * 判断用户token是否存在，不存在则返回错误信息
 		if (oConvertUtils.isEmpty(token)) {
 			return Result.error("退出登录失败！");
 		}
+		// * 在 token 中获取 username
 		String username = JwtUtil.getUsername(token);
+		// * 根据用户名查询用户信息
 		LoginUser sysUser = sysBaseApi.getUserByName(username);
 		if (sysUser != null) {
-			// update-begin--Author:wangshuai Date:20200714 for：登出日志没有记录人员
+			// * 记录退出登录日志
 			baseCommonService.addLog("用户名: " + sysUser.getRealname() + ",退出成功！", CommonConstant.LOG_TYPE_1, null, sysUser);
-			// update-end--Author:wangshuai Date:20200714 for：登出日志没有记录人员
+			// * 记录退出登录日志
 			log.info(" 用户名:  " + sysUser.getRealname() + ",退出成功！ ");
-			// 清空用户登录Token缓存
+			// * 清空用户登录Token缓存
 			redisUtil.del(CommonConstant.PREFIX_USER_TOKEN + token);
-			// 清空用户登录Shiro权限缓存
+			// * 清空用户登录Shiro权限缓存
 			redisUtil.del(CommonConstant.PREFIX_USER_SHIRO_CACHE + sysUser.getId());
-			// 清空用户的缓存信息（包括部门信息），例如sys:cache:user::<username>
+			// * 清空用户的缓存信息（包括部门信息），例如sys:cache:user::<username>
 			redisUtil.del(String.format("%s::%s", CacheConstant.SYS_USERS_CACHE, sysUser.getUsername()));
-			// 调用shiro的logout
+			// * 调用shiro的logout
 			SecurityUtils.getSubject().logout();
+			// * 返回成功
 			return Result.ok("退出登录成功！");
 		} else {
+			// * 用户信息不存在，则返回错误信息
 			return Result.error("Token无效!");
 		}
 	}
@@ -591,9 +596,9 @@ public class LoginController {
 	}
 
 	/**
-	 * 获取加密字符串
+	 * * 获取加密字符串
 	 * 
-	 * @return
+	 * @return Result<Map<String, String>>
 	 */
 	@GetMapping(value = "/getEncryptedString")
 	public Result<Map<String, String>> getEncryptedString() {
