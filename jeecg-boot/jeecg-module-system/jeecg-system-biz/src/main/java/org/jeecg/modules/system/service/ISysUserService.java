@@ -107,10 +107,10 @@ public interface ISysUserService extends IService<SysUser> {
 	public List<String> getRole(String username);
 
 	/**
-	 * 获取根据登录用户的角色获取动态首页
+	 * * 获取根据登录用户的角色获取动态首页
 	 *
-	 * @param username
-	 * @param version 前端UI版本
+	 * @param username 用户名
+	 * @param version  前端UI版本
 	 * @return
 	 */
 	public SysRoleIndex getDynamicIndexByUserRole(String username,String version);

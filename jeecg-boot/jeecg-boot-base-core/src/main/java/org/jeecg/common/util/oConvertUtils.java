@@ -43,6 +43,15 @@ public class oConvertUtils {
 		return (false);
 	}
 	
+	/**
+	 * * 判断对象是否为空
+	 * * - 1. 判断对象是否为 null
+	 * * - 2. 判断对象是否为 ""
+	 * * - 3. 判断对象是否为 "null"
+	 * 
+	 * @param object
+	 * @return
+	 */
 	public static boolean isNotEmpty(Object object) {
 		if (object != null && !"".equals(object) && !object.equals(CommonConstant.STRING_NULL)) {
 			return (true);
@@ -414,22 +423,25 @@ public class oConvertUtils {
 	}
 
 	/**
-	 * 判断元素是否在数组内
+	 * * 判断 字符串 是否在 字符串数组 内
 	 * 
-	 * @param child
-	 * @param all
+	 * @param child 需要判断的元素
+	 * @param all   目标数组
 	 * @return
 	 */
 	public static boolean isIn(String child, String[] all) {
+		// * all为空直接返回false
 		if (all == null || all.length == 0) {
 			return false;
 		}
+		// * 循环判断
 		for (int i = 0; i < all.length; i++) {
 			String aSource = all[i];
 			if (aSource.equals(child)) {
 				return true;
 			}
 		}
+		// * 其他情况直接返回 false
 		return false;
 	}
 

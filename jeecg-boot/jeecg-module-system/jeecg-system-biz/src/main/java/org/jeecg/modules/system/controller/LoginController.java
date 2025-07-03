@@ -214,44 +214,68 @@ public class LoginController {
 	}
 
 	/**
-	 * 【vue3专用】获取用户信息
+	 * * 获取用户信息
 	 */
 	@GetMapping("/user/getUserInfo")
 	public Result<JSONObject> getUserInfo(HttpServletRequest request) {
+		// * 获取当前时间戳
 		long start = System.currentTimeMillis();
+		// * 初始化 JSONObject 返回结果
 		Result<JSONObject> result = new Result<JSONObject>();
+		// * 从 token 中获取用户名
 		String username = JwtUtil.getUserNameByToken(request);
+
+		// * 判断用户名是否为空
 		if (oConvertUtils.isNotEmpty(username)) {
-			// 根据用户名查询用户信息
+			// * 根据用户名查询用户信息
 			SysUser sysUser = sysUserService.getUserByName(username);
+			// * 初始化返回数据
 			JSONObject obj = new JSONObject();
+			// * 获取 用户信息 耗时
 			log.info("1 获取用户信息耗时（用户基础信息）" + (System.currentTimeMillis() - start) + "毫秒");
 
-			// update-begin---author:scott ---date:2022-06-20 for：vue3前端，支持自定义首页-----------
+			// * 获取相应头 X-Version 中的版本信息
 			String vue3Version = request.getHeader(CommonConstant.VERSION);
-			// update-begin---author:liusq ---date:2022-06-29
-			// for：接口返回值修改，同步修改这里的判断逻辑-----------
+			// * 获取用户角色首页配置详情
 			SysRoleIndex roleIndex = sysUserService.getDynamicIndexByUserRole(username, vue3Version);
+
+			/**
+			 * * 1. 如果版本信息为空
+			 * * 2. 角色首页配置不为空
+			 * * 3. 角色首页配置路由地址不为空
+			 */
 			if (oConvertUtils.isNotEmpty(vue3Version) && roleIndex != null && oConvertUtils.isNotEmpty(roleIndex.getUrl())) {
+				// * 设置首页为角色首页配置的首页
 				String homePath = roleIndex.getUrl();
+				// * 如果首页字符串不是 / 开头，则补充 /
 				if (!homePath.startsWith(SymbolConstant.SINGLE_SLASH)) {
 					homePath = SymbolConstant.SINGLE_SLASH + homePath;
 				}
+				// * 在 userInfo 中设置首页
 				sysUser.setHomePath(homePath);
 			}
-			// update-begin---author:liusq ---date:2022-06-29
-			// for：接口返回值修改，同步修改这里的判断逻辑-----------
-			// update-end---author:scott ---date::2022-06-20
-			// for：vue3前端，支持自定义首页--------------
+			// * 获取 首页面配置 耗时
 			log.info("2 获取用户信息耗时 (首页面配置)" + (System.currentTimeMillis() - start) + "毫秒");
 
+			// * 设置用户信息字段
 			obj.put("userInfo", sysUser);
+
+			// * 设置所有字典信息
 			obj.put("sysAllDictItems", sysDictService.queryAllDictItems());
+			// * 获取 字典数据 耗时
 			log.info("3 获取用户信息耗时 (字典数据)" + (System.currentTimeMillis() - start) + "毫秒");
 
+			// * 设置返回数据 result 字段
 			result.setResult(obj);
+			/**
+			 * * code 200
+			 * * message ""
+			 * * success true
+			 * * result obj
+			 */
 			result.success("");
 		}
+		// * 获取 用户信息 总耗时
 		log.info("end 获取用户信息耗时 " + (System.currentTimeMillis() - start) + "毫秒");
 		return result;
 
