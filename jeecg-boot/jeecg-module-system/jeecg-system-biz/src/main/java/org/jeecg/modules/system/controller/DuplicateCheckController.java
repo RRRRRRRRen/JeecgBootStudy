@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * * 检验数据库重复数据
+ * 
  * @Title: DuplicateCheckAction
  * @Description: 重复校验工具
  * @Author 张代浩
@@ -24,41 +26,41 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 @RestController
 @RequestMapping("/sys/duplicate")
-@Tag(name="重复校验")
+@Tag(name = "重复校验")
 public class DuplicateCheckController {
 
+	/**
+	 * * 字典服务
+	 */
 	@Autowired
 	ISysDictService sysDictService;
 
 	/**
-	 * 校验数据是否在系统中是否存在
+	 * * 校验数据是否在系统中是否存在
 	 * 
 	 * @return
 	 */
 	@RequestMapping(value = "/check", method = RequestMethod.GET)
-	@Operation(summary ="重复校验接口")
+	@Operation(summary = "重复校验接口")
 	public Result<String> doDuplicateCheck(DuplicateCheckVo duplicateCheckVo, HttpServletRequest request) {
-		log.debug("----duplicate check------："+ duplicateCheckVo.toString());
-		
-		// 1.填值为空，直接返回
-		if(StringUtils.isEmpty(duplicateCheckVo.getFieldVal())){
+		log.debug("----duplicate check------：" + duplicateCheckVo.toString());
+
+		// * 1.填值为空，直接返回
+		if (StringUtils.isEmpty(duplicateCheckVo.getFieldVal())) {
 			Result rs = new Result();
 			rs.setCode(500);
 			rs.setSuccess(true);
 			rs.setMessage("数据为空,不作处理！");
 			return rs;
 		}
-		
-		// 2.返回结果
+
+		// * 2.返回结果
 		if (sysDictService.duplicateCheckData(duplicateCheckVo)) {
-			// 该值可用
 			return Result.ok("该值可用！");
 		} else {
-			// 该值不可用
 			log.info("该值不可用，系统中已存在！");
 			return Result.error("该值不可用，系统中已存在！");
 		}
 	}
-
 
 }

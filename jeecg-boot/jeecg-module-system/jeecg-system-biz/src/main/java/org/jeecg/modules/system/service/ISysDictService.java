@@ -23,7 +23,7 @@ import java.util.Map;
 public interface ISysDictService extends IService<SysDict> {
 
 	/**
-	 *  校验数据是否可用，不存在重复数据
+	 *  * 校验数据是否可用，不存在重复数据
 	 *  
 	 * @param duplicateCheckVo
 	 * @return
