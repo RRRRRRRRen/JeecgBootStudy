@@ -28,20 +28,21 @@ import java.util.Map;
  *
  * 备注:Demo工程编码采用UTF-8
  * 国际短信发送请勿参照此DEMO
+ * 
  * @author: jeecg-boot
  */
 public class DySmsHelper {
-	
-	private final static Logger logger=LoggerFactory.getLogger(DySmsHelper.class);
 
-    /**产品名称:云通信短信API产品,开发者无需替换*/
+    private final static Logger logger = LoggerFactory.getLogger(DySmsHelper.class);
+
+    /** 产品名称:云通信短信API产品,开发者无需替换 */
     static final String PRODUCT = "Dysmsapi";
-    /**产品域名,开发者无需替换*/
+    /** 产品域名,开发者无需替换 */
     static final String DOMAIN = "dysmsapi.aliyuncs.com";
 
-    /**TODO 此处需要替换成开发者自己的AK(在阿里云访问控制台寻找)*/
-    static  String accessKeyId;
-    static  String accessKeySecret;
+    /** TODO 此处需要替换成开发者自己的AK(在阿里云访问控制台寻找) */
+    static String accessKeyId;
+    static String accessKeySecret;
 
     public static void setAccessKeyId(String accessKeyId) {
         DySmsHelper.accessKeyId = accessKeyId;
@@ -58,92 +59,93 @@ public class DySmsHelper {
     public static String getAccessKeySecret() {
         return accessKeySecret;
     }
-    
-    
-    public static boolean sendSms(String phone, JSONObject templateParamJson, DySmsEnum dySmsEnum) throws ClientException {
-    	//可自助调整超时时间
+
+    public static boolean sendSms(String phone, JSONObject templateParamJson, DySmsEnum dySmsEnum)
+            throws ClientException {
+        // 可自助调整超时时间
         System.setProperty("sun.net.client.defaultConnectTimeout", "10000");
         System.setProperty("sun.net.client.defaultReadTimeout", "10000");
 
-        //update-begin-author：taoyan date:20200811 for:配置类数据获取
+        // update-begin-author：taoyan date:20200811 for:配置类数据获取
         StaticConfig staticConfig = SpringContextUtils.getBean(StaticConfig.class);
-        //logger.info("阿里大鱼短信秘钥 accessKeyId：" + staticConfig.getAccessKeyId());
-        //logger.info("阿里大鱼短信秘钥 accessKeySecret："+ staticConfig.getAccessKeySecret());
+        // logger.info("阿里大鱼短信秘钥 accessKeyId：" + staticConfig.getAccessKeyId());
+        // logger.info("阿里大鱼短信秘钥 accessKeySecret："+ staticConfig.getAccessKeySecret());
         setAccessKeyId(staticConfig.getAccessKeyId());
         setAccessKeySecret(staticConfig.getAccessKeySecret());
-        //update-end-author：taoyan date:20200811 for:配置类数据获取
-        
-        //初始化acsClient,暂不支持region化
+        // update-end-author：taoyan date:20200811 for:配置类数据获取
+
+        // 初始化acsClient,暂不支持region化
         IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", PRODUCT, DOMAIN);
         IAcsClient acsClient = new DefaultAcsClient(profile);
-        
-        //验证json参数
-        validateParam(templateParamJson,dySmsEnum);
 
-        //update-begin---author:wangshuai---date:2024-11-05---for:【QQYUN-9422】短信模板管理，阿里云---
+        // 验证json参数
+        validateParam(templateParamJson, dySmsEnum);
+
+        // update-begin---author:wangshuai---date:2024-11-05---for:【QQYUN-9422】短信模板管理，阿里云---
         String templateCode = dySmsEnum.getTemplateCode();
         JeecgSmsTemplateConfig baseConfig = SpringContextUtils.getBean(JeecgSmsTemplateConfig.class);
-        if(baseConfig != null && CollectionUtil.isNotEmpty(baseConfig.getTemplateCode())){
+        if (baseConfig != null && CollectionUtil.isNotEmpty(baseConfig.getTemplateCode())) {
             Map<String, String> smsTemplate = baseConfig.getTemplateCode();
-            if(smsTemplate.containsKey(templateCode) && StringUtils.isNotEmpty(smsTemplate.get(templateCode))){
-                templateCode = smsTemplate.get(templateCode);   
-                logger.info("yml中读取短信code{}",templateCode);
+            if (smsTemplate.containsKey(templateCode) && StringUtils.isNotEmpty(smsTemplate.get(templateCode))) {
+                templateCode = smsTemplate.get(templateCode);
+                logger.info("yml中读取短信code{}", templateCode);
             }
         }
-        //签名名称
+        // 签名名称
         String signName = dySmsEnum.getSignName();
-        if(baseConfig != null && StringUtils.isNotEmpty(baseConfig.getSignature())){
-            logger.info("yml中读取签名名称{}",baseConfig.getSignature());
+        if (baseConfig != null && StringUtils.isNotEmpty(baseConfig.getSignature())) {
+            logger.info("yml中读取签名名称{}", baseConfig.getSignature());
             signName = baseConfig.getSignature();
         }
-        //update-end---author:wangshuai---date:2024-11-05---for:【QQYUN-9422】短信模板管理，阿里云---
-        
-        //组装请求对象-具体描述见控制台-文档部分内容
-        SendSmsRequest request = new SendSmsRequest();
-        //必填:待发送手机号
-        request.setPhoneNumbers(phone);
-        //必填:短信签名-可在短信控制台中找到
-        request.setSignName(signName);
-        //必填:短信模板-可在短信控制台中找到
-        request.setTemplateCode(templateCode);
-        //可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时,此处的值为
-        request.setTemplateParam(templateParamJson.toJSONString());
-        
-        //选填-上行短信扩展码(无特殊需求用户请忽略此字段)
-        //request.setSmsUpExtendCode("90997");
+        // update-end---author:wangshuai---date:2024-11-05---for:【QQYUN-9422】短信模板管理，阿里云---
 
-        //可选:outId为提供给业务方扩展字段,最终在短信回执消息中将此值带回给调用者
-        //request.setOutId("yourOutId");
+        // 组装请求对象-具体描述见控制台-文档部分内容
+        SendSmsRequest request = new SendSmsRequest();
+        // 必填:待发送手机号
+        request.setPhoneNumbers(phone);
+        // 必填:短信签名-可在短信控制台中找到
+        request.setSignName(signName);
+        // 必填:短信模板-可在短信控制台中找到
+        request.setTemplateCode(templateCode);
+        // 可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时,此处的值为
+        request.setTemplateParam(templateParamJson.toJSONString());
+
+        // 选填-上行短信扩展码(无特殊需求用户请忽略此字段)
+        // request.setSmsUpExtendCode("90997");
+
+        // 可选:outId为提供给业务方扩展字段,最终在短信回执消息中将此值带回给调用者
+        // request.setOutId("yourOutId");
 
         boolean result = false;
 
-        //hint 此处可能会抛出异常，注意catch
+        // hint 此处可能会抛出异常，注意catch
         SendSmsResponse sendSmsResponse = acsClient.getAcsResponse(request);
         logger.info("短信接口返回的数据----------------");
-        logger.info("{Code:" + sendSmsResponse.getCode()+",Message:" + sendSmsResponse.getMessage()+",RequestId:"+ sendSmsResponse.getRequestId()+",BizId:"+sendSmsResponse.getBizId()+"}");
+        logger.info("{Code:" + sendSmsResponse.getCode() + ",Message:" + sendSmsResponse.getMessage() + ",RequestId:"
+                + sendSmsResponse.getRequestId() + ",BizId:" + sendSmsResponse.getBizId() + "}");
         String ok = "OK";
         if (ok.equals(sendSmsResponse.getCode())) {
             result = true;
         }
         return result;
-        
-    }
-    
-    private static void validateParam(JSONObject templateParamJson,DySmsEnum dySmsEnum) {
-    	String keys = dySmsEnum.getKeys();
-    	String [] keyArr = keys.split(",");
-    	for(String item :keyArr) {
-    		if(!templateParamJson.containsKey(item)) {
-    			throw new RuntimeException("模板缺少参数："+item);
-    		}
-    	}
-    }
-    
 
-//    public static void main(String[] args) throws ClientException, InterruptedException {
-//    	JSONObject obj = new JSONObject();
-//    	obj.put("code", "1234");
-//    	sendSms("13800138000", obj, DySmsEnum.FORGET_PASSWORD_TEMPLATE_CODE);
-//    }
+    }
+
+    private static void validateParam(JSONObject templateParamJson, DySmsEnum dySmsEnum) {
+        String keys = dySmsEnum.getKeys();
+        String[] keyArr = keys.split(",");
+        for (String item : keyArr) {
+            if (!templateParamJson.containsKey(item)) {
+                throw new RuntimeException("模板缺少参数：" + item);
+            }
+        }
+    }
+
+    // public static void main(String[] args) throws ClientException,
+    // InterruptedException {
+    // JSONObject obj = new JSONObject();
+    // obj.put("code", "1234");
+    // sendSms("13800138000", obj, DySmsEnum.FORGET_PASSWORD_TEMPLATE_CODE);
+    // }
 }

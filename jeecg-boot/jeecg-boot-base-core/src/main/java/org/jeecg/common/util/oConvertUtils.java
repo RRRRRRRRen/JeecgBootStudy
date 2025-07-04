@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 /**
  * 
- * @Author  张代浩
+ * @Author 张代浩
  *
  */
 @Slf4j
@@ -42,7 +42,7 @@ public class oConvertUtils {
 		}
 		return (false);
 	}
-	
+
 	/**
 	 * * 判断对象是否为空
 	 * * - 1. 判断对象是否为 null
@@ -59,7 +59,6 @@ public class oConvertUtils {
 		return (false);
 	}
 
-	
 	/**
 	 * 返回decode解密字符串
 	 * 
@@ -74,8 +73,9 @@ public class oConvertUtils {
 		try {
 			inStr = URLDecoder.decode(inStr, "UTF-8");
 		} catch (Exception e) {
-			// 解决：URLDecoder: Illegal hex characters in escape (%) pattern - For input string: "自动"
-			//e.printStackTrace();
+			// 解决：URLDecoder: Illegal hex characters in escape (%) pattern - For input
+			// string: "自动"
+			// e.printStackTrace();
 		}
 		return inStr;
 	}
@@ -86,7 +86,7 @@ public class oConvertUtils {
 	}
 
 	@SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
-    public static String StrToUTF(String strIn, String sourceCode, String targetCode) {
+	public static String StrToUTF(String strIn, String sourceCode, String targetCode) {
 		strIn = "";
 		try {
 			strIn = new String(strIn.getBytes("ISO-8859-1"), "GBK");
@@ -179,13 +179,15 @@ public class oConvertUtils {
 		return s;
 	}
 
-	/*public static Short getShort(String s) {
-		if (StringUtil.isNotEmpty(s)) {
-			return (Short.parseShort(s));
-		} else {
-			return null;
-		}
-	}*/
+	/*
+	 * public static Short getShort(String s) {
+	 * if (StringUtil.isNotEmpty(s)) {
+	 * return (Short.parseShort(s));
+	 * } else {
+	 * return null;
+	 * }
+	 * }
+	 */
 
 	public static int getInt(Object object, int defval) {
 		if (isEmpty(object)) {
@@ -197,7 +199,7 @@ public class oConvertUtils {
 			return (defval);
 		}
 	}
-	
+
 	public static Integer getInteger(Object object, Integer defval) {
 		if (isEmpty(object)) {
 			return (defval);
@@ -208,7 +210,7 @@ public class oConvertUtils {
 			return (defval);
 		}
 	}
-	
+
 	public static Integer getInt(Object object) {
 		if (isEmpty(object)) {
 			return null;
@@ -246,13 +248,16 @@ public class oConvertUtils {
 
 	/**
 	 * 转义成Unicode编码
+	 * 
 	 * @param s
 	 * @return
 	 */
-	/*public static String escapeJava(Object s) {
-		return StringEscapeUtils.escapeJava(getString(s));
-	}*/
-	
+	/*
+	 * public static String escapeJava(Object s) {
+	 * return StringEscapeUtils.escapeJava(getString(s));
+	 * }
+	 */
+
 	public static String getString(Object object) {
 		if (isEmpty(object)) {
 			return "";
@@ -324,11 +329,15 @@ public class oConvertUtils {
 	 * 判断一个类是否为基本数据类型。
 	 * 
 	 * @param clazz
-	 *            要判断的类。
+	 *              要判断的类。
 	 * @return true 表示为基本数据类型。
 	 */
 	private static boolean isBaseDataType(Class clazz) throws Exception {
-		return (clazz.equals(String.class) || clazz.equals(Integer.class) || clazz.equals(Byte.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Character.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class) || clazz.equals(BigInteger.class) || clazz.equals(Boolean.class) || clazz.equals(Date.class) || clazz.isPrimitive());
+		return (clazz.equals(String.class) || clazz.equals(Integer.class) || clazz.equals(Byte.class)
+				|| clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class)
+				|| clazz.equals(Character.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class)
+				|| clazz.equals(BigInteger.class) || clazz.equals(Boolean.class) || clazz.equals(Date.class)
+				|| clazz.isPrimitive());
 	}
 
 	/**
@@ -345,11 +354,10 @@ public class oConvertUtils {
 		String decodedString = new String(byteContent);
 		return decodedString;
 	}
-	
-	
+
 	/**
 	 * @param request
-	 *            IP
+	 *                IP
 	 * @return IP Address
 	 */
 	public static String getIpAddrByRequest(HttpServletRequest request) {
@@ -371,28 +379,28 @@ public class oConvertUtils {
 	 * @throws SocketException
 	 */
 	public static String getRealIp() throws SocketException {
-        // 本地IP，如果没有配置外网IP则返回它
+		// 本地IP，如果没有配置外网IP则返回它
 		String localip = null;
-        // 外网IP
+		// 外网IP
 		String netip = null;
 
 		Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
 		InetAddress ip = null;
-        // 是否找到外网IP
+		// 是否找到外网IP
 		boolean finded = false;
 		while (netInterfaces.hasMoreElements() && !finded) {
 			NetworkInterface ni = netInterfaces.nextElement();
 			Enumeration<InetAddress> address = ni.getInetAddresses();
 			while (address.hasMoreElements()) {
 				ip = address.nextElement();
-                // 外网IP
+				// 外网IP
 				if (!ip.isSiteLocalAddress() && !ip.isLoopbackAddress() && ip.getHostAddress().indexOf(":") == -1) {
 					netip = ip.getHostAddress();
 					finded = true;
 					break;
 				} else if (ip.isSiteLocalAddress() && !ip.isLoopbackAddress() && ip.getHostAddress().indexOf(":") == -1) {
-                    // 内网IP
-				    localip = ip.getHostAddress();
+					// 内网IP
+					localip = ip.getHostAddress();
 				}
 			}
 		}
@@ -413,7 +421,7 @@ public class oConvertUtils {
 	public static String replaceBlank(String str) {
 		String dest = "";
 		if (str != null) {
-		    String reg = "\\s*|\t|\r|\n";
+			String reg = "\\s*|\t|\r|\n";
 			Pattern p = Pattern.compile(reg);
 			Matcher m = p.matcher(str);
 			dest = m.replaceAll("");
@@ -512,7 +520,8 @@ public class oConvertUtils {
 		boolean isInnerIp = false;
 		long ipNum = getIpNum(ipAddress);
 		/**
-		 * 私有IP：A类 10.0.0.0-10.255.255.255 B类 172.16.0.0-172.31.255.255 C类 192.168.0.0-192.168.255.255 当然，还有127这个网段是环回地址
+		 * 私有IP：A类 10.0.0.0-10.255.255.255 B类 172.16.0.0-172.31.255.255 C类
+		 * 192.168.0.0-192.168.255.255 当然，还有127这个网段是环回地址
 		 **/
 		long aBegin = getIpNum("10.0.0.0");
 		long aEnd = getIpNum("10.255.255.255");
@@ -521,7 +530,8 @@ public class oConvertUtils {
 		long cBegin = getIpNum("192.168.0.0");
 		long cEnd = getIpNum("192.168.255.255");
 		String localIp = "127.0.0.1";
-		isInnerIp = isInner(ipNum, aBegin, aEnd) || isInner(ipNum, bBegin, bEnd) || isInner(ipNum, cBegin, cEnd) || localIp.equals(ipAddress);
+		isInnerIp = isInner(ipNum, aBegin, aEnd) || isInner(ipNum, bBegin, bEnd) || isInner(ipNum, cBegin, cEnd)
+				|| localIp.equals(ipAddress);
 		return isInnerIp;
 	}
 
@@ -539,14 +549,14 @@ public class oConvertUtils {
 	private static boolean isInner(long userIp, long begin, long end) {
 		return (userIp >= begin) && (userIp <= end);
 	}
-	
+
 	/**
 	 * 将下划线大写方式命名的字符串转换为驼峰式。
 	 * 如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。</br>
 	 * 例如：hello_world->helloWorld
 	 * 
 	 * @param name
-	 *            转换前的下划线大写方式命名的字符串
+	 *             转换前的下划线大写方式命名的字符串
 	 * @return 转换后的驼峰式命名的字符串
 	 */
 	public static String camelName(String name) {
@@ -557,10 +567,13 @@ public class oConvertUtils {
 			return "";
 		} else if (!name.contains(SymbolConstant.UNDERLINE)) {
 			// 不含下划线，仅将首字母小写
-			//update-begin--Author:zhoujf  Date:20180503 for：TASK #2500 【代码生成器】代码生成器开发一通用模板生成功能
-			//update-begin--Author:zhoujf  Date:20180503 for：TASK #2500 【代码生成器】代码生成器开发一通用模板生成功能
+			// update-begin--Author:zhoujf Date:20180503 for：TASK #2500
+			// 【代码生成器】代码生成器开发一通用模板生成功能
+			// update-begin--Author:zhoujf Date:20180503 for：TASK #2500
+			// 【代码生成器】代码生成器开发一通用模板生成功能
 			return name.substring(0, 1).toLowerCase() + name.substring(1).toLowerCase();
-			//update-end--Author:zhoujf  Date:20180503 for：TASK #2500 【代码生成器】代码生成器开发一通用模板生成功能
+			// update-end--Author:zhoujf Date:20180503 for：TASK #2500
+			// 【代码生成器】代码生成器开发一通用模板生成功能
 		}
 		// 用下划线将原始字符串分割
 		String[] camels = name.split("_");
@@ -581,18 +594,18 @@ public class oConvertUtils {
 		}
 		return result.toString();
 	}
-	
+
 	/**
 	 * 将下划线大写方式命名的字符串转换为驼峰式。
 	 * 如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。</br>
 	 * 例如：hello_world,test_id->helloWorld,testId
 	 * 
 	 * @param name
-	 *            转换前的下划线大写方式命名的字符串
+	 *             转换前的下划线大写方式命名的字符串
 	 * @return 转换后的驼峰式命名的字符串
 	 */
 	public static String camelNames(String names) {
-		if(names==null||"".equals(names)){
+		if (names == null || "".equals(names)) {
 			return null;
 		}
 		StringBuffer sf = new StringBuffer();
@@ -604,15 +617,16 @@ public class oConvertUtils {
 		String result = sf.toString();
 		return result.substring(0, result.length() - 1);
 	}
-	
-	//update-begin--Author:zhoujf  Date:20180503 for：TASK #2500 【代码生成器】代码生成器开发一通用模板生成功能
+
+	// update-begin--Author:zhoujf Date:20180503 for：TASK #2500
+	// 【代码生成器】代码生成器开发一通用模板生成功能
 	/**
 	 * 将下划线大写方式命名的字符串转换为驼峰式。(首字母写)
 	 * 如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。</br>
 	 * 例如：hello_world->HelloWorld
 	 * 
 	 * @param name
-	 *            转换前的下划线大写方式命名的字符串
+	 *             转换前的下划线大写方式命名的字符串
 	 * @return 转换后的驼峰式命名的字符串
 	 */
 	public static String camelNameCapFirst(String name) {
@@ -638,45 +652,48 @@ public class oConvertUtils {
 		}
 		return result.toString();
 	}
-	//update-end--Author:zhoujf  Date:20180503 for：TASK #2500 【代码生成器】代码生成器开发一通用模板生成功能
-	
+	// update-end--Author:zhoujf Date:20180503 for：TASK #2500
+	// 【代码生成器】代码生成器开发一通用模板生成功能
+
 	/**
 	 * 将驼峰命名转化成下划线
+	 * 
 	 * @param para
 	 * @return
 	 */
-	public static String camelToUnderline(String para){
-	    int length = 3;
-        if(para.length()<length){
-        	return para.toLowerCase(); 
-        }
-        StringBuilder sb=new StringBuilder(para);
-        //定位
-        int temp=0;
-        //从第三个字符开始 避免命名不规范 
-        for(int i=2;i<para.length();i++){
-            if(Character.isUpperCase(para.charAt(i))){
-                sb.insert(i+temp, "_");
-                temp+=1;
-            }
-        }
-        return sb.toString().toLowerCase(); 
+	public static String camelToUnderline(String para) {
+		int length = 3;
+		if (para.length() < length) {
+			return para.toLowerCase();
+		}
+		StringBuilder sb = new StringBuilder(para);
+		// 定位
+		int temp = 0;
+		// 从第三个字符开始 避免命名不规范
+		for (int i = 2; i < para.length(); i++) {
+			if (Character.isUpperCase(para.charAt(i))) {
+				sb.insert(i + temp, "_");
+				temp += 1;
+			}
+		}
+		return sb.toString().toLowerCase();
 	}
 
 	/**
 	 * 随机数
+	 * 
 	 * @param place 定义随机数的位数
 	 */
 	public static String randomGen(int place) {
 		String base = "qwertyuioplkjhgfdsazxcvbnmQAZWSXEDCRFVTGBYHNUJMIKLOP0123456789";
 		StringBuffer sb = new StringBuffer();
 		Random rd = new Random();
-		for(int i=0;i<place;i++) {
+		for (int i = 0; i < place; i++) {
 			sb.append(base.charAt(rd.nextInt(base.length())));
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * 获取类的所有属性，包括父类
 	 * 
@@ -694,50 +711,52 @@ public class oConvertUtils {
 		fieldList.toArray(fields);
 		return fields;
 	}
-	
+
 	/**
-	  * 将map的key全部转成小写
+	 * * 将map的key全部转成小写
+	 * 
 	 * @param list
 	 * @return
 	 */
-	public static List<Map<String, Object>> toLowerCasePageList(List<Map<String, Object>> list){
+	public static List<Map<String, Object>> toLowerCasePageList(List<Map<String, Object>> list) {
 		List<Map<String, Object>> select = new ArrayList<>();
 		for (Map<String, Object> row : list) {
-			 Map<String, Object> resultMap = new HashMap<>(5);
-			 Set<String> keySet = row.keySet(); 
-			 for (String key : keySet) { 
-				 String newKey = key.toLowerCase(); 
-				 resultMap.put(newKey, row.get(key)); 
-			 }
-			 select.add(resultMap);
+			Map<String, Object> resultMap = new HashMap<>(5);
+			Set<String> keySet = row.keySet();
+			for (String key : keySet) {
+				String newKey = key.toLowerCase();
+				resultMap.put(newKey, row.get(key));
+			}
+			select.add(resultMap);
 		}
 		return select;
 	}
 
 	/**
 	 * 将entityList转换成modelList
+	 * 
 	 * @param fromList
 	 * @param tClass
 	 * @param <F>
 	 * @param <T>
 	 * @return
 	 */
-	public static<F,T> List<T> entityListToModelList(List<F> fromList, Class<T> tClass){
-		if(fromList == null || fromList.isEmpty()){
+	public static <F, T> List<T> entityListToModelList(List<F> fromList, Class<T> tClass) {
+		if (fromList == null || fromList.isEmpty()) {
 			return null;
 		}
 		List<T> tList = new ArrayList<>();
-		for(F f : fromList){
+		for (F f : fromList) {
 			T t = entityToModel(f, tClass);
 			tList.add(t);
 		}
 		return tList;
 	}
 
-	public static<F,T> T entityToModel(F entity, Class<T> modelClass) {
+	public static <F, T> T entityToModel(F entity, Class<T> modelClass) {
 		log.debug("entityToModel : Entity属性的值赋值到Model");
 		Object model = null;
-		if (entity == null || modelClass ==null) {
+		if (entity == null || modelClass == null) {
 			return null;
 		}
 
@@ -749,7 +768,7 @@ public class oConvertUtils {
 			log.error("entityToModel : 安全权限异常", e);
 		}
 		BeanUtils.copyProperties(entity, model);
-		return (T)model;
+		return (T) model;
 	}
 
 	/**
@@ -757,8 +776,8 @@ public class oConvertUtils {
 	 *
 	 * @param list
 	 * @return true or false
-	 * list == null		: true
-	 * list.size() == 0	: true
+	 *         list == null : true
+	 *         list.size() == 0 : true
 	 */
 	public static boolean listIsEmpty(Collection list) {
 		return (list == null || list.size() == 0);
@@ -775,10 +794,10 @@ public class oConvertUtils {
 		if (oldVal != null && newVal != null) {
 			if (isArray(oldVal)) {
 				return equalityOfArrays((Object[]) oldVal, (Object[]) newVal);
-			}else if(oldVal instanceof JSONArray){
-				if(newVal instanceof JSONArray){
+			} else if (oldVal instanceof JSONArray) {
+				if (newVal instanceof JSONArray) {
 					return equalityOfJSONArray((JSONArray) oldVal, (JSONArray) newVal);
-				}else{
+				} else {
 					if (isEmpty(newVal) && (oldVal == null || ((JSONArray) oldVal).size() == 0)) {
 						return true;
 					}
@@ -786,10 +805,10 @@ public class oConvertUtils {
 					JSONArray newValArray = new JSONArray(arrayStr);
 					return equalityOfJSONArray((JSONArray) oldVal, newValArray);
 				}
-			}else{
+			} else {
 				return oldVal.equals(newVal);
 			}
-			
+
 		} else {
 			if (oldVal == null && newVal == null) {
 				return true;
@@ -823,7 +842,7 @@ public class oConvertUtils {
 	public static int getCollectionSize(Collection<?> collection) {
 		return collection != null ? collection.size() : 0;
 	}
-	
+
 	/**
 	 * 判断两个数组是否相等（数组元素不分顺序）
 	 *
@@ -835,7 +854,7 @@ public class oConvertUtils {
 		if (oldVal != null && newVal != null) {
 			Object[] oldValArray = oldVal.toArray();
 			Object[] newValArray = newVal.toArray();
-			return equalityOfArrays(oldValArray,newValArray);
+			return equalityOfArrays(oldValArray, newValArray);
 		} else {
 			if ((oldVal == null || oldVal.size() == 0) && (newVal == null || newVal.size() == 0)) {
 				return true;
@@ -848,25 +867,26 @@ public class oConvertUtils {
 	/**
 	 * 比较带逗号的字符串
 	 * QQYUN-5212【简流】按日期触发 多选 人员组件 选择顺序不一致时 不触发，应该是统一问题 包括多选部门组件
+	 * 
 	 * @param oldVal
 	 * @param newVal
 	 * @return
 	 */
 	public static boolean equalityOfStringArrays(String oldVal, String newVal) {
-		if(oldVal.equals(newVal)){
+		if (oldVal.equals(newVal)) {
 			return true;
 		}
-		if(oldVal.indexOf(",")>=0 && newVal.indexOf(",")>=0){
+		if (oldVal.indexOf(",") >= 0 && newVal.indexOf(",") >= 0) {
 			String[] arr1 = oldVal.split(",");
 			String[] arr2 = newVal.split(",");
-			if(arr1.length == arr2.length){
+			if (arr1.length == arr2.length) {
 				boolean flag = true;
 				Map<String, Integer> map = new HashMap<>();
-				for(String s1: arr1){
+				for (String s1 : arr1) {
 					map.put(s1, 1);
 				}
-				for(String s2: arr2){
-					if(map.get(s2) == null){
+				for (String s2 : arr2) {
+					if (map.get(s2) == null) {
 						flag = false;
 						break;
 					}
@@ -876,7 +896,7 @@ public class oConvertUtils {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 判断两个数组是否相等（数组元素不分顺序）
 	 *
@@ -903,8 +923,8 @@ public class oConvertUtils {
 	 *
 	 * @param list
 	 * @return true or false
-	 * list == null		: false
-	 * list.size() == 0	: false
+	 *         list == null : false
+	 *         list.size() == 0 : false
 	 */
 	public static boolean listIsNotEmpty(Collection list) {
 		return !listIsEmpty(list);
@@ -912,31 +932,33 @@ public class oConvertUtils {
 
 	/**
 	 * 读取静态文本内容
+	 * 
 	 * @param url
 	 * @return
 	 */
 	public static String readStatic(String url) {
 		String json = "";
 		try {
-			//换个写法，解决springboot读取jar包中文件的问题
+			// 换个写法，解决springboot读取jar包中文件的问题
 			InputStream stream = oConvertUtils.class.getClassLoader().getResourceAsStream(url.replace("classpath:", ""));
-			json = IOUtils.toString(stream,"UTF-8");
+			json = IOUtils.toString(stream, "UTF-8");
 		} catch (IOException e) {
-			log.error(e.getMessage(),e);
+			log.error(e.getMessage(), e);
 		}
 		return json;
 	}
 
 	/**
 	 * 将List 转成 JSONArray
+	 * 
 	 * @return
 	 */
-	public static JSONArray list2JSONArray(List<String> list){
-		if(list==null || list.size()==0){
+	public static JSONArray list2JSONArray(List<String> list) {
+		if (list == null || list.size() == 0) {
 			return null;
 		}
 		JSONArray array = new JSONArray();
-		for(String str: list){
+		for (String str : list) {
 			array.add(str);
 		}
 		return array;
@@ -945,45 +967,46 @@ public class oConvertUtils {
 	/**
 	 * 判断两个list中的元素是否完全一致
 	 * QQYUN-5326【简流】获取组织人员 单/多 筛选条件 没有部门筛选
+	 * 
 	 * @return
 	 */
-	public static boolean isEqList(List<String> list1, List<String> list2){
-		if(list1.size() != list2.size()){
+	public static boolean isEqList(List<String> list1, List<String> list2) {
+		if (list1.size() != list2.size()) {
 			return false;
 		}
-		for(String str1: list1){
+		for (String str1 : list1) {
 			boolean flag = false;
-			for(String str2: list2){
-				if(str1.equals(str2)){
+			for (String str2 : list2) {
+				if (str1.equals(str2)) {
 					flag = true;
 					break;
 				}
 			}
-			if(!flag){
+			if (!flag) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-
 	/**
 	 * 判断 list1中的元素是否在list2中出现
 	 * QQYUN-5326【简流】获取组织人员 单/多 筛选条件 没有部门筛选
+	 * 
 	 * @param list1
 	 * @param list2
 	 * @return
 	 */
-	public static boolean isInList(List<String> list1, List<String> list2){
-		for(String str1: list1){
+	public static boolean isInList(List<String> list1, List<String> list2) {
+		for (String str1 : list1) {
 			boolean flag = false;
-			for(String str2: list2){
-				if(str1.equals(str2)){
+			for (String str2 : list2) {
+				if (str1.equals(str2)) {
 					flag = true;
 					break;
 				}
 			}
-			if(flag){
+			if (flag) {
 				return true;
 			}
 		}
@@ -992,14 +1015,15 @@ public class oConvertUtils {
 
 	/**
 	 * 计算文件大小转成MB
+	 * 
 	 * @param uploadCount
 	 * @return
 	 */
-	public static Double calculateFileSizeToMb(Long uploadCount){
+	public static Double calculateFileSizeToMb(Long uploadCount) {
 		double count = 0.0;
-		if(uploadCount>0) {
+		if (uploadCount > 0) {
 			BigDecimal bigDecimal = new BigDecimal(uploadCount);
-			//换算成MB
+			// 换算成MB
 			BigDecimal divide = bigDecimal.divide(new BigDecimal(1048576));
 			count = divide.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 			return count;
@@ -1038,6 +1062,7 @@ public class oConvertUtils {
 	 * 判断对象是否为空 <br/>
 	 * 支持各种类型的对象
 	 * for for [QQYUN-10990]AIRAG
+	 * 
 	 * @param obj
 	 * @return
 	 * @author chenrui
@@ -1065,13 +1090,13 @@ public class oConvertUtils {
 	/**
 	 * iterator 是否为空
 	 * for for [QQYUN-10990]AIRAG
+	 * 
 	 * @param iterator Iterator对象
 	 * @return 是否为空
 	 */
 	public static boolean isEmptyIterator(Iterator<?> iterator) {
 		return null == iterator || false == iterator.hasNext();
 	}
-
 
 	/**
 	 * * 判断对象是否不为空
@@ -1130,10 +1155,10 @@ public class oConvertUtils {
 		return true;
 	}
 
-
 	/**
 	 * 判断是否存在
 	 * for [QQYUN-10990]AIRAG
+	 * 
 	 * @param obj
 	 * @param objs
 	 * @param <T>
@@ -1144,5 +1169,5 @@ public class oConvertUtils {
 	public static <T> boolean isIn(T obj, T... objs) {
 		return isIn(obj, objs);
 	}
-	
+
 }

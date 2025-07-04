@@ -8,6 +8,13 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+/**
+ * * SecurityUtils 是 Shiro 提供的工具类，用于获取当前执行操作的用户。
+ * 
+ * * - getSubject() 返回当前“主体（Subject）”，表示当前用户，不管是登录用户、未登录用户，还是系统内部调用。
+ * * - getPrincipal() 获取当前用户的“身份信息”（通常是登录时存进去的用户对象，比如用户名或用户对象）。
+ * 
+ */
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
@@ -371,7 +378,7 @@ public class LoginController {
 	}
 
 	/**
-	 * 获取访问量
+	 * * 获取 上一周 访问量汇总
 	 * 
 	 * @return
 	 */
@@ -379,21 +386,24 @@ public class LoginController {
 	public Result<List<Map<String, Object>>> visitInfo() {
 		Result<List<Map<String, Object>>> result = new Result<List<Map<String, Object>>>();
 		Calendar calendar = new GregorianCalendar();
+		// * 明天 00:00:00
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		Date dayEnd = calendar.getTime();
+		// * 7天前 00:00:00
 		calendar.add(Calendar.DAY_OF_MONTH, -7);
 		Date dayStart = calendar.getTime();
+		// * 查询上一周数据
 		List<Map<String, Object>> list = logService.findVisitCount(dayStart, dayEnd);
 		result.setResult(oConvertUtils.toLowerCasePageList(list));
 		return result;
 	}
 
 	/**
-	 * 登陆成功选择用户当前部门
+	 * * 更新用户当前部门
 	 * 
 	 * @param user
 	 * @return
@@ -401,19 +411,24 @@ public class LoginController {
 	@RequestMapping(value = "/selectDepart", method = RequestMethod.PUT)
 	public Result<JSONObject> selectDepart(@RequestBody SysUser user) {
 		Result<JSONObject> result = new Result<JSONObject>();
+		// * 获取用户名
 		String username = user.getUsername();
+		// * 如果未能从参数中获取，则从 Shiro 中获取
 		if (oConvertUtils.isEmpty(username)) {
 			LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 			username = sysUser.getUsername();
 		}
 
-		// 获取登录部门
+		// * 获取登录部门
 		String orgCode = user.getOrgCode();
-		// 获取登录租户
+		// * 获取登录租户
 		Integer tenantId = user.getLoginTenantId();
-		// 设置用户登录部门和登录租户
+		// * 设置用户登录部门和登录租户
 		this.sysUserService.updateUserDepart(username, orgCode, tenantId);
+
+		// * 获取用户信息
 		SysUser sysUser = sysUserService.getUserByName(username);
+		// * 返回完整的用户信息
 		JSONObject obj = new JSONObject();
 		obj.put("userInfo", sysUser);
 		result.setResult(obj);
@@ -421,7 +436,7 @@ public class LoginController {
 	}
 
 	/**
-	 * 短信登录接口
+	 * * 获取短信登录验证码
 	 * 
 	 * @param jsonObject
 	 * @return
@@ -429,31 +444,34 @@ public class LoginController {
 	@PostMapping(value = "/sms")
 	public Result<String> sms(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
 		Result<String> result = new Result<String>();
+		// * 获取客户端ip
 		String clientIp = IpUtils.getIpAddr(request);
+		// * 获取手机号
 		String mobile = jsonObject.get("mobile").toString();
-		// 手机号模式 登录模式: "2" 注册模式: "1"
+		// * 手机号模式 登录模式: "2" 注册模式: "1"
 		String smsmode = jsonObject.get("smsmode").toString();
 		log.info("-------- IP:{}, 手机号：{}，获取绑定验证码", clientIp, mobile);
 
+		// * 手机号为空返回错误信息
 		if (oConvertUtils.isEmpty(mobile)) {
 			result.setMessage("手机号不允许为空！");
 			result.setSuccess(false);
 			return result;
 		}
 
-		// update-begin-author:taoyan date:2022-9-13 for: VUEN-2245 【漏洞】发现新漏洞待处理20220906
+		// * 手机短信相关redis key构建
 		String redisKey = CommonConstant.PHONE_REDIS_KEY_PRE + mobile;
+		// * 获取redis保存的验证吗
 		Object object = redisUtil.get(redisKey);
-		// update-end-author:taoyan date:2022-9-13 for: VUEN-2245 【漏洞】发现新漏洞待处理20220906
 
+		// * 如果redis中验证码未失效，则返回验证码未失效
 		if (object != null) {
 			result.setMessage("验证码10分钟内，仍然有效！");
 			result.setSuccess(false);
 			return result;
 		}
 
-		// -------------------------------------------------------------------------------------
-		// 增加 check防止恶意刷短信接口
+		// * 防止恶意刷短信接口
 		if (!DySmsLimit.canSendSms(clientIp)) {
 			log.warn("--------[警告] IP地址:{}, 短信接口请求太多-------", clientIp);
 			result.setMessage("短信接口请求太多，请稍后再试！");
@@ -461,16 +479,24 @@ public class LoginController {
 			result.setSuccess(false);
 			return result;
 		}
-		// -------------------------------------------------------------------------------------
 
-		// 随机数
+		// * 生成随机数作为验证码
 		String captcha = RandomUtil.randomNumbers(6);
+		// * 验证码存入接口数据
 		JSONObject obj = new JSONObject();
 		obj.put("code", captcha);
+
 		try {
+			// * 验证码发送状态
 			boolean b = false;
-			// 注册模板
+
 			if (CommonConstant.SMS_TPL_TYPE_1.equals(smsmode)) {
+				/**
+				 * * 注册模式
+				 * 
+				 * * 1. 手机号已注册，返回错误信息
+				 * * 2. 手机号未注册，发送验证码
+				 */
 				SysUser sysUser = sysUserService.getUserByPhone(mobile);
 				if (sysUser != null) {
 					result.error500(" 手机号已经注册，请直接登录！");
@@ -479,7 +505,12 @@ public class LoginController {
 				}
 				b = DySmsHelper.sendSms(mobile, obj, DySmsEnum.REGISTER_TEMPLATE_CODE);
 			} else {
-				// 登录模式，校验用户有效性
+				/**
+				 * * 检验用户是否合法
+				 * 
+				 * * 1. 用户 是否冻结｜是否注销 返回错误信息
+				 * * 2. 用户 不存在 更新提示信息
+				 */
 				SysUser sysUser = sysUserService.getUserByPhone(mobile);
 				result = sysUserService.checkUserIsEffective(sysUser);
 				if (!result.isSuccess()) {
@@ -491,39 +522,39 @@ public class LoginController {
 					return result;
 				}
 
-				/**
-				 * smsmode 短信模板方式 0 .登录模板、1.注册模板、2.忘记密码模板
-				 */
 				if (CommonConstant.SMS_TPL_TYPE_0.equals(smsmode)) {
-					// 登录模板
+					/**
+					 * * 登录模式
+					 * * 发送验证码
+					 */
 					b = DySmsHelper.sendSms(mobile, obj, DySmsEnum.LOGIN_TEMPLATE_CODE);
 				} else if (CommonConstant.SMS_TPL_TYPE_2.equals(smsmode)) {
-					// 忘记密码模板
+					/**
+					 * * 忘记密码模版
+					 * * 发送验证码
+					 */
 					b = DySmsHelper.sendSms(mobile, obj, DySmsEnum.FORGET_PASSWORD_TEMPLATE_CODE);
 				}
 			}
 
+			// * 发送失败返回错误信息
 			if (b == false) {
 				result.setMessage("短信验证码发送失败,请稍后重试");
 				result.setSuccess(false);
 				return result;
 			}
 
-			// update-begin-author:taoyan date:2022-9-13 for: VUEN-2245 【漏洞】发现新漏洞待处理20220906
-			// 验证码10分钟内有效
+			// * 验证码10分钟内有效
 			redisUtil.set(redisKey, captcha, 600);
-			// update-end-author:taoyan date:2022-9-13 for: VUEN-2245 【漏洞】发现新漏洞待处理20220906
-
-			// update-begin--Author:scott Date:20190812 for：issues#391
-			// result.setResult(captcha);
-			// update-end--Author:scott Date:20190812 for：issues#391
+			// * 设置返回信息为成功状态
 			result.setSuccess(true);
-
 		} catch (ClientException e) {
+			// * 其他情况返回错误提示
 			e.printStackTrace();
 			result.error500(" 短信接口未配置，请联系管理员！");
 			return result;
 		}
+		// * 成功的结果返回
 		return result;
 	}
 

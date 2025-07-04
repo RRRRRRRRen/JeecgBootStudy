@@ -42,8 +42,9 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @param pageNo
 	 * @return
 	 */
-	Result<IPage<SysUser>> queryPageList(HttpServletRequest req, QueryWrapper<SysUser> queryWrapper, Integer pageSize, Integer pageNo);
-	
+	Result<IPage<SysUser>> queryPageList(HttpServletRequest req, QueryWrapper<SysUser> queryWrapper, Integer pageSize,
+			Integer pageNo);
+
 	/**
 	 * 重置密码
 	 *
@@ -65,6 +66,7 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 删除用户
+	 * 
 	 * @param userId
 	 * @return
 	 */
@@ -72,35 +74,39 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 批量删除用户
+	 * 
 	 * @param userIds
 	 * @return
 	 */
 	public boolean deleteBatchUsers(String userIds);
 
-    /**
-     * 根据用户名查询
-     * @param username 用户名
-     * @return SysUser
-     */
+	/**
+	 * 根据用户名查询
+	 * 
+	 * @param username 用户名
+	 * @return SysUser
+	 */
 	public SysUser getUserByName(String username);
-	
+
 	/**
 	 * 添加用户和用户角色关系
+	 * 
 	 * @param user
 	 * @param roles
 	 */
-	public void addUserWithRole(SysUser user,String roles);
-	
-	
+	public void addUserWithRole(SysUser user, String roles);
+
 	/**
 	 * 修改用户和用户角色关系
+	 * 
 	 * @param user
 	 * @param roles
 	 */
-	public void editUserWithRole(SysUser user,String roles);
+	public void editUserWithRole(SysUser user, String roles);
 
 	/**
 	 * 获取用户的授权角色
+	 * 
 	 * @param username
 	 * @return
 	 */
@@ -113,10 +119,11 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @param version  前端UI版本
 	 * @return
 	 */
-	public SysRoleIndex getDynamicIndexByUserRole(String username,String version);
-	
+	public SysRoleIndex getDynamicIndexByUserRole(String username, String version);
+
 	/**
-	  * 查询用户信息包括 部门信息
+	 * 查询用户信息包括 部门信息
+	 * 
 	 * @param username
 	 * @return
 	 */
@@ -125,59 +132,66 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 根据部门Id查询
+	 * 
 	 * @param page
-     * @param departId 部门id
-     * @param username 用户账户名称
+	 * @param departId 部门id
+	 * @param username 用户账户名称
 	 * @return
 	 */
 	public IPage<SysUser> getUserByDepId(Page<SysUser> page, String departId, String username);
 
 	/**
 	 * 根据部门Ids查询
+	 * 
 	 * @param page
-     * @param departIds  部门id集合
-     * @param username 用户账户名称
+	 * @param departIds 部门id集合
+	 * @param username  用户账户名称
 	 * @return
 	 */
 	public IPage<SysUser> getUserByDepIds(Page<SysUser> page, List<String> departIds, String username);
 
 	/**
 	 * 根据 userIds查询，查询用户所属部门的名称（多个部门名逗号隔开）
+	 * 
 	 * @param userIds
 	 * @return
 	 */
-	public Map<String,String> getDepNamesByUserIds(List<String> userIds);
+	public Map<String, String> getDepNamesByUserIds(List<String> userIds);
 
-    /**
-     * 根据部门 Id 和 QueryWrapper 查询
-     *
-     * @param page
-     * @param departId
-     * @param queryWrapper
-     * @return
-     */
-    //update-begin-author:taoyan date:2022-9-13 for: VUEN-2245【漏洞】发现新漏洞待处理20220906 ----sql注入 方法没有使用，注掉
-    // public IPage<SysUser> getUserByDepartIdAndQueryWrapper(Page<SysUser> page, String departId, QueryWrapper<SysUser> queryWrapper);
-	//update-end-author:taoyan date:2022-9-13 for: VUEN-2245【漏洞】发现新漏洞待处理20220906 ----sql注入 方法没有使用，注掉
+	/**
+	 * 根据部门 Id 和 QueryWrapper 查询
+	 *
+	 * @param page
+	 * @param departId
+	 * @param queryWrapper
+	 * @return
+	 */
+	// update-begin-author:taoyan date:2022-9-13 for: VUEN-2245【漏洞】发现新漏洞待处理20220906
+	// ----sql注入 方法没有使用，注掉
+	// public IPage<SysUser> getUserByDepartIdAndQueryWrapper(Page<SysUser> page,
+	// String departId, QueryWrapper<SysUser> queryWrapper);
+	// update-end-author:taoyan date:2022-9-13 for: VUEN-2245【漏洞】发现新漏洞待处理20220906
+	// ----sql注入 方法没有使用，注掉
 
 	/**
 	 * 根据 orgCode 查询用户，包括子部门下的用户
 	 *
 	 * @param orgCode
 	 * @param userParams 用户查询条件，可为空
-	 * @param page 分页参数
+	 * @param page       分页参数
 	 * @return
 	 */
 	IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage page);
 
 	/**
 	 * 根据角色Id查询
+	 * 
 	 * @param page
-     * @param roleId 角色id
-     * @param username 用户账户名称
+	 * @param roleId   角色id
+	 * @param username 用户账户名称
 	 * @return
 	 */
-	public IPage<SysUser> getUserByRoleId(Page<SysUser> page,String roleId, String username);
+	public IPage<SysUser> getUserByRoleId(Page<SysUser> page, String roleId, String username);
 
 	/**
 	 * 通过用户名获取用户角色集合
@@ -186,7 +200,7 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @return 角色集合
 	 */
 	Set<String> getUserRolesSet(String username);
-	
+
 	/**
 	 * 通过用户名获取用户角色集合
 	 *
@@ -202,32 +216,34 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @return 权限集合
 	 */
 	Set<String> getUserPermissionsSet(String userId);
-	
+
 	/**
 	 * 根据用户名设置部门ID
+	 * 
 	 * @param username
 	 * @param orgCode
 	 */
-	void updateUserDepart(String username,String orgCode,Integer loginTenantId);
-	
+	void updateUserDepart(String username, String orgCode, Integer loginTenantId);
+
 	/**
 	 * 根据手机号获取用户名和密码
-     * @param phone 手机号
-     * @return SysUser
+	 * 
+	 * @param phone 手机号
+	 * @return SysUser
 	 */
 	public SysUser getUserByPhone(String phone);
 
-
 	/**
 	 * 根据邮箱获取用户
-     * @param email 邮箱
-     * @return SysUser
-     */
+	 * 
+	 * @param email 邮箱
+	 * @return SysUser
+	 */
 	public SysUser getUserByEmail(String email);
-
 
 	/**
 	 * 添加用户和用户部门关系
+	 * 
 	 * @param user
 	 * @param selectedParts
 	 */
@@ -235,13 +251,15 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 编辑用户和用户部门关系
+	 * 
 	 * @param user
 	 * @param departs
 	 */
 	void editUserWithDepart(SysUser user, String departs);
-	
+
 	/**
-	   * 校验用户是否有效
+	 * * 校验用户是否有效
+	 * 
 	 * @param sysUser
 	 * @return
 	 */
@@ -249,124 +267,140 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 查询被逻辑删除的用户
-     * @return List<SysUser>
+	 * 
+	 * @return List<SysUser>
 	 */
 	List<SysUser> queryLogicDeleted();
 
 	/**
 	 * 查询被逻辑删除的用户（可拼装查询条件）
-     * @param wrapper
-     * @return List<SysUser>
+	 * 
+	 * @param wrapper
+	 * @return List<SysUser>
 	 */
 	List<SysUser> queryLogicDeleted(LambdaQueryWrapper<SysUser> wrapper);
 
 	/**
 	 * 还原被逻辑删除的用户
-     * @param userIds  存放用户id集合
-     * @param updateEntity
-     * @return boolean
+	 * 
+	 * @param userIds      存放用户id集合
+	 * @param updateEntity
+	 * @return boolean
 	 */
 	boolean revertLogicDeleted(List<String> userIds, SysUser updateEntity);
 
 	/**
 	 * 彻底删除被逻辑删除的用户
-     * @param userIds 存放用户id集合
-     * @return boolean
+	 * 
+	 * @param userIds 存放用户id集合
+	 * @return boolean
 	 */
 	boolean removeLogicDeleted(List<String> userIds);
 
-    /**
-     * 更新手机号、邮箱空字符串为 null
-     * @return boolean
-     */
-    @Transactional(rollbackFor = Exception.class)
-    boolean updateNullPhoneEmail();
+	/**
+	 * 更新手机号、邮箱空字符串为 null
+	 * 
+	 * @return boolean
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	boolean updateNullPhoneEmail();
 
 	/**
 	 * 保存第三方用户信息
+	 * 
 	 * @param sysUser
 	 */
 	void saveThirdUser(SysUser sysUser);
 
 	/**
 	 * 根据部门Ids查询
+	 * 
 	 * @param departIds 部门id集合
-     * @param username 用户账户名称
+	 * @param username  用户账户名称
 	 * @return
 	 */
 	List<SysUser> queryByDepIds(List<String> departIds, String username);
 
 	/**
 	 * 保存用户
-	 * @param user 用户
-	 * @param selectedRoles 选择的角色id，多个以逗号隔开
+	 * 
+	 * @param user            用户
+	 * @param selectedRoles   选择的角色id，多个以逗号隔开
 	 * @param selectedDeparts 选择的部门id，多个以逗号隔开
-	 * @param relTenantIds 多个租户id
+	 * @param relTenantIds    多个租户id
 	 */
 	void saveUser(SysUser user, String selectedRoles, String selectedDeparts, String relTenantIds);
 
 	/**
 	 * 编辑用户
-	 * @param user 用户
-	 * @param roles 选择的角色id，多个以逗号隔开
-	 * @param departs 选择的部门id，多个以逗号隔开
-	 * @param relTenantIds 多个租户id
+	 * 
+	 * @param user           用户
+	 * @param roles          选择的角色id，多个以逗号隔开
+	 * @param departs        选择的部门id，多个以逗号隔开
+	 * @param relTenantIds   多个租户id
 	 * @param updateFromPage 更新来自的页面 [TV360X-1686]
 	 */
 	void editUser(SysUser user, String roles, String departs, String relTenantIds, String updateFromPage);
 
 	/**
-     * userId转为username
-     * @param userIdList
-     * @return List<String>
-     */
+	 * userId转为username
+	 * 
+	 * @param userIdList
+	 * @return List<String>
+	 */
 	List<String> userIdToUsername(Collection<String> userIdList);
-
 
 	/**
 	 * 获取用户信息 字段信息是加密后的 【加密用户信息】
+	 * 
 	 * @param username
 	 * @return
 	 */
 	LoginUser getEncodeUserInfo(String username);
 
-    /**
-     * 用户离职
-     * @param username
-     */
-    void userQuit(String username);
+	/**
+	 * 用户离职
+	 * 
+	 * @param username
+	 */
+	void userQuit(String username);
 
-    /**
-     * 获取离职人员列表
+	/**
+	 * 获取离职人员列表
+	 * 
 	 * @param tenantId 租户id
-     * @return
-     */
-    List<SysUser> getQuitList(Integer tenantId);
+	 * @return
+	 */
+	List<SysUser> getQuitList(Integer tenantId);
 
-    /**
-     * 更新刪除状态和离职状态
-     * @param userIds  存放用户id集合
-     * @param sysUser
-     * @return boolean
-     */
-    void updateStatusAndFlag(List<String> userIds, SysUser sysUser);
+	/**
+	 * 更新刪除状态和离职状态
+	 * 
+	 * @param userIds 存放用户id集合
+	 * @param sysUser
+	 * @return boolean
+	 */
+	void updateStatusAndFlag(List<String> userIds, SysUser sysUser);
 
 	/**
 	 * 设置登录租户
+	 * 
 	 * @param sysUser
 	 * @return
 	 */
-	Result<JSONObject>  setLoginTenant(SysUser sysUser, JSONObject obj, String username, Result<JSONObject> result);
+	Result<JSONObject> setLoginTenant(SysUser sysUser, JSONObject obj, String username, Result<JSONObject> result);
 
-	//--- author:taoyan date:20221231 for: QQYUN-3515【应用】应用下的组织机构管理功能，细节实现 ---
+	// --- author:taoyan date:20221231 for: QQYUN-3515【应用】应用下的组织机构管理功能，细节实现 ---
 	/**
 	 * 批量编辑用户信息
+	 * 
 	 * @param json
 	 */
 	void batchEditUsers(JSONObject json);
 
 	/**
 	 * 根据关键词查询用户和部门
+	 * 
 	 * @param keyword
 	 * @return
 	 */
@@ -374,6 +408,7 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 查询 部门修改的信息
+	 * 
 	 * @param departId
 	 * @return
 	 */
@@ -381,34 +416,39 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 修改部门相关信息
+	 * 
 	 * @param updateDepartInfo
 	 */
 	void doUpdateDepartInfo(UpdateDepartInfo updateDepartInfo);
 
 	/**
 	 * 设置负责人 取消负责人
+	 * 
 	 * @param json
 	 */
 	void changeDepartChargePerson(JSONObject json);
-	//--- author:taoyan date:20221231 for: QQYUN-3515【应用】应用下的组织机构管理功能，细节实现 ---
-	
+	// --- author:taoyan date:20221231 for: QQYUN-3515【应用】应用下的组织机构管理功能，细节实现 ---
+
 	/**
 	 * 编辑租户用户
+	 * 
 	 * @param sysUser
 	 * @param tenantId
 	 * @param departs
 	 */
 	void editTenantUser(SysUser sysUser, String tenantId, String departs, String roles);
 
-/**
+	/**
 	 * 修改用户账号状态
-	 * @param id 账号id
+	 * 
+	 * @param id     账号id
 	 * @param status 账号状态
 	 */
 	void updateStatus(String id, String status);
 
 	/**
 	 * 导出应用下的用户Excel
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -416,6 +456,7 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 导入应用下的用户
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -423,6 +464,7 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 验证用户是否为管理员
+	 * 
 	 * @param ids
 	 */
 	void checkUserAdminRejectDel(String ids);
@@ -433,19 +475,20 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @param json
 	 * @param username
 	 */
-    void changePhone(JSONObject json, String username);
+	void changePhone(JSONObject json, String username);
 
 	/**
 	 * 发送短信验证码
 	 * 
 	 * @param jsonObject
-	 * @param username 用户名
-	 * @param ipAddress ip地址
+	 * @param username   用户名
+	 * @param ipAddress  ip地址
 	 */
 	void sendChangePhoneSms(JSONObject jsonObject, String username, String ipAddress);
 
 	/**
 	 * 发送注销用户手机号验证密码[敲敲云专用]
+	 * 
 	 * @param jsonObject
 	 * @param username
 	 * @param ipAddress
@@ -454,6 +497,7 @@ public interface ISysUserService extends IService<SysUser> {
 
 	/**
 	 * 用户注销[敲敲云专用]
+	 * 
 	 * @param jsonObject
 	 * @param username
 	 */
