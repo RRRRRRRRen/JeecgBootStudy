@@ -322,16 +322,28 @@ public class LoginController {
 	}
 
 	/**
-	 * 获取访问量
+	 * * 获取访问量
 	 * 
 	 * @return
 	 */
 	@GetMapping("loginfo")
 	public Result<JSONObject> loginfo() {
+		// * 初始化响应体
 		Result<JSONObject> result = new Result<JSONObject>();
+		// * 初始化返回对象
 		JSONObject obj = new JSONObject();
-		// update-begin--Author:zhangweijian Date:20190428 for：传入开始时间，结束时间参数
-		// 获取一天的开始和结束时间
+
+		/**
+		 * * 获取一天的开始和结束时间
+		 * 
+		 * * 不推荐 Calendar 和 Date：
+		 * * • 过时、易错、线程不安全。
+		 * * • java.time 是现代 Java 处理日期时间的首选，提供了更强的表达能力和安全性。
+		 * 
+		 * * 推荐使用 java.time.LocalDateTime
+		 * * - LocalDateTime dayStart = LocalDate.now().atStartOfDay();
+		 * * - LocalDateTime dayEnd = dayStart.plusDays(1);
+		 */
 		Calendar calendar = new GregorianCalendar();
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
@@ -340,15 +352,20 @@ public class LoginController {
 		Date dayStart = calendar.getTime();
 		calendar.add(Calendar.DATE, 1);
 		Date dayEnd = calendar.getTime();
-		// 获取系统访问记录
+
+		// * 获取系统 总访问记录
 		Long totalVisitCount = logService.findTotalVisitCount();
 		obj.put("totalVisitCount", totalVisitCount);
+		// * 获取系统 今日访问记录
 		Long todayVisitCount = logService.findTodayVisitCount(dayStart, dayEnd);
 		obj.put("todayVisitCount", todayVisitCount);
+		// * 获取系统 今日ip访问记录
 		Long todayIp = logService.findTodayIp(dayStart, dayEnd);
-		// update-end--Author:zhangweijian Date:20190428 for：传入开始时间，结束时间参数
 		obj.put("todayIp", todayIp);
+
+		// * 设置返回对象
 		result.setResult(obj);
+		// * 返回成功
 		result.success("登录成功");
 		return result;
 	}
