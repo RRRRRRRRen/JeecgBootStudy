@@ -129,7 +129,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	@Override
 	public Result<IPage<SysUser>> queryPageList(HttpServletRequest req, QueryWrapper<SysUser> queryWrapper,
 			Integer pageSize, Integer pageNo) {
-		Result<IPage<SysUser>> result = new Result<IPage<SysUser>>();
+		Result<IPage<SysUser>> result = new Result<>();
 		// update-begin-Author:wangshuai--Date:20211119--for:【vue3】通过部门id查询用户，通过code查询id
 		// 部门ID
 		String departId = req.getParameter("departId");

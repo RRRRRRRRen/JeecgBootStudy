@@ -15,140 +15,245 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * <p>
- * 部门表
- * <p>
+ * * 部门表
  * 
  * @Author Steve
- * @Since  2019-01-22
+ * @Since 2019-01-22
  */
 @Data
 @TableName("sys_depart")
 public class SysDepart implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
-	/**ID*/
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * * ID
+	 */
 	@TableId(type = IdType.ASSIGN_ID)
 	private String id;
-	/**父机构ID*/
+
+	/**
+	 * * 父机构ID
+	 */
 	private String parentId;
-	/**机构/部门名称*/
-	@Excel(name="机构/部门名称",width=15)
+
+	/**
+	 * * 机构/部门名称
+	 */
+	@Excel(name = "机构/部门名称", width = 15)
 	private String departName;
-	/**英文名*/
-	@Excel(name="英文名",width=15)
+
+	/**
+	 * * 英文名
+	 */
+	@Excel(name = "英文名", width = 15)
 	private String departNameEn;
-	/**缩写*/
+
+	/**
+	 * * 缩写
+	 */
 	private String departNameAbbr;
-	/**排序*/
-	@Excel(name="排序",width=15)
+
+	/**
+	 * * 排序
+	 */
+	@Excel(name = "排序", width = 15)
 	private Integer departOrder;
-	/**描述*/
-	@Excel(name="描述",width=15)
+
+	/**
+	 * * 描述
+	 */
+	@Excel(name = "描述", width = 15)
 	private String description;
-	/**机构类别 1=公司，2=组织机构，3=岗位*/
-	@Excel(name="机构类别",width=15,dicCode="org_category")
+
+	/**
+	 * * 机构类别
+	 * * 1=公司，2=组织机构，3=岗位
+	 */
+	@Excel(name = "机构类别", width = 15, dicCode = "org_category")
 	private String orgCategory;
-	/**机构类型*/
+
+	/**
+	 * * 机构类型
+	 */
 	private String orgType;
-	/**机构编码*/
-	@Excel(name="机构编码",width=15)
+
+	/**
+	 * * 机构编码
+	 */
+	@Excel(name = "机构编码", width = 15)
 	private String orgCode;
-	/**手机号*/
-	@Excel(name="手机号",width=15)
+
+	/**
+	 * 手机号
+	 */
+	@Excel(name = "手机号", width = 15)
 	private String mobile;
-	/**传真*/
-	@Excel(name="传真",width=15)
+
+	/**
+	 * * 传真
+	 */
+	@Excel(name = "传真", width = 15)
 	private String fax;
-	/**地址*/
-	@Excel(name="地址",width=15)
+
+	/**
+	 * * 地址
+	 */
+	@Excel(name = "地址", width = 15)
 	private String address;
-	/**备注*/
-	@Excel(name="备注",width=15)
+
+	/**
+	 * * 备注
+	 */
+	@Excel(name = "备注", width = 15)
 	private String memo;
-	/**状态（1启用，0不启用）*/
+
+	/**
+	 * * 状态
+	 * * （1启用，0不启用）
+	 */
 	@Dict(dicCode = "depart_status")
 	private String status;
-	/**删除状态（0，正常，1已删除）*/
+
+	/**
+	 * * 删除状态
+	 * * （0，正常，1已删除）
+	 */
 	@Dict(dicCode = "del_flag")
 	private String delFlag;
-	/**对接企业微信的ID*/
+
+	/**
+	 * * 对接企业微信的ID
+	 */
 	private String qywxIdentifier;
-	/**对接钉钉的部门ID*/
+
+	/**
+	 * * 对接钉钉的部门ID
+	 */
 	private String dingIdentifier;
-	/**创建人*/
+
+	/**
+	 * * 创建人
+	 */
 	private String createBy;
-	/**创建日期*/
-	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+
+	/**
+	 * * 创建日期
+	 */
+	@JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
-	/**更新人*/
+
+	/**
+	 * * 更新人
+	 */
 	private String updateBy;
-	/**更新日期*/
-	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+
+	/**
+	 * * 更新日期
+	 */
+	@JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
-	/**租户ID*/
+
+	/**
+	 * * 租户ID
+	 */
 	private java.lang.Integer tenantId;
 
-	/**是否有叶子节点: 1是0否*/
+	/**
+	 * * 是否有叶子节点
+	 * * 1是 0否
+	 */
 	private Integer izLeaf;
 
-    //update-begin---author:wangshuai ---date:20200308  for：[JTC-119]在部门管理菜单下设置部门负责人，新增字段负责人ids和旧的负责人ids
-    /**部门负责人的ids*/
+	/**
+	 * * 部门负责人的ids
+	 */
 	@TableField(exist = false)
 	private String directorUserIds;
-    /**旧的部门负责人的ids(用于比较删除和新增)*/
-	@TableField(exist = false)
-    private String oldDirectorUserIds;
-    //update-end---author:wangshuai ---date:20200308  for：[JTC-119]新增字段负责人ids和旧的负责人ids
-	
+
 	/**
-	 * 重写equals方法
+	 * * 旧的部门负责人的ids(用于比较删除和新增)
 	 */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+	@TableField(exist = false)
+	private String oldDirectorUserIds;
+
+	/**
+	 * * 重写equals方法
+	 */
+	@Override
+	public boolean equals(Object o) {
+		/**
+		 * * 快速判断：如果当前对象和传入对象是同一个引用（即内存地址相同），直接返回 true，提升效率。
+		 */
+		if (this == o) {
 			return true;
 		}
-        if (o == null || getClass() != o.getClass()) {
+		/**
+		 * * 判断传入对象是否为空（null）。
+		 * * 如果不为空，检查运行时类是否一致。只有同类对象才可能被认为是相等的。
+		 */
+		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-        if (!super.equals(o)) {
+		/**
+		 * * 调用父类的 equals() 方法进行比较。这确保了父类中的字段也被纳入比较范围。
+		 * * 如果父类判断不相等，则当前对象也不相等，返回 false。
+		 */
+		if (!super.equals(o)) {
 			return false;
 		}
-        SysDepart depart = (SysDepart) o;
-        return Objects.equals(id, depart.id) &&
-                Objects.equals(parentId, depart.parentId) &&
-                Objects.equals(departName, depart.departName) &&
-                Objects.equals(departNameEn, depart.departNameEn) &&
-                Objects.equals(departNameAbbr, depart.departNameAbbr) &&
-                Objects.equals(departOrder, depart.departOrder) &&
-                Objects.equals(description, depart.description) &&
-                Objects.equals(orgCategory, depart.orgCategory) &&
-                Objects.equals(orgType, depart.orgType) &&
-                Objects.equals(orgCode, depart.orgCode) &&
-                Objects.equals(mobile, depart.mobile) &&
-                Objects.equals(fax, depart.fax) &&
-                Objects.equals(address, depart.address) &&
-                Objects.equals(memo, depart.memo) &&
-                Objects.equals(status, depart.status) &&
-                Objects.equals(delFlag, depart.delFlag) &&
-                Objects.equals(createBy, depart.createBy) &&
-                Objects.equals(createTime, depart.createTime) &&
-                Objects.equals(updateBy, depart.updateBy) &&
-                Objects.equals(tenantId, depart.tenantId) &&
-                Objects.equals(updateTime, depart.updateTime);
-    }
+		SysDepart depart = (SysDepart) o;
+		return Objects.equals(id, depart.id) &&
+				Objects.equals(parentId, depart.parentId) &&
+				Objects.equals(departName, depart.departName) &&
+				Objects.equals(departNameEn, depart.departNameEn) &&
+				Objects.equals(departNameAbbr, depart.departNameAbbr) &&
+				Objects.equals(departOrder, depart.departOrder) &&
+				Objects.equals(description, depart.description) &&
+				Objects.equals(orgCategory, depart.orgCategory) &&
+				Objects.equals(orgType, depart.orgType) &&
+				Objects.equals(orgCode, depart.orgCode) &&
+				Objects.equals(mobile, depart.mobile) &&
+				Objects.equals(fax, depart.fax) &&
+				Objects.equals(address, depart.address) &&
+				Objects.equals(memo, depart.memo) &&
+				Objects.equals(status, depart.status) &&
+				Objects.equals(delFlag, depart.delFlag) &&
+				Objects.equals(createBy, depart.createBy) &&
+				Objects.equals(createTime, depart.createTime) &&
+				Objects.equals(updateBy, depart.updateBy) &&
+				Objects.equals(tenantId, depart.tenantId) &&
+				Objects.equals(updateTime, depart.updateTime);
+	}
 
-    /**
-     * 重写hashCode方法
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), id, parentId, departName, 
-        		departNameEn, departNameAbbr, departOrder, description,orgCategory, 
-        		orgType, orgCode, mobile, fax, address, memo, status, 
-        		delFlag, createBy, createTime, updateBy, updateTime, tenantId);
-    }
+	/**
+	 * * 重写hashCode方法
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				super.hashCode(),
+				id,
+				parentId,
+				departName,
+				departNameEn,
+				departNameAbbr,
+				departOrder,
+				description,
+				orgCategory,
+				orgType,
+				orgCode,
+				mobile,
+				fax,
+				address,
+				memo,
+				status,
+				delFlag,
+				createBy,
+				createTime,
+				updateBy,
+				updateTime,
+				tenantId);
+	}
 }
