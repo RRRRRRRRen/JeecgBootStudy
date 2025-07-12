@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
+ * * Log 日志
+ * 
  * @Description: common实现类
  * @author: jeecg-boot
  */
@@ -31,64 +33,77 @@ public class BaseCommonServiceImpl implements BaseCommonService {
 
     @Override
     public void addLog(LogDTO logDTO) {
-        if(oConvertUtils.isEmpty(logDTO.getId())){
+        // * 没有id则生成一个id保存
+        if (oConvertUtils.isEmpty(logDTO.getId())) {
             logDTO.setId(String.valueOf(IdWorker.getId()));
         }
-        //保存日志（异常捕获处理，防止数据太大存储失败，导致业务失败）JT-238
-        try {   
+
+        // * 异常捕获处理，防止数据太大存储失败，导致业务失败
+        try {
+            // * 保存日志
             logDTO.setCreateTime(new Date());
             baseCommonMapper.saveLog(logDTO);
         } catch (Exception e) {
-            log.warn(" LogContent length : "+logDTO.getLogContent().length());
+            // * 保存失败则采用 Slf4j 保存
+            log.warn(" LogContent length : " + logDTO.getLogContent().length());
             log.warn(e.getMessage());
         }
     }
 
     @Override
     public void addLog(String logContent, Integer logType, Integer operatetype, LoginUser user) {
+        // * 读取参数到 LogDTO
         LogDTO sysLog = new LogDTO();
         sysLog.setId(String.valueOf(IdWorker.getId()));
-        //注解上的描述,操作日志内容
         sysLog.setLogContent(logContent);
         sysLog.setLogType(logType);
         sysLog.setOperateType(operatetype);
+
         try {
-            //获取request
+            /**
+             * * 获取 HttpServletRequest
+             * 
+             * * - 在非 Controller 层（比如 Service 或工具类）里，获取当前线程下的 HttpServletRequest 对象。
+             */
             HttpServletRequest request = SpringContextUtils.getHttpServletRequest();
-            //设置IP地址
+            // * 设置IP地址
             sysLog.setIp(IpUtils.getIpAddr(request));
 
+            // * 设置客户端
             try {
-                //设置客户端
-                if(BrowserUtils.isDesktop(request)){
+                if (BrowserUtils.isDesktop(request)) {
                     sysLog.setClientType(ClientTerminalTypeEnum.PC.getKey());
-                }else{
+                } else {
                     sysLog.setClientType(ClientTerminalTypeEnum.APP.getKey());
                 }
             } catch (Exception e) {
-                //e.printStackTrace();
+                // e.printStackTrace();
             }
         } catch (Exception e) {
+            // * 如果ip获取失败，则设置为本地
             sysLog.setIp("127.0.0.1");
         }
-        //获取登录用户信息
-        if(user==null){
+
+        // * 获取登录用户信息
+        if (user == null) {
             try {
+                // * 从 Shiro 的安全上下文中获取当前登录用户对象，并强制转换为 LoginUser 类型。
                 user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
             } catch (Exception e) {
-                //e.printStackTrace();
+                // e.printStackTrace();
             }
         }
-        if(user!=null){
+        if (user != null) {
             sysLog.setUserid(user.getUsername());
             sysLog.setUsername(user.getRealname());
         }
         sysLog.setCreateTime(new Date());
-        //保存日志（异常捕获处理，防止数据太大存储失败，导致业务失败）JT-238
+
+        // * 保存日志
         try {
             baseCommonMapper.saveLog(sysLog);
         } catch (Exception e) {
-            log.warn(" LogContent length : "+sysLog.getLogContent().length());
+            log.warn(" LogContent length : " + sysLog.getLogContent().length());
             log.warn(e.getMessage());
         }
     }
@@ -97,7 +112,5 @@ public class BaseCommonServiceImpl implements BaseCommonService {
     public void addLog(String logContent, Integer logType, Integer operateType) {
         addLog(logContent, logType, operateType, null);
     }
-
-
 
 }

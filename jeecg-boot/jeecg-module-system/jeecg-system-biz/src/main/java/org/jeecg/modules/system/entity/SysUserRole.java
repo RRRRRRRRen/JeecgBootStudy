@@ -10,9 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
- * <p>
- * 用户角色表
- * </p>
+ * * 用户角色表
  *
  * @Author scott
  * @since 2018-12-21
@@ -24,28 +22,33 @@ public class SysUserRole implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * * 主键
+     */
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
-    
+
     /**
-     * 用户id
+     * * 用户id
      */
     private String userId;
 
     /**
-     * 角色id
+     * * 角色id
      */
     private String roleId;
-    
-    /**租户ID*/
-    private java.lang.Integer tenantId;
-    
-	public SysUserRole() {
-	}
 
-	public SysUserRole(String userId, String roleId) {
-		this.userId = userId;
-		this.roleId = roleId;
-	}
+    /**
+     * * 租户ID
+     */
+    private java.lang.Integer tenantId;
+
+    public SysUserRole() {
+    }
+
+    public SysUserRole(String userId, String roleId) {
+        this.userId = userId;
+        this.roleId = roleId;
+    }
 
 }

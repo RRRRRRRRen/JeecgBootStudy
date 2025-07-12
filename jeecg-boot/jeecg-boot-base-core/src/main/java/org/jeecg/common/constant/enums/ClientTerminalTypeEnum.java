@@ -1,7 +1,7 @@
 package org.jeecg.common.constant.enums;
 
 /**
- * 客户终端类型
+ * * 客户终端类型
  */
 public enum ClientTerminalTypeEnum {
 

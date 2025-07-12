@@ -24,17 +24,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>
- * 用户表 服务类
- * </p>
- *
+ * * 用户表 服务类
+ * 
  * @Author scott
  * @since 2018-12-20
  */
 public interface ISysUserService extends IService<SysUser> {
 
 	/**
-	 * 查询用户数据列表
+	 * * 查询用户数据列表
 	 * 
 	 * @param req
 	 * @param queryWrapper
@@ -322,7 +320,7 @@ public interface ISysUserService extends IService<SysUser> {
 	List<SysUser> queryByDepIds(List<String> departIds, String username);
 
 	/**
-	 * 保存用户
+	 * * 保存用户
 	 * 
 	 * @param user            用户
 	 * @param selectedRoles   选择的角色id，多个以逗号隔开
@@ -470,7 +468,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void checkUserAdminRejectDel(String ids);
 
 	/**
-	 * 修改手机号
+	 * * 修改手机号
 	 * 
 	 * @param json
 	 * @param username
@@ -478,7 +476,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void changePhone(JSONObject json, String username);
 
 	/**
-	 * 发送短信验证码
+	 * * 发送短信验证码
 	 * 
 	 * @param jsonObject
 	 * @param username   用户名
@@ -487,7 +485,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void sendChangePhoneSms(JSONObject jsonObject, String username, String ipAddress);
 
 	/**
-	 * 发送注销用户手机号验证密码[敲敲云专用]
+	 * * 发送注销用户手机号验证密码[敲敲云专用]
 	 * 
 	 * @param jsonObject
 	 * @param username

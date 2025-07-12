@@ -40,6 +40,9 @@ import java.util.stream.Collectors;
 /**
  * 异常处理器
  * 
+ * * spring boot 会自动扫描 @RestControllerAdvice 注释
+ * * - 当扫描到后会自动全局生效
+ * 
  * @Author scott
  * @Date 2019
  */
@@ -52,6 +55,7 @@ public class JeecgBootExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public Result<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+		// * getMessage 为 Throwable 的方法
 		log.error(e.getMessage(), e);
 		addSysLog(e);
 		return Result.error("校验失败！" + e.getBindingResult().getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(",")));

@@ -60,6 +60,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+/**
+ * * Spring 提供的事务管理注解
+ * 
+ * * - 声明方法或类需要事务支持，保证数据库操作的一致性和完整性。
+ * * - 当方法执行过程中出现异常时，自动回滚数据库操作；正常执行则提交。
+ */
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -126,74 +132,77 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	@Autowired
 	private RedisUtil redisUtil;
 
+	/**
+	 * * 查询用户数据列表
+	 * 
+	 * @param req
+	 * @param queryWrapper
+	 * @param pageSize
+	 * @param pageNo
+	 * @return
+	 */
 	@Override
 	public Result<IPage<SysUser>> queryPageList(HttpServletRequest req, QueryWrapper<SysUser> queryWrapper,
 			Integer pageSize, Integer pageNo) {
+		// * 初始化列表返回结果
 		Result<IPage<SysUser>> result = new Result<>();
-		// update-begin-Author:wangshuai--Date:20211119--for:【vue3】通过部门id查询用户，通过code查询id
-		// 部门ID
+		// * 通过 getParameter 获取url参数 部门ID departId
 		String departId = req.getParameter("departId");
+
+		/**
+		 * * 如果存在部门
+		 */
 		if (oConvertUtils.isNotEmpty(departId)) {
+			// * 查询部门列表
 			LambdaQueryWrapper<SysUserDepart> query = new LambdaQueryWrapper<>();
 			query.eq(SysUserDepart::getDepId, departId);
 			List<SysUserDepart> list = sysUserDepartMapper.selectList(query);
+			// * 读取 userId List
 			List<String> userIds = list.stream().map(SysUserDepart::getUserId).collect(Collectors.toList());
-			// update-begin---author:wangshuai ---date:20220322
-			// for：[issues/I4XTYB]查询用户时，当部门id 下没有分配用户时接口报错------------
+			// * 如果部门表中保存了 userid 则增加查询条件，否则直接返回成功
 			if (oConvertUtils.listIsNotEmpty(userIds)) {
 				queryWrapper.in("id", userIds);
 			} else {
 				return Result.OK();
 			}
-			// update-end---author:wangshuai ---date:20220322 for：[issues/I4XTYB]查询用户时，当部门id
-			// 下没有分配用户时接口报错------------
 		}
-		// 用户ID
+
+		// * 解析参数中的 code
 		String code = req.getParameter("code");
 		if (oConvertUtils.isNotEmpty(code)) {
 			queryWrapper.in("id", Arrays.asList(code.split(",")));
+			// * 设置pagesize 为用户id的个数
 			pageSize = code.split(",").length;
 		}
-		// update-end-Author:wangshuai--Date:20211119--for:【vue3】通过部门id查询用户，通过code查询id
 
-		// update-begin-author:taoyan--date:20220104--for: JTC-372 【用户冻结问题】
-		// online授权、用户组件，选择用户都能看到被冻结的用户
+		// * 解析参数中的 status
 		String status = req.getParameter("status");
 		if (oConvertUtils.isNotEmpty(status)) {
 			queryWrapper.eq("status", Integer.parseInt(status));
 		}
-		// update-end-author:taoyan--date:20220104--for: JTC-372 【用户冻结问题】
-		// online授权、用户组件，选择用户都能看到被冻结的用户
 
-		// update-begin---author:wangshuai---date:2024-03-08---for:【QQYUN-8110】在线通讯录支持设置权限(只能看分配的技术支持)---
+		// * 从 token 中获取 TenantId、LowAppId
 		String tenantId = TokenUtils.getTenantIdByRequest(req);
 		String lowAppId = TokenUtils.getLowAppIdByRequest(req);
-		// Object bean =
-		// ResourceUtil.getImplementationClass(DataEnhanceEnum.getClassPath(tenantId,lowAppId));
-		// if(null != bean){
-		// UserFilterEnhance userEnhanceService = (UserFilterEnhance) bean;
-		// LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
-		// List<String> userIds = userEnhanceService.getUserIds(sysUser.getId());
-		// if(CollectionUtil.isNotEmpty(userIds)){
-		// queryWrapper.in("id", userIds);
-		// }
-		// }
-		// update-end---author:wangshuai---date:2024-03-08---for:【QQYUN-8110】在线通讯录支持设置权限(只能看分配的技术支持)---
 
-		// TODO 外部模拟登陆临时账号，列表不显示
+		// * 外部模拟登陆临时账号，列表不显示
 		queryWrapper.ne("username", "_reserve_user_external");
+
+		// * 初始化 page
 		Page<SysUser> page = new Page<SysUser>(pageNo, pageSize);
+		// * 初始化 pageList
 		IPage<SysUser> pageList = this.page(page, queryWrapper);
 
 		// 批量查询用户的所属部门
-		// step.1 先拿到全部的 useids
-		// step.2 通过 useids，一次性查询用户的所属部门名字
+		// * step.1 先拿到全部的 useids
 		List<String> userIds = pageList.getRecords().stream().map(SysUser::getId).collect(Collectors.toList());
+		// * step.2 通过 useids，一次性查询用户的所属部门名字
 		if (userIds != null && userIds.size() > 0) {
 			Map<String, String> useDepNames = this.getDepNamesByUserIds(userIds);
 			pageList.getRecords().forEach(item -> {
+				// * 设置部门名称
 				item.setOrgCodeTxt(useDepNames.get(item.getId()));
-				// 查询用户的租户ids
+				// TODO 查询用户的租户ids
 				List<Integer> list = userTenantMapper.getTenantIdsByUserId(item.getId());
 				if (oConvertUtils.isNotEmpty(list)) {
 					item.setRelTenantIds(StringUtils.join(list.toArray(), SymbolConstant.COMMA));
@@ -205,16 +214,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 					posTenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
 					;
 				}
-				// 查询用户职位关系表(获取租户下面的)
-				// update-begin---author:wangshuai---date:2023-11-15---for:【QQYUN-7028】用户职务保存后未回显---
+				// TODO 查询用户职位关系表
 				List<String> positionList = sysUserPositionMapper.getPositionIdByUserTenantId(item.getId(), posTenantId);
-				// update-end---author:wangshuai---date:2023-11-15---for:【QQYUN-7028】用户职务保存后未回显---
-				// update-end---author:wangshuai ---date:20230228
-				// for：[QQYUN-4354]加入更多字段：当前加入时间应该取当前租户的/职位也是当前租户下的------------
 				item.setPost(CommonUtils.getSplitText(positionList, SymbolConstant.COMMA));
 
-				// update-begin---author:wangshuai---date:2023-10-08---for:【QQYUN-6668】钉钉部门和用户同步，我怎么知道哪些用户是双向绑定成功的---
-				// 是否根据租户隔离(敲敲云用户列表专用，用于展示是否同步钉钉)
+				// TODO 是否根据租户隔离(敲敲云用户列表专用，用于展示是否同步钉钉)
 				if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 					// 查询账号表是否已同步钉钉
 					LambdaQueryWrapper<SysThirdAccount> query = new LambdaQueryWrapper<>();
@@ -228,13 +232,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 						item.setIzBindThird(true);
 					}
 				}
-				// update-end---author:wangshuai---date:2023-10-08---for:【QQYUN-6668】钉钉部门和用户同步，我怎么知道哪些用户是双向绑定成功的---
 			});
 		}
-
+		// * 返回结果
 		result.setSuccess(true);
 		result.setResult(pageList);
-		// log.info(pageList.toString());
 		return result;
 	}
 
@@ -778,14 +780,22 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userMapper.queryByDepIds(departIds, username);
 	}
 
+	/**
+	 * * 保存用户
+	 * 
+	 * @param user            用户
+	 * @param selectedRoles   选择的角色id，多个以逗号隔开
+	 * @param selectedDeparts 选择的部门id，多个以逗号隔开
+	 * @param relTenantIds    多个租户id
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void saveUser(SysUser user, String selectedRoles, String selectedDeparts, String relTenantIds) {
-		// step.1 保存用户
+		// * step.1 保存用户 和 租户
+		// * 调用 mb 保存接口
 		this.save(user);
-		// 获取用户保存前台传过来的租户id并添加到租户
 		this.saveUserTenant(user.getId(), relTenantIds);
-		// step.2 保存角色
+		// * step.2 保存角色
 		if (oConvertUtils.isNotEmpty(selectedRoles)) {
 			String[] arr = selectedRoles.split(",");
 			for (String roleId : arr) {
@@ -793,8 +803,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				sysUserRoleMapper.insert(userRole);
 			}
 		}
-
-		// step.3 保存所属部门
+		// * step.3 保存所属部门
 		if (oConvertUtils.isNotEmpty(selectedDeparts)) {
 			String[] arr = selectedDeparts.split(",");
 			for (String deaprtId : arr) {
@@ -802,8 +811,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				sysUserDepartMapper.insert(userDeaprt);
 			}
 		}
-
-		// step.4 保存职位
+		// * step.4 保存职位
 		this.saveUserPosition(user.getId(), user.getPost());
 	}
 
@@ -1982,94 +1990,139 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 	}
 
+	/**
+	 * * 修改手机号
+	 * 
+	 * @param json
+	 * @param username
+	 */
 	@Override
 	public void changePhone(JSONObject json, String username) {
+		// * 获取验证码 原手机号 操作类型
 		String smscode = json.getString("smscode");
 		String phone = json.getString("phone");
 		String type = json.getString("type");
+		// * 手机号不存在 抛出错误
 		if (oConvertUtils.isEmpty(phone)) {
 			throw new JeecgBootException("请填写原手机号！");
 		}
+		// * 验证码不存在 抛出错误
 		if (oConvertUtils.isEmpty(smscode)) {
 			throw new JeecgBootException("请填写验证码！");
 		}
-		// step1 验证原手机号是否和当前用户匹配
+
+		// * 1. 验证原手机号是否和当前用户匹配
 		SysUser sysUser = userMapper.getUserByNameAndPhone(phone, username);
 		if (null == sysUser) {
 			throw new JeecgBootException("原手机号不匹配，无法修改密码！");
 		}
-		// step2 根据类型判断是验证原手机号的验证码还是新手机号的验证码
-		// 验证原手机号
+
+		// * 2. 根据类型判断是验证原手机号的验证码还是新手机号的验证码
 		if (CommonConstant.VERIFY_ORIGINAL_PHONE.equals(type)) {
 			this.verifyPhone(phone, smscode);
 		} else if (CommonConstant.UPDATE_PHONE.equals(type)) {
-			// 修改手机号
+			// * 获取 新手机号
 			String newPhone = json.getString("newPhone");
-			// 需要验证新手机号和原手机号是否一致，一致不让修改
+			// * 需要验证新手机号和原手机号是否一致，一致不让修改
 			if (newPhone.equals(phone)) {
 				throw new JeecgBootException("新手机号与原手机号一致，无法修改！");
 			}
+			// * 检查验证码
 			this.verifyPhone(newPhone, smscode);
-			// step3 新手机号验证码验证成功之后即可修改手机号
+			// * 修改手机号
 			sysUser.setPhone(newPhone);
 			userMapper.updateById(sysUser);
 		}
 	}
 
 	/**
-	 * 验证手机号
+	 * * 验证手机号
 	 *
 	 * @param phone
 	 * @param smsCode
 	 * @return
 	 */
 	public void verifyPhone(String phone, String smsCode) {
+		// * 获取redis中保存的验证码
 		String phoneKey = CommonConstant.CHANGE_PHONE_REDIS_KEY_PRE + phone;
 		Object phoneCode = redisUtil.get(phoneKey);
+		// * 如果redis中没有 则提示验证码过期
 		if (null == phoneCode) {
 			throw new JeecgBootException("验证码失效，请重新发送验证码！");
 		}
+		// * 不匹配则提示
 		if (!smsCode.equals(phoneCode.toString())) {
 			throw new JeecgBootException("短信验证码不匹配！");
 		}
-		// 验证完成之后清空手机验证码
+		// * 验证完成之后清空手机验证码
 		redisUtil.removeAll(phoneKey);
 	}
 
+	/**
+	 * * 发送短信验证码
+	 * 
+	 * @param jsonObject
+	 * @param username   用户名
+	 * @param ipAddress  ip地址
+	 */
 	@Override
 	public void sendChangePhoneSms(JSONObject jsonObject, String username, String ipAddress) {
+		// * 获取操作类型
 		String type = jsonObject.getString("type");
+		// * 获取手机号
 		String phone = jsonObject.getString("phone");
+		// * 未填写手机号抛出错误
 		if (oConvertUtils.isEmpty(phone)) {
 			throw new JeecgBootException("请填写手机号！");
 		}
-		// step1 根据类型判断是发送旧手机号验证码还是新的手机号验证码
+		// * 校验操作是否合法
 		if (CommonConstant.VERIFY_ORIGINAL_PHONE.equals(type)) {
-			// step2 旧手机号验证码需要验证手机号是否匹配
+			/**
+			 * * 操作类型为 验证原手机号
+			 * 
+			 * * - 根据 phone username 查询是否存在用户，判断手机号和用户是否匹配
+			 * * - 不存在则抛出错误
+			 */
 			SysUser sysUser = userMapper.getUserByNameAndPhone(phone, username);
 			if (null == sysUser) {
 				throw new JeecgBootException("旧手机号不匹配，无法修改手机号！");
 			}
 		} else if (CommonConstant.UPDATE_PHONE.equals(type)) {
-			// step3 新手机号需要验证手机号码是否已注册过
+			/**
+			 * * 操作类型为 更新手机号
+			 * 
+			 * * - 根据 phone 查询是否存在用户，判断手机号是否已注册过
+			 * * - 存在则抛出错误
+			 */
 			SysUser userByPhone = userMapper.getUserByPhone(phone);
 			if (null != userByPhone) {
 				throw new JeecgBootException("手机号已被注册，请尝试其他手机号！");
 			}
 		}
-		// step4 发送短信验证码
+		// * 生成redis key
 		String redisKey = CommonConstant.CHANGE_PHONE_REDIS_KEY_PRE + phone;
+		// * 校验通过则 发送短信验证码
 		this.sendPhoneSms(phone, ipAddress, redisKey);
 	}
 
+	/**
+	 * * 发送注销用户手机号验证密码[敲敲云专用]
+	 * 
+	 * @param jsonObject
+	 * @param username
+	 * @param ipAddress
+	 */
 	@Override
 	public void sendLogOffPhoneSms(JSONObject jsonObject, String username, String ipAddress) {
+		// * 获取参数 手机号
 		String phone = jsonObject.getString("phone");
-		// 通过用户名查询数据库中的手机号
+		// * 通过 用户名 手机号 查询用户
 		SysUser userByNameAndPhone = userMapper.getUserByNameAndPhone(phone, username);
+		// * 用户不存在 抛出错误
 		if (null == userByNameAndPhone) {
 			throw new JeecgBootException("当前用户手机号不匹配，无法修改！");
 		}
+		// * 用户存在发送验证码
 		String code = CommonConstant.LOG_OFF_PHONE_REDIS_KEY_PRE + phone;
 		this.sendPhoneSms(phone, ipAddress, code);
 	}
@@ -2098,27 +2151,33 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 发送短信验证码
+	 * * 发送短信验证码
 	 * 
-	 * @param phone
+	 * @param phone    手机号
+	 * @param clientIp ip
+	 * @param redisKey redisKey
 	 */
 	private void sendPhoneSms(String phone, String clientIp, String redisKey) {
+		// * 获取该key保存的数据
 		Object object = redisUtil.get(redisKey);
 
+		// * 如果存在数据则抛出错误，提示已经发送过验证码
 		if (object != null) {
 			throw new JeecgBootException("验证码10分钟内，仍然有效！");
 		}
 
-		// 增加 check防止恶意刷短信接口
+		// * 检测ip是否在刷短信接口
 		if (!DySmsLimit.canSendSms(clientIp)) {
 			log.warn("--------[警告] IP地址:{}, 短信接口请求太多-------", clientIp);
 			throw new JeecgBootException("短信接口请求太多，请稍后再试！", CommonConstant.PHONE_SMS_FAIL_CODE);
 		}
 
-		// 随机数
+		// * 生成随机数验证码
 		String captcha = RandomUtil.randomNumbers(6);
 		JSONObject obj = new JSONObject();
 		obj.put("code", captcha);
+
+		// * 发送验证码
 		try {
 			boolean sendSmsSuccess = DySmsHelper.sendSms(phone, obj, DySmsEnum.LOGIN_TEMPLATE_CODE);
 			if (!sendSmsSuccess) {
