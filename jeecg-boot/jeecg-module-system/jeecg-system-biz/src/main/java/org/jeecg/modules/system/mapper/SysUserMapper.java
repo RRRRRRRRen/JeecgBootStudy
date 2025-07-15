@@ -55,7 +55,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	List<String> getUserAccountsByDepCode(@Param("orgCode") String orgCode);
 
 	/**
-	 * 根据用户Ids,查询用户所属部门名称信息
+	 * * 根据用户Ids,查询用户所属部门名称信息
 	 * 
 	 * @param userIds
 	 * @return

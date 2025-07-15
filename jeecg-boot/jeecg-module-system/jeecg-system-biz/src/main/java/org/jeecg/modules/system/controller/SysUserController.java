@@ -214,32 +214,51 @@ public class SysUserController {
         return result;
     }
 
+    /**
+     * * 编辑用户
+     * 
+     * @param jsonObject
+     * @return
+     */
     @RequiresPermissions("system:user:edit")
     @RequestMapping(value = "/edit", method = { RequestMethod.PUT, RequestMethod.POST })
     public Result<SysUser> edit(@RequestBody JSONObject jsonObject) {
+        // * 初始化响应体
         Result<SysUser> result = new Result<SysUser>();
         try {
+            // * 根据id获取用户数据
             SysUser sysUser = sysUserService.getById(jsonObject.getString("id"));
             baseCommonService.addLog("编辑用户，username： " + sysUser.getUsername(), CommonConstant.LOG_TYPE_2, 2);
+            // * 上方已经执行 sysUser.getUsername() 所有下方不会执行。
             if (sysUser == null) {
                 result.error500("未找到对应实体");
             } else {
+                /**
+                 * * 转化为java对象
+                 * 
+                 * * - 更推荐 SysUser user = jsonObject.toJavaObject(SysUser.class);
+                 * * - 或者 @RequestBody SysUser user 直接映射
+                 */
                 SysUser user = JSON.parseObject(jsonObject.toJSONString(), SysUser.class);
+                // * 设置更新时间
                 user.setUpdateTime(new Date());
-                // String passwordEncode = PasswordUtil.encrypt(user.getUsername(),
-                // user.getPassword(), sysUser.getSalt());
+                // * 设置密码
                 user.setPassword(sysUser.getPassword());
+                // * 读取角色和部门
                 String roles = jsonObject.getString("selectedroles");
                 String departs = jsonObject.getString("selecteddeparts");
+
+                // * 使用 selecteddeparts || departIds 作为部门数据
                 if (oConvertUtils.isEmpty(departs)) {
-                    // vue3.0前端只传递了departIds
                     departs = user.getDepartIds();
                 }
-                // 用户表字段org_code不能在这里设置他的值
+
+                // * 用户表字段org_code不能在这里设置他的值
                 user.setOrgCode(null);
-                // 修改用户走一个service 保证事务
-                // 获取租户ids
+
+                // * 获取 租户id
                 String relTenantIds = jsonObject.getString("relTenantIds");
+                // * 获取修改发起页面
                 String updateFromPage = jsonObject.getString("updateFromPage");
                 sysUserService.editUser(user, roles, departs, relTenantIds, updateFromPage);
                 result.success("修改成功!");
@@ -252,40 +271,30 @@ public class SysUserController {
     }
 
     /**
-     * 删除用户
+     * * 删除用户
      */
     @RequiresPermissions("system:user:delete")
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
     public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
         baseCommonService.addLog("删除用户，id： " + id, CommonConstant.LOG_TYPE_2, 3);
-        List<String> userNameList = sysUserService.userIdToUsername(Arrays.asList(id));
+        // * 执行删除
         this.sysUserService.deleteUser(id);
-
-        if (!userNameList.isEmpty()) {
-            String joinedString = String.join(",", userNameList);
-        }
         return Result.ok("删除用户成功");
     }
 
     /**
-     * 批量删除用户
+     * * 批量删除用户
      */
     @RequiresPermissions("system:user:deleteBatch")
     @RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
     public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
         baseCommonService.addLog("批量删除用户， ids： " + ids, CommonConstant.LOG_TYPE_2, 3);
-        List<String> userNameList = sysUserService.userIdToUsername(Arrays.asList(ids.split(",")));
         this.sysUserService.deleteBatchUsers(ids);
-
-        // 用户变更，触发同步工作流
-        if (!userNameList.isEmpty()) {
-            String joinedString = String.join(",", userNameList);
-        }
         return Result.ok("批量删除用户成功");
     }
 
     /**
-     * 冻结&解冻用户
+     * * 冻结&解冻用户
      * 
      * @param jsonObject
      * @return
@@ -295,20 +304,21 @@ public class SysUserController {
     public Result<SysUser> frozenBatch(@RequestBody JSONObject jsonObject) {
         Result<SysUser> result = new Result<SysUser>();
         try {
+            // * 获取id参数
             String ids = jsonObject.getString("ids");
+            // * 判断id是否包含管理员
             sysUserService.checkUserAdminRejectDel(ids);
+            // * 获取 状态 参数
             String status = jsonObject.getString("status");
             String[] arr = ids.split(",");
             for (String id : arr) {
+                // * 不为空则变更状态
                 if (oConvertUtils.isNotEmpty(id)) {
-                    // update-begin---author:liusq ---date:20230620
-                    // for：[QQYUN-5577]用户列表-冻结用户，再解冻之后，用户还是无法登陆，有缓存问题 #5066------------
                     sysUserService.updateStatus(id, status);
-                    // update-end---author:liusq ---date:20230620
-                    // for：[QQYUN-5577]用户列表-冻结用户，再解冻之后，用户还是无法登陆，有缓存问题 #5066------------
                 }
             }
         } catch (Exception e) {
+            // * 捕获异常
             log.error(e.getMessage(), e);
             result.error500("操作失败" + e.getMessage());
         }
@@ -317,10 +327,17 @@ public class SysUserController {
 
     }
 
+    /**
+     * * 根据 id 查询用户信息
+     * 
+     * @param id
+     * @return
+     */
     @RequiresPermissions("system:user:queryById")
     @RequestMapping(value = "/queryById", method = RequestMethod.GET)
     public Result<SysUser> queryById(@RequestParam(name = "id", required = true) String id) {
         Result<SysUser> result = new Result<SysUser>();
+        // * 利用 mybatis plus 自带的方法直接查询
         SysUser sysUser = sysUserService.getById(id);
         if (sysUser == null) {
             result.error500("未找到对应实体");
@@ -331,16 +348,25 @@ public class SysUserController {
         return result;
     }
 
+    /**
+     * * 查询用户的角色列表
+     * 
+     * @param userid
+     * @return
+     */
     @RequiresPermissions("system:user:queryUserRole")
     @RequestMapping(value = "/queryUserRole", method = RequestMethod.GET)
     public Result<List<String>> queryUserRole(@RequestParam(name = "userid", required = true) String userid) {
         Result<List<String>> result = new Result<>();
         List<String> list = new ArrayList<String>();
+        // * 查询所有该id下的角色信息
         List<SysUserRole> userRole = sysUserRoleService
                 .list(new QueryWrapper<SysUserRole>().lambda().eq(SysUserRole::getUserId, userid));
+        // * 未查询到返回错误
         if (userRole == null || userRole.size() <= 0) {
             result.error500("未找到用户相关角色信息");
         } else {
+            // * 查询到则构建角色列表返回
             for (SysUserRole sysUserRole : userRole) {
                 list.add(sysUserRole.getRoleId());
             }
@@ -351,8 +377,7 @@ public class SysUserController {
     }
 
     /**
-     * 校验用户账号是否唯一<br>
-     * 可以校验其他 需要检验什么就传什么。。。
+     * * 校验用户账号是否唯一
      *
      * @param sysUser
      * @return
@@ -360,13 +385,16 @@ public class SysUserController {
     @RequestMapping(value = "/checkOnlyUser", method = RequestMethod.GET)
     public Result<Boolean> checkOnlyUser(SysUser sysUser) {
         Result<Boolean> result = new Result<>();
-        // 如果此参数为false则程序发生异常
+        // * 如果此参数为false则程序发生异常
         result.setResult(true);
+        // * 通过传入信息查询新的用户信息
         try {
-            // 通过传入信息查询新的用户信息
+            // * 清空参数中的密码
             sysUser.setPassword(null);
+            // * 根据参数查询用户
             SysUser user = sysUserService.getOne(new QueryWrapper<SysUser>(sysUser));
             if (user != null) {
+                // * 查询到则返回错误
                 result.setSuccess(false);
                 result.setMessage("用户账号已存在");
                 return result;
@@ -377,34 +405,37 @@ public class SysUserController {
             result.setMessage(e.getMessage());
             return result;
         }
+        // * 未查询到侧返回正确
         result.setSuccess(true);
         return result;
     }
 
     /**
-     * 修改密码
+     * * 修改密码
      */
     @RequiresPermissions("system:user:changepwd")
     @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
     public Result<?> changePassword(@RequestBody SysUser sysUser) {
+        // * 根据用户名获取用户信息
         SysUser u = this.sysUserService
                 .getOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, sysUser.getUsername()));
+        // * 未查询到则返回错误
         if (u == null) {
             return Result.error("用户不存在！");
         }
+        // * 设置为数据库id
         sysUser.setId(u.getId());
-        // update-begin---author:wangshuai ---date:20220316
-        // for：[VUEN-234]修改密码添加敏感日志------------
+        // * 获取当前登录人
         LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+        // * 修改密码添加敏感日志
         baseCommonService.addLog("修改用户 " + sysUser.getUsername() + " 的密码，操作人： " + loginUser.getUsername(),
                 CommonConstant.LOG_TYPE_2, 2);
-        // update-end---author:wangshuai ---date:20220316
-        // for：[VUEN-234]修改密码添加敏感日志------------
+        // * 执行修改
         return sysUserService.changePassword(sysUser);
     }
 
     /**
-     * 查询指定用户和部门关联的数据
+     * * 查询指定用户和部门关联的数据
      *
      * @param userId
      * @return
@@ -414,7 +445,9 @@ public class SysUserController {
             @RequestParam(name = "userId", required = true) String userId) {
         Result<List<DepartIdModel>> result = new Result<>();
         try {
+            // * 获取该id下的部门列表
             List<DepartIdModel> depIdModelList = this.sysUserDepartService.queryDepartIdsOfUser(userId);
+            // * 不为空则返回
             if (depIdModelList != null && depIdModelList.size() > 0) {
                 result.setSuccess(true);
                 result.setMessage("查找成功");
@@ -434,14 +467,14 @@ public class SysUserController {
     }
 
     /**
-     * 生成在添加用户情况下没有主键的问题,返回给前端,根据该id绑定部门数据
+     * * 生成随机用户id
+     * * 生成在添加用户情况下没有主键的问题,返回给前端,根据该id绑定部门数据
      *
      * @return
      */
     @RequestMapping(value = "/generateUserId", method = RequestMethod.GET)
     public Result<String> generateUserId() {
         Result<String> result = new Result<>();
-        System.out.println("我执行了,生成用户ID==============================");
         String userId = UUID.randomUUID().toString().replace("-", "");
         result.setSuccess(true);
         result.setResult(userId);
@@ -449,7 +482,7 @@ public class SysUserController {
     }
 
     /**
-     * 根据部门id查询用户信息
+     * * 根据部门id查询用户信息
      *
      * @param id
      * @return
@@ -458,22 +491,21 @@ public class SysUserController {
     public Result<List<SysUser>> queryUserByDepId(@RequestParam(name = "id", required = true) String id,
             @RequestParam(name = "realname", required = false) String realname) {
         Result<List<SysUser>> result = new Result<>();
-        // List<SysUser> userList = sysUserDepartService.queryUserByDepId(id);
+        // * 获取部门详情
         SysDepart sysDepart = sysDepartService.getById(id);
+        // * 根据部门code获取用户列表
         List<SysUser> userList = sysUserDepartService.queryUserByDepCode(sysDepart.getOrgCode(), realname);
 
-        // 批量查询用户的所属部门
-        // step.1 先拿到全部的 useids
-        // step.2 通过 useids，一次性查询用户的所属部门名字
+        // * 获取所有用户的id
         List<String> userIds = userList.stream().map(SysUser::getId).collect(Collectors.toList());
         if (userIds != null && userIds.size() > 0) {
+            // * 用户id和部门名称的映射关系
             Map<String, String> useDepNames = sysUserService.getDepNamesByUserIds(userIds);
             userList.forEach(item -> {
-                // TODO 临时借用这个字段用于页面展示
+                // * 设置 orgCodeTxt 临时借用这个字段用于页面展示
                 item.setOrgCodeTxt(useDepNames.get(item.getId()));
             });
         }
-
         try {
             result.setSuccess(true);
             result.setResult(userList);
@@ -486,7 +518,8 @@ public class SysUserController {
     }
 
     /**
-     * 用户选择组件 专用 根据用户账号或部门分页查询
+     * * 根据用户账号或部门分页查询
+     * * 用户选择组件 专用
      * 
      * @param departId
      * @param username
@@ -501,10 +534,10 @@ public class SysUserController {
             @RequestParam(name = "username", required = false) String username,
             @RequestParam(name = "isMultiTranslate", required = false) String isMultiTranslate,
             @RequestParam(name = "id", required = false) String id) {
-        // update-begin-author:taoyan date:2022-7-14 for: VUEN-1702【禁止问题】sql注入漏洞
+        // * sql 注入优化
         String[] arr = new String[] { departId, realname, username, id };
         SqlInjectionUtil.filterContent(arr, SymbolConstant.SINGLE_QUOTATION_MARK);
-        // update-end-author:taoyan date:2022-7-14 for: VUEN-1702【禁止问题】sql注入漏洞
+        // * 查询用户列表
         IPage<SysUser> pageList = sysUserDepartService.queryDepartUserPageList(departId, username, realname, pageSize,
                 pageNo, id, isMultiTranslate);
         return Result.OK(pageList);
@@ -1096,42 +1129,6 @@ public class SysUserController {
         }
         return result;
     }
-
-    // /**
-    // * 根据用户名或手机号查询用户信息
-    // * @param
-    // * @return
-    // */
-    // @GetMapping("/querySysUser")
-    // public Result<Map<String, Object>> querySysUser(SysUser sysUser) {
-    // String phone = sysUser.getPhone();
-    // String username = sysUser.getUsername();
-    // Result<Map<String, Object>> result = new Result<Map<String, Object>>();
-    // Map<String, Object> map = new HashMap<String, Object>();
-    // if (oConvertUtils.isNotEmpty(phone)) {
-    // SysUser user = sysUserService.getUserByPhone(phone);
-    // if(user!=null) {
-    // map.put("username",user.getUsername());
-    // map.put("phone",user.getPhone());
-    // result.setSuccess(true);
-    // result.setResult(map);
-    // return result;
-    // }
-    // }
-    // if (oConvertUtils.isNotEmpty(username)) {
-    // SysUser user = sysUserService.getUserByName(username);
-    // if(user!=null) {
-    // map.put("username",user.getUsername());
-    // map.put("phone",user.getPhone());
-    // result.setSuccess(true);
-    // result.setResult(map);
-    // return result;
-    // }
-    // }
-    // result.setSuccess(false);
-    // result.setMessage("验证失败");
-    // return result;
-    // }
 
     /**
      * 用户手机号验证

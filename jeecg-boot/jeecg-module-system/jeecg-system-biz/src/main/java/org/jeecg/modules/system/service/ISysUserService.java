@@ -55,7 +55,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public Result<?> resetPassword(String username, String oldpassword, String newpassword, String confirmpassword);
 
 	/**
-	 * 修改密码
+	 * * 修改密码
 	 *
 	 * @param sysUser
 	 * @return
@@ -63,7 +63,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public Result<?> changePassword(SysUser sysUser);
 
 	/**
-	 * 删除用户
+	 * * 删除用户
 	 * 
 	 * @param userId
 	 * @return
@@ -71,7 +71,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public boolean deleteUser(String userId);
 
 	/**
-	 * 批量删除用户
+	 * * 批量删除用户
 	 * 
 	 * @param userIds
 	 * @return
@@ -149,7 +149,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public IPage<SysUser> getUserByDepIds(Page<SysUser> page, List<String> departIds, String username);
 
 	/**
-	 * 根据 userIds查询，查询用户所属部门的名称（多个部门名逗号隔开）
+	 * * 根据 userIds查询，查询用户所属部门的名称（多个部门名逗号隔开）
 	 * 
 	 * @param userIds
 	 * @return
@@ -330,7 +330,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void saveUser(SysUser user, String selectedRoles, String selectedDeparts, String relTenantIds);
 
 	/**
-	 * 编辑用户
+	 * * 编辑用户
 	 * 
 	 * @param user           用户
 	 * @param roles          选择的角色id，多个以逗号隔开
@@ -437,7 +437,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void editTenantUser(SysUser sysUser, String tenantId, String departs, String roles);
 
 	/**
-	 * 修改用户账号状态
+	 * * 修改用户账号状态
 	 * 
 	 * @param id     账号id
 	 * @param status 账号状态

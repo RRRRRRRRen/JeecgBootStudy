@@ -57,6 +57,9 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+/**
+ * TODO 删除缓存
+ */
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -260,40 +263,58 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return Result.ok("密码重置成功!");
 	}
 
+	/**
+	 * * 修改密码
+	 *
+	 * @param sysUser
+	 * @return
+	 */
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	public Result<?> changePassword(SysUser sysUser) {
+		// * 设置加盐
 		String salt = oConvertUtils.randomGen(8);
 		sysUser.setSalt(salt);
+		// * 获取参数密码
 		String password = sysUser.getPassword();
+		// * 执行加密保存
 		String passwordEncode = PasswordUtil.encrypt(sysUser.getUsername(), password, salt);
 		sysUser.setPassword(passwordEncode);
+		// * 更新数据
 		this.userMapper.updateById(sysUser);
 		return Result.ok("密码修改成功!");
 	}
 
+	/**
+	 * * 删除用户
+	 * 
+	 * @param userId
+	 * @return
+	 */
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	@Transactional(rollbackFor = Exception.class)
 	public boolean deleteUser(String userId) {
-		// update-begin---author:wangshuai---date:2024-01-16---for:【QQYUN-7974】admin用户禁止删除---
-		// 1.验证当前用户是管理员账号 admin
-		// 验证用户是否为管理员
+		// * 1.验证当前用户是管理员账号 admin
 		this.checkUserAdminRejectDel(userId);
-		// update-end---author:wangshuai---date:2024-01-16---for:【QQYUN-7974】admin用户禁止删除---
-
-		// 2.删除用户
+		// * 2.删除用户
 		this.removeById(userId);
 		return false;
 	}
 
+	/**
+	 * * 批量删除用户
+	 * 
+	 * @param userIds
+	 * @return
+	 */
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	@Transactional(rollbackFor = Exception.class)
 	public boolean deleteBatchUsers(String userIds) {
-		// 1.验证当前用户是管理员账号 admin
+		// * 1.验证当前用户是管理员账号 admin
 		this.checkUserAdminRejectDel(userIds);
-		// 2.删除用户
+		// * 2.删除用户
 		this.removeByIds(Arrays.asList(userIds.split(",")));
 		return false;
 	}
@@ -527,10 +548,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userMapper.getUserByDepIds(page, departIds, username);
 	}
 
+	/**
+	 * * 根据 userIds查询，查询用户所属部门的名称（多个部门名逗号隔开）
+	 * 
+	 * @param userIds
+	 * @return
+	 */
 	@Override
 	public Map<String, String> getDepNamesByUserIds(List<String> userIds) {
+		// * 获取部门列表
 		List<SysUserDepVo> list = this.baseMapper.getDepNamesByUserIds(userIds);
-
+		// * 构造逗号分隔的部门名称字符串
 		Map<String, String> res = new HashMap(5);
 		list.forEach(item -> {
 			if (res.get(item.getUserId()) == null) {
@@ -815,18 +843,30 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		this.saveUserPosition(user.getId(), user.getPost());
 	}
 
+	/**
+	 * * 编辑用户
+	 * 
+	 * @param user           用户
+	 * @param roles          选择的角色id，多个以逗号隔开
+	 * @param departs        选择的部门id，多个以逗号隔开
+	 * @param relTenantIds   多个租户id
+	 * @param updateFromPage 更新来自的页面 [TV360X-1686]
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	public void editUser(SysUser user, String roles, String departs, String relTenantIds, String updateFromPage) {
-		// 获取用户编辑前台传过来的租户id
+		// * 修改租户信息
 		this.editUserTenants(user.getId(), relTenantIds);
-		// step.1 修改用户基础信息
+
+		// * step.1 修改用户基础信息
 		this.updateById(user);
-		// step.2 修改角色
+
+		// * step.2 修改角色
 		if (oConvertUtils.isEmpty(updateFromPage) || !"deptUsers".equalsIgnoreCase(updateFromPage)) {
-			// 处理用户角色 先删后加 , 如果是在部门用户页面修改用户,不处理用户角色,因为该页面无法编辑用户角色.
+			// * 删除角色表中该用户保存的角色
 			sysUserRoleMapper.delete(new QueryWrapper<SysUserRole>().lambda().eq(SysUserRole::getUserId, user.getId()));
+			// * 不为空则插入
 			if (oConvertUtils.isNotEmpty(roles)) {
 				String[] arr = roles.split(",");
 				for (String roleId : arr) {
@@ -836,21 +876,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 			}
 		}
 
-		// step.3 修改部门
+		// * step.3 修改部门
 		String[] arr = {};
 		if (oConvertUtils.isNotEmpty(departs)) {
 			arr = departs.split(",");
 		}
-		// 查询已关联部门
+		// * 查询已关联部门
 		List<SysUserDepart> userDepartList = sysUserDepartMapper
 				.selectList(new QueryWrapper<SysUserDepart>().lambda().eq(SysUserDepart::getUserId, user.getId()));
+
+		// * 如果存在已关联部门
 		if (userDepartList != null && userDepartList.size() > 0) {
 			for (SysUserDepart depart : userDepartList) {
-				// 修改已关联部门删除部门用户角色关系
+				// * 修改已关联部门删除部门用户角色关系
 				if (!Arrays.asList(arr).contains(depart.getDepId())) {
+					// * 读取部门角色
 					List<SysDepartRole> sysDepartRoleList = sysDepartRoleMapper.selectList(
 							new QueryWrapper<SysDepartRole>().lambda().eq(SysDepartRole::getDepartId, depart.getDepId()));
+
+					// * 读取部门角色ID
 					List<String> roleIds = sysDepartRoleList.stream().map(SysDepartRole::getId).collect(Collectors.toList());
+
+					// * 有ID则删除
 					if (roleIds != null && roleIds.size() > 0) {
 						departRoleUserMapper
 								.delete(new QueryWrapper<SysDepartRoleUser>().lambda().eq(SysDepartRoleUser::getUserId, user.getId())
@@ -859,20 +906,20 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				}
 			}
 		}
-		// 先删后加
+		// * 删除所有该用户绑定的deptid
 		sysUserDepartMapper.delete(new QueryWrapper<SysUserDepart>().lambda().eq(SysUserDepart::getUserId, user.getId()));
+		// * 插入所有部门数据
 		if (oConvertUtils.isNotEmpty(departs)) {
 			for (String departId : arr) {
 				SysUserDepart userDepart = new SysUserDepart(user.getId(), departId);
 				sysUserDepartMapper.insert(userDepart);
 			}
 		}
-		// step.4 修改手机号和邮箱
-		// 更新手机号、邮箱空字符串为 null
+		// * step.4 修改手机号和邮箱 为 null
 		userMapper.updateNullByEmptyString("email");
 		userMapper.updateNullByEmptyString("phone");
 
-		// step.5 修改职位
+		// * step.5 修改职位
 		this.editUserPosition(user.getId(), user.getPost());
 	}
 
@@ -1438,7 +1485,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 修改账号状态
+	 * * 修改用户账号状态
 	 * 
 	 * @param id     账号id
 	 * @param status 账号状态
@@ -1446,7 +1493,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	public void updateStatus(String id, String status) {
-		userMapper.update(new SysUser().setStatus(Integer.parseInt(status)),
+		userMapper.update(
+				// * 构建参数
+				new SysUser().setStatus(Integer.parseInt(status)),
+				// * 执行sql
 				new UpdateWrapper<SysUser>().lambda().eq(SysUser::getId, id));
 	}
 
@@ -1978,13 +2028,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	// ======================================= end 用户与部门 用户列表导入
 	// =========================================
 
+	/**
+	 * * 验证是否为管理员
+	 */
 	@Override
 	public void checkUserAdminRejectDel(String userIds) {
 		LambdaQueryWrapper<SysUser> query = new LambdaQueryWrapper<>();
+		// * 匹配id
 		query.in(SysUser::getId, Arrays.asList(userIds.split(SymbolConstant.COMMA)));
+		// * 判断 Username 是否为 admin
 		query.eq(SysUser::getUsername, "admin");
+		// * 执行查询
 		Long adminRoleCount = this.baseMapper.selectCount(query);
-		// 大于0说明存在管理员用户，不允许删除
+		// * 大于0说明存在管理员用户，不允许删除
 		if (adminRoleCount > 0) {
 			throw new JeecgBootException("admin用户，不允许删除！");
 		}
