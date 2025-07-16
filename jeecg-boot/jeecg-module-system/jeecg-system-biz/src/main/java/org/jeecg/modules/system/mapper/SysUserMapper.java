@@ -21,7 +21,7 @@ import java.util.List;
  */
 public interface SysUserMapper extends BaseMapper<SysUser> {
 	/**
-	 * 通过用户账号查询用户信息
+	 * * 通过用户账号查询用户信息
 	 * 
 	 * @param username
 	 * @return
@@ -74,7 +74,9 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 			@Param("username") String username);
 
 	/**
-	 * 根据角色Id查询用户信息
+	 * * 根据角色Id查询用户信息
+	 * 
+	 * * - mybatis plus 会自动拦截参数包含 Page 的 sql，并且自动追加分页参数到sql
 	 * 
 	 * @param page
 	 * @param roleId   角色id

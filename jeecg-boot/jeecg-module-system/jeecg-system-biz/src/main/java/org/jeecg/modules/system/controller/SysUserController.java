@@ -544,7 +544,7 @@ public class SysUserController {
     }
 
     /**
-     * 导出excel
+     * TODO 导出excel
      *
      * @param request
      * @param sysUser
@@ -578,7 +578,7 @@ public class SysUserController {
     }
 
     /**
-     * 通过excel导入数据
+     * TODO 通过excel导入数据
      *
      * @param request
      * @param response
@@ -663,7 +663,8 @@ public class SysUserController {
     }
 
     /**
-     * @功能：根据id 批量查询
+     * * 根据id 批量查询 批量查询 SysUser
+     * 
      * @param userIds
      * @return
      */
@@ -679,7 +680,8 @@ public class SysUserController {
     }
 
     /**
-     * @功能：根据id 批量查询
+     * * 根据username 批量查询 SysUser
+     * 
      * @param userNames
      * @return
      */
@@ -687,8 +689,11 @@ public class SysUserController {
     public Result<Collection<SysUser>> queryByNames(@RequestParam(name = "userNames") String userNames) {
         Result<Collection<SysUser>> result = new Result<>();
         String[] names = userNames.split(",");
-        QueryWrapper<SysUser> queryWrapper = new QueryWrapper();
-        queryWrapper.lambda().in(true, SysUser::getUsername, names);
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
+        /**
+         * * in 的第一个参数condition 表示，是否将查询拼接进入sql，用于减少if判断
+         */
+        queryWrapper.lambda().in(true, SysUser::getUsername, Arrays.asList(names));
         Collection<SysUser> userRole = sysUserService.list(queryWrapper);
         result.setSuccess(true);
         result.setResult(userRole);
@@ -696,35 +701,47 @@ public class SysUserController {
     }
 
     /**
-     * 首页用户重置密码
+     * * 修改密码
      */
     @RequiresPermissions("system:user:updatepwd")
     @RequestMapping(value = "/updatePassword", method = RequestMethod.PUT)
     public Result<?> updatePassword(@RequestBody JSONObject json) {
+        // * 获取参数
         String username = json.getString("username");
         String oldpassword = json.getString("oldpassword");
         String password = json.getString("password");
         String confirmpassword = json.getString("confirmpassword");
+        // * 获取 Shiro 当前登录人
         LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+        // * 登录人 与 参数不一致报错
         if (!sysUser.getUsername().equals(username)) {
             return Result.error("只允许修改自己的密码！");
         }
+        // * 在数据库中查询该 username 的用户
         SysUser user = this.sysUserService.getOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, username));
         if (user == null) {
             return Result.error("用户不存在！");
         }
-        // update-begin---author:wangshuai ---date:20220316
-        // for：[VUEN-234]修改密码添加敏感日志------------
+        // * 修改密码添加敏感日志
         LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
         baseCommonService.addLog("修改密码，username： " + loginUser.getUsername(), CommonConstant.LOG_TYPE_2, 2);
-        // update-end---author:wangshuai ---date:20220316
-        // for：[VUEN-234]修改密码添加敏感日志------------
+        // * 执行修改操作
         return sysUserService.resetPassword(username, oldpassword, password, confirmpassword);
     }
 
+    /**
+     * * 根据 roleId 和 username 获取用户角色列表
+     * 
+     * @param pageNo
+     * @param pageSize
+     * @param req
+     * @return
+     */
     @RequestMapping(value = "/userRoleList", method = RequestMethod.GET)
-    public Result<IPage<SysUser>> userRoleList(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
-            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize, HttpServletRequest req) {
+    public Result<IPage<SysUser>> userRoleList(
+            @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+            HttpServletRequest req) {
         Result<IPage<SysUser>> result = new Result<IPage<SysUser>>();
         Page<SysUser> page = new Page<SysUser>(pageNo, pageSize);
         String roleId = req.getParameter("roleId");
@@ -1021,17 +1038,21 @@ public class SysUserController {
     }
 
     /**
-     * 查询当前用户的所有部门/当前部门编码
+     * * 查询当前用户的所有部门/当前部门编码
      * 
      * @return
      */
     @RequestMapping(value = "/getCurrentUserDeparts", method = RequestMethod.GET)
     public Result<Map<String, Object>> getCurrentUserDeparts() {
+        // * 初始化返回结果
         Result<Map<String, Object>> result = new Result<Map<String, Object>>();
         try {
+            // * 在线程中获取当前登录用户信息
             LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+            // * 通过部门员工映射表链接部门表查询部门列表
             List<SysDepart> list = this.sysDepartService.queryUserDeparts(sysUser.getId());
             Map<String, Object> map = new HashMap(5);
+            // * 返回部门详情列表和组织id集合
             map.put("list", list);
             map.put("orgCode", sysUser.getOrgCode());
             result.setSuccess(true);
@@ -1044,7 +1065,7 @@ public class SysUserController {
     }
 
     /**
-     * 用户注册接口
+     * * 用户注册接口
      * 
      * @param jsonObject
      * @param user
@@ -1052,32 +1073,42 @@ public class SysUserController {
      */
     @PostMapping("/register")
     public Result<JSONObject> userRegister(@RequestBody JSONObject jsonObject, SysUser user) {
+        // * 初始化返回结果
         Result<JSONObject> result = new Result<JSONObject>();
+        // * 获取参数中的手机号和验证码
         String phone = jsonObject.getString("phone");
         String smscode = jsonObject.getString("smscode");
 
-        // update-begin-author:taoyan date:2022-9-13 for: VUEN-2245 【漏洞】发现新漏洞待处理20220906
+        // * 获取redis中保存的验证码
         String redisKey = CommonConstant.PHONE_REDIS_KEY_PRE + phone;
         Object code = redisUtil.get(redisKey);
-        // update-end-author:taoyan date:2022-9-13 for: VUEN-2245 【漏洞】发现新漏洞待处理20220906
 
+        // * 获取参数中的用户名
         String username = jsonObject.getString("username");
-        // 未设置用户名，则用手机号作为用户名
+
+        // * 未设置用户名，则用手机号作为用户名
         if (oConvertUtils.isEmpty(username)) {
             username = phone;
         }
-        // 未设置密码，则随机生成一个密码
+
+        // * 未设置密码，则随机生成一个密码
         String password = jsonObject.getString("password");
         if (oConvertUtils.isEmpty(password)) {
             password = RandomUtil.randomString(8);
         }
+
+        // * 获取参数中的email
         String email = jsonObject.getString("email");
+
+        // * 查询 用户名 是否被注册
         SysUser sysUser1 = sysUserService.getUserByName(username);
         if (sysUser1 != null) {
             result.setMessage("用户名已注册");
             result.setSuccess(false);
             return result;
         }
+
+        // * 查询 手机号 是否被注册
         SysUser sysUser2 = sysUserService.getUserByPhone(phone);
         if (sysUser2 != null) {
             result.setMessage("该手机号已注册");
@@ -1085,6 +1116,7 @@ public class SysUserController {
             return result;
         }
 
+        // * 查询 邮箱 是否被注册
         if (oConvertUtils.isNotEmpty(email)) {
             SysUser sysUser3 = sysUserService.getUserByEmail(email);
             if (sysUser3 != null) {
@@ -1093,35 +1125,44 @@ public class SysUserController {
                 return result;
             }
         }
+
+        // * 检测redis验证码是否失效
         if (null == code) {
             result.setMessage("手机验证码失效，请重新获取");
             result.setSuccess(false);
             return result;
         }
+
+        // * 检测验证码是否正确
         if (!smscode.equals(code.toString())) {
             result.setMessage("手机验证码错误");
             result.setSuccess(false);
             return result;
         }
 
+        // * 自动填充 realname
         String realname = jsonObject.getString("realname");
         if (oConvertUtils.isEmpty(realname)) {
             realname = username;
         }
 
         try {
-            user.setCreateTime(new Date());// 设置创建时间
+            // * 设置创建时间
+            user.setCreateTime(new Date());
+            // * 设置盐和密码
             String salt = oConvertUtils.randomGen(8);
             String passwordEncode = PasswordUtil.encrypt(username, password, salt);
             user.setSalt(salt);
+            user.setPassword(passwordEncode);
+            // * 设置其他信息
             user.setUsername(username);
             user.setRealname(realname);
-            user.setPassword(passwordEncode);
             user.setEmail(email);
             user.setPhone(phone);
             user.setStatus(CommonConstant.USER_UNFREEZE);
             user.setDelFlag(CommonConstant.DEL_FLAG_0);
             user.setActivitiSync(CommonConstant.ACT_SYNC_1);
+            // * 添加包含角色信息的用户
             sysUserService.addUserWithRole(user, "");// 默认临时角色 test
             result.success("注册成功");
         } catch (Exception e) {

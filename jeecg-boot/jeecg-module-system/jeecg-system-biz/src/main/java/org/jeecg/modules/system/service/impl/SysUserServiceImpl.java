@@ -243,21 +243,37 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return result;
 	}
 
+	/**
+	 * * 重置密码
+	 *
+	 * @param username
+	 * @param oldpassword
+	 * @param newpassword
+	 * @param confirmpassword
+	 * @return
+	 */
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	public Result<?> resetPassword(String username, String oldpassword, String newpassword, String confirmpassword) {
+		// * 根据 username 查询数据库用户信息
 		SysUser user = userMapper.getUserByName(username);
+		// * 获取参数加密后的密码
 		String passwordEncode = PasswordUtil.encrypt(username, oldpassword, user.getSalt());
+		// * 对比数据库密码
 		if (!user.getPassword().equals(passwordEncode)) {
 			return Result.error("旧密码输入错误!");
 		}
+		// * 不能为空
 		if (oConvertUtils.isEmpty(newpassword)) {
 			return Result.error("新密码不允许为空!");
 		}
+		// * confirmpassword 要一致
 		if (!newpassword.equals(confirmpassword)) {
 			return Result.error("两次输入密码不一致!");
 		}
+		// * 加密新密码
 		String password = PasswordUtil.encrypt(username, newpassword, user.getSalt());
+		// * 保存新密码
 		this.userMapper.update(new SysUser().setPassword(password),
 				new LambdaQueryWrapper<SysUser>().eq(SysUser::getId, user.getId()));
 		return Result.ok("密码重置成功!");
@@ -319,10 +335,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return false;
 	}
 
+	/**
+	 * * 根据用户名查询
+	 * 
+	 * @param username 用户名
+	 * @return SysUser
+	 */
 	@Override
 	public SysUser getUserByName(String username) {
 		SysUser sysUser = userMapper.getUserByName(username);
-		// 查询用户的租户ids
+		// * 查询用户的租户ids
 		if (sysUser != null) {
 			List<Integer> list = userTenantMapper.getTenantIdsByUserId(sysUser.getId());
 			if (oConvertUtils.isNotEmpty(list)) {
@@ -334,10 +356,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return sysUser;
 	}
 
+	/**
+	 * * 添加 用户 和 用户角色关系
+	 * 
+	 * @param user
+	 * @param roles
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void addUserWithRole(SysUser user, String roles) {
+		// * 保存到数据库
 		this.save(user);
+		// * 保存角色信息
 		if (oConvertUtils.isNotEmpty(roles)) {
 			String[] arr = roles.split(",");
 			for (String roleId : arr) {
@@ -605,7 +635,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 根据角色Id查询
+	 * * 根据角色Id查询用户列表
 	 * 
 	 * @param page
 	 * @param roleId   角色id
@@ -614,13 +644,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	 */
 	@Override
 	public IPage<SysUser> getUserByRoleId(Page<SysUser> page, String roleId, String username) {
-		// update-begin---author:wangshuai ---date:20230220 for：[QQYUN-3980]组织管理中 职位功能
-		// 职位表加租户id 加职位-用户关联表------------
+		// * 获取用户列表 包含分页
 		IPage<SysUser> userRoleList = userMapper.getUserByRoleId(page, roleId, username);
+		// * 获取用户列表
 		List<SysUser> records = userRoleList.getRecords();
+		// * 判断是否存在
 		if (null != records && records.size() > 0) {
+			// * 获取所有id
 			List<String> userIds = records.stream().map(SysUser::getId).collect(Collectors.toList());
+			// * 根据id获取所有depname
 			Map<String, String> useDepNames = this.getDepNamesByUserIds(userIds);
+			// * 补充其他数据例如部门
 			for (SysUser sysUser : userRoleList.getRecords()) {
 				// 设置部门
 				sysUser.setOrgCodeTxt(useDepNames.get(sysUser.getId()));
@@ -629,8 +663,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 			}
 		}
 		return userRoleList;
-		// update-end---author:wangshuai ---date:20230220 for：[QQYUN-3980]组织管理中 职位功能
-		// 职位表加租户id 加职位-用户关联表------------
 	}
 
 	@Override
@@ -639,11 +671,23 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		baseMapper.updateUserDepart(username, orgCode, loginTenantId);
 	}
 
+	/**
+	 * * 根据手机号获取用户
+	 * 
+	 * @param phone 手机号
+	 * @return SysUser
+	 */
 	@Override
 	public SysUser getUserByPhone(String phone) {
 		return userMapper.getUserByPhone(phone);
 	}
 
+	/**
+	 * * 根据邮箱获取用户
+	 * 
+	 * @param email 邮箱
+	 * @return SysUser
+	 */
 	@Override
 	public SysUser getUserByEmail(String email) {
 		return userMapper.getUserByEmail(email);

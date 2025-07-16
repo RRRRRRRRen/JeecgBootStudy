@@ -14,6 +14,11 @@ import org.jeecg.modules.system.entity.SysUser;
 import org.jeecg.modules.system.model.SysUserSysDepartModel;
 import org.jeecg.modules.system.vo.lowapp.DepartAndUserInfo;
 import org.jeecg.modules.system.vo.lowapp.UpdateDepartInfo;
+/**
+ * * 	•	@Transactional 通过 代理对象 实现。
+ * *	•	Spring 只对受管 Bean（比如 @Service）的业务方法做代理。
+ * *	•	Controller 方法并不属于 Spring 的事务代理范围。
+ */
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,7 +49,7 @@ public interface ISysUserService extends IService<SysUser> {
 			Integer pageNo);
 
 	/**
-	 * 重置密码
+	 * * 重置密码
 	 *
 	 * @param username
 	 * @param oldpassword
@@ -79,7 +84,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public boolean deleteBatchUsers(String userIds);
 
 	/**
-	 * 根据用户名查询
+	 * * 根据用户名查询
 	 * 
 	 * @param username 用户名
 	 * @return SysUser
@@ -87,7 +92,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public SysUser getUserByName(String username);
 
 	/**
-	 * 添加用户和用户角色关系
+	 * * 添加用户 和 用户角色关系
 	 * 
 	 * @param user
 	 * @param roles
@@ -182,7 +187,7 @@ public interface ISysUserService extends IService<SysUser> {
 	IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage page);
 
 	/**
-	 * 根据角色Id查询
+	 * * 根据角色Id查询用户列表
 	 * 
 	 * @param page
 	 * @param roleId   角色id
@@ -224,7 +229,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void updateUserDepart(String username, String orgCode, Integer loginTenantId);
 
 	/**
-	 * 根据手机号获取用户名和密码
+	 * * 根据手机号获取用户
 	 * 
 	 * @param phone 手机号
 	 * @return SysUser
@@ -232,7 +237,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public SysUser getUserByPhone(String phone);
 
 	/**
-	 * 根据邮箱获取用户
+	 * * 根据邮箱获取用户
 	 * 
 	 * @param email 邮箱
 	 * @return SysUser
