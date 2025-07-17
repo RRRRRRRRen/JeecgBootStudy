@@ -384,11 +384,23 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		}
 	}
 
+	/**
+	 * * 根据部门Id查询,当前和下级所有部门IDS
+	 * 
+	 * @param departId
+	 * @return
+	 */
 	@Override
 	public List<String> getSubDepIdsByDepId(String departId) {
 		return this.baseMapper.getSubDepIdsByDepId(departId);
 	}
 
+	/**
+	 * 获取我的部门下级所有部门IDS
+	 * 
+	 * @param departIds 多个部门id
+	 * @return
+	 */
 	@Override
 	public List<String> getMySubDepIdsByDepId(String departIds) {
 		// 根据部门id获取所负责部门
@@ -526,31 +538,29 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 根据用户所负责部门ids获取父级部门编码
+	 * * 根据用户所负责部门ids获取父级部门编码
 	 * 
 	 * @param departIds
 	 * @return
 	 */
 	private String[] getMyDeptParentOrgCode(String departIds) {
-		// 根据部门id查询所负责部门
+		// * 根据部门id查询所负责部门
 		LambdaQueryWrapper<SysDepart> query = new LambdaQueryWrapper<SysDepart>();
 		query.eq(SysDepart::getDelFlag, CommonConstant.DEL_FLAG_0.toString());
 		if (oConvertUtils.isNotEmpty(departIds)) {
 			query.in(SysDepart::getId, Arrays.asList(departIds.split(",")));
 		}
-
-		// ------------------------------------------------------------------------------------------------
-		// 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
+		// * 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			query.eq(SysDepart::getTenantId, oConvertUtils.getInt(TenantContext.getTenant(), 0));
 		}
-		// ------------------------------------------------------------------------------------------------
+		// * 根据编码排序
 		query.orderByAsc(SysDepart::getOrgCode);
 		List<SysDepart> list = this.list(query);
-		// 查找根部门
 		if (list == null || list.size() == 0) {
 			return null;
 		}
+		// * 查找根部门
 		String orgCode = this.getMyDeptParentNode(list);
 		String[] codeArr = orgCode.split(",");
 		return codeArr;

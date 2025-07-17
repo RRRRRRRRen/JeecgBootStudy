@@ -130,7 +130,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     void deleteBatchWithChildren(List<String> ids);
 
     /**
-     * 根据部门Id查询,当前和下级所有部门IDS
+     * * 根据部门Id查询,当前和下级所有部门IDS
      * 
      * @param departId
      * @return
@@ -138,7 +138,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<String> getSubDepIdsByDepId(String departId);
 
     /**
-     * 获取我的部门下级所有部门IDS
+     * * 获取我的部门下级所有部门IDS
      * 
      * @param departIds 多个部门id
      * @return

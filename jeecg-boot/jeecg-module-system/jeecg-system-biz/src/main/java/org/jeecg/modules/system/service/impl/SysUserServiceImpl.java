@@ -573,6 +573,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userMapper.getUserByDepId(page, departId, username);
 	}
 
+	/**
+	 * * 根据部门Ids查询
+	 * 
+	 * @param page
+	 * @param departIds 部门id集合
+	 * @param username  用户账户名称
+	 * @return
+	 */
 	@Override
 	public IPage<SysUser> getUserByDepIds(Page<SysUser> page, List<String> departIds, String username) {
 		return userMapper.getUserByDepIds(page, departIds, username);
@@ -600,37 +608,27 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return res;
 	}
 
-	// update-begin-author:taoyan date:2022-9-13 for: VUEN-2245【漏洞】发现新漏洞待处理20220906
-	// ----sql注入 方法没有使用，注掉
-	/*
-	 * @Override
-	 * public IPage<SysUser> getUserByDepartIdAndQueryWrapper(Page<SysUser> page,
-	 * String departId, QueryWrapper<SysUser> queryWrapper) {
-	 * LambdaQueryWrapper<SysUser> lambdaQueryWrapper = queryWrapper.lambda();
-	 * 
-	 * lambdaQueryWrapper.eq(SysUser::getDelFlag, CommonConstant.DEL_FLAG_0);
-	 * lambdaQueryWrapper.inSql(SysUser::getId,
-	 * "SELECT user_id FROM sys_user_depart WHERE dep_id = '" + departId + "'");
-	 * 
-	 * return userMapper.selectPage(page, lambdaQueryWrapper);
-	 * }
+	/**
+	 * * 根据 orgCode 查询用户，包括子部门下的用户
+	 *
+	 * @param orgCode
+	 * @param userParams 用户查询条件，可为空
+	 * @param page       分页参数
+	 * @return
 	 */
-	// update-end-author:taoyan date:2022-9-13 for: VUEN-2245【漏洞】发现新漏洞待处理20220906
-	// ----sql注入 方法没有使用，注掉
-
 	@Override
 	public IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage page) {
+		// * 获取列表
 		List<SysUserSysDepartModel> list = baseMapper.getUserByOrgCode(page, orgCode, userParams);
-		// 根据部门orgCode查询部门，需要将职位id进行传递
+		// * 根据部门orgCode查询部门，设置职位
 		for (SysUserSysDepartModel model : list) {
 			List<String> positionList = sysUserPositionMapper.getPositionIdByUserId(model.getId());
 			model.setPost(CommonUtils.getSplitText(positionList, SymbolConstant.COMMA));
 		}
+		// * 获取总数
 		Integer total = baseMapper.getUserByOrgCodeTotal(orgCode, userParams);
-
 		IPage<SysUserSysDepartModel> result = new Page<>(page.getCurrent(), page.getSize(), total);
 		result.setRecords(list);
-
 		return result;
 	}
 

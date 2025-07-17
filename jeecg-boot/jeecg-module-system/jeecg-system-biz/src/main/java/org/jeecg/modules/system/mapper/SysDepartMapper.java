@@ -77,7 +77,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	public SysDepart getParentDepartId(@Param("departId") String departId);
 
 	/**
-	 * 根据部门Id查询,当前和下级所有部门IDS
+	 * * 根据部门Id查询,当前和下级所有部门IDS
 	 * 
 	 * @param departId
 	 * @return

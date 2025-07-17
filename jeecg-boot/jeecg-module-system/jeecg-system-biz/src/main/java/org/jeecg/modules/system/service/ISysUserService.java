@@ -144,7 +144,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public IPage<SysUser> getUserByDepId(Page<SysUser> page, String departId, String username);
 
 	/**
-	 * 根据部门Ids查询
+	 * * 根据部门Ids查询
 	 * 
 	 * @param page
 	 * @param departIds 部门id集合
@@ -177,7 +177,7 @@ public interface ISysUserService extends IService<SysUser> {
 	// ----sql注入 方法没有使用，注掉
 
 	/**
-	 * 根据 orgCode 查询用户，包括子部门下的用户
+	 * * 根据 orgCode 查询用户，包括子部门下的用户
 	 *
 	 * @param orgCode
 	 * @param userParams 用户查询条件，可为空

@@ -753,7 +753,7 @@ public class SysUserController {
     }
 
     /**
-     * 给指定角色添加用户
+     * * 给指定角色添加用户
      *
      * @param
      * @return
@@ -762,18 +762,25 @@ public class SysUserController {
     @RequestMapping(value = "/addSysUserRole", method = RequestMethod.POST)
     public Result<String> addSysUserRole(@RequestBody SysUserRoleVO sysUserRoleVO) {
         Result<String> result = new Result<String>();
-        // TODO 判断当前操作的角色是当前登录租户下的
         try {
+            // * 获取参数角色id
             String sysRoleId = sysUserRoleVO.getRoleId();
+            /**
+             * * 会把前端传来的 字符串数组自动转换为 List<String>
+             * 
+             * * • Spring 使用 Jackson（默认）或 Gson 进行反序列化。
+             * * • Jackson 能自动识别 List 泛型，只要类型是普通 Java 类型（如 String、Integer）。
+             */
             for (String sysUserId : sysUserRoleVO.getUserIdList()) {
+                // * 查询当前角色是否已经包含当前用户
                 SysUserRole sysUserRole = new SysUserRole(sysUserId, sysRoleId);
                 QueryWrapper<SysUserRole> queryWrapper = new QueryWrapper<SysUserRole>();
                 queryWrapper.eq("role_id", sysRoleId).eq("user_id", sysUserId);
                 SysUserRole one = sysUserRoleService.getOne(queryWrapper);
+                // * 不包含则直接保存， 包含则直接跳过
                 if (one == null) {
                     sysUserRoleService.save(sysUserRole);
                 }
-
             }
             result.setMessage("添加成功!");
             result.setSuccess(true);
@@ -787,19 +794,24 @@ public class SysUserController {
     }
 
     /**
-     * 删除指定角色的用户关系
+     * * 删除指定角色的用户关系
      * 
      * @param
      * @return
      */
     @RequiresPermissions("system:user:deleteRole")
     @RequestMapping(value = "/deleteUserRole", method = RequestMethod.DELETE)
-    public Result<SysUserRole> deleteUserRole(@RequestParam(name = "roleId") String roleId,
+    public Result<SysUserRole> deleteUserRole(
+            @RequestParam(name = "roleId") String roleId,
             @RequestParam(name = "userId", required = true) String userId) {
         Result<SysUserRole> result = new Result<SysUserRole>();
         try {
             QueryWrapper<SysUserRole> queryWrapper = new QueryWrapper<SysUserRole>();
             queryWrapper.eq("role_id", roleId).eq("user_id", userId);
+            /**
+             * * 删除成功会返回 true
+             * * 删除失败会返回 false
+             */
             sysUserRoleService.remove(queryWrapper);
             result.success("删除成功!");
         } catch (Exception e) {
@@ -810,7 +822,7 @@ public class SysUserController {
     }
 
     /**
-     * 批量删除指定角色的用户关系
+     * * 批量删除指定角色下的用户
      *
      * @param
      * @return
@@ -823,6 +835,7 @@ public class SysUserController {
         Result<SysUserRole> result = new Result<SysUserRole>();
         try {
             QueryWrapper<SysUserRole> queryWrapper = new QueryWrapper<SysUserRole>();
+            // * 批量删除
             queryWrapper.eq("role_id", roleId).in("user_id", Arrays.asList(userIds.split(",")));
             sysUserRoleService.remove(queryWrapper);
             result.success("删除成功!");
@@ -834,54 +847,66 @@ public class SysUserController {
     }
 
     /**
-     * 部门用户列表
+     * * 部门用户列表
      */
     @RequestMapping(value = "/departUserList", method = RequestMethod.GET)
-    public Result<IPage<SysUser>> departUserList(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
-            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize, HttpServletRequest req) {
+    public Result<IPage<SysUser>> departUserList(
+            @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+            HttpServletRequest req) {
+        // * 初始化返回结果
         Result<IPage<SysUser>> result = new Result<IPage<SysUser>>();
+        // * 构建page查询参数
         Page<SysUser> page = new Page<SysUser>(pageNo, pageSize);
+        /**
+         * * getParameter 可以获取的参数类型：
+         * 
+         * * - Content-Type: application/x-www-form-urlencoded 或 multipart/form-data
+         * * - 多值参数可通过 getParameterValues(String name) 获取 String 数组。
+         */
         String depId = req.getParameter("depId");
         String username = req.getParameter("username");
-        // 根据部门ID查询,当前和下级所有的部门IDS
+
+        // * 初始化部门id集合
         List<String> subDepids = new ArrayList<>();
-        // 部门id为空时，查询我的部门下所有用户
+
+        // * 部门id为空时，查询我的部门下所有用户
         if (oConvertUtils.isEmpty(depId)) {
             LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+            // * 获取员工身份
             int userIdentity = user.getUserIdentity() != null ? user.getUserIdentity() : CommonConstant.USER_IDENTITY_1;
-            // update-begin---author:chenrui ---date:20250107 for：[QQYUN-10775]验证码可以复用
-            // #7674------------
-            if (oConvertUtils.isNotEmpty(userIdentity) && userIdentity == CommonConstant.USER_IDENTITY_2
+            // * 查询当前用户是否有管理的部门
+            if (oConvertUtils.isNotEmpty(userIdentity)
+                    && userIdentity == CommonConstant.USER_IDENTITY_2
                     && oConvertUtils.isNotEmpty(user.getDepartIds())) {
-                // update-end---author:chenrui ---date:20250107 for：[QQYUN-10775]验证码可以复用
-                // #7674------------
+                // * 获取当前用户的管理的部门
                 subDepids = sysDepartService.getMySubDepIdsByDepId(user.getDepartIds());
             }
         } else {
+            // * 部门id不为空时，查询
             subDepids = sysDepartService.getSubDepIdsByDepId(depId);
         }
+
         if (subDepids != null && subDepids.size() > 0) {
+            // * 查询
             IPage<SysUser> pageList = sysUserService.getUserByDepIds(page, subDepids, username);
-            // 批量查询用户的所属部门
-            // step.1 先拿到全部的 useids
-            // step.2 通过 useids，一次性查询用户的所属部门名字
+
+            // * 批量查询用户的所属部门
+            // * step.1 先拿到全部的 useids
+            // * step.2 通过 useids，一次性查询用户的所属部门名字
             List<String> userIds = pageList.getRecords().stream().map(SysUser::getId).collect(Collectors.toList());
             if (userIds != null && userIds.size() > 0) {
                 Map<String, String> useDepNames = sysUserService.getDepNamesByUserIds(userIds);
                 pageList.getRecords().forEach(item -> {
-                    // 批量查询用户的所属部门
                     item.setOrgCode(useDepNames.get(item.getId()));
                 });
             }
-            // update-begin---author:wangshuai ---date:20221223
-            // for：[QQYUN-3371]租户逻辑改造，改成关系表------------
-            // 设置租户id
+            // * 设置租户id
             page.setRecords(userTenantService.setUserTenantIds(page.getRecords()));
-            // update-end---author:wangshuai ---date:20221223
-            // for：[QQYUN-3371]租户逻辑改造，改成关系表------------
             result.setSuccess(true);
             result.setResult(pageList);
         } else {
+            // * 结果为空的返回
             result.setSuccess(true);
             result.setResult(null);
         }
@@ -889,8 +914,8 @@ public class SysUserController {
     }
 
     /**
-     * 根据 orgCode 查询用户，包括子部门下的用户
-     * 若某个用户包含多个部门，则会显示多条记录，可自行处理成单条记录
+     * * 根据 orgCode 查询用户，包括子部门下的用户
+     * * 若某个用户包含多个部门，则会显示多条记录，可自行处理成单条记录
      */
     @GetMapping("/queryByOrgCode")
     public Result<?> queryByDepartId(
@@ -898,14 +923,16 @@ public class SysUserController {
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "orgCode") String orgCode,
             SysUser userParams) {
-        IPage<SysUserSysDepartModel> pageList = sysUserService.queryUserByOrgCode(orgCode, userParams,
-                new Page(pageNo, pageSize));
+        IPage<SysUserSysDepartModel> pageList = sysUserService.queryUserByOrgCode(
+                orgCode,
+                userParams,
+                new Page<SysUserSysDepartModel>(pageNo, pageSize));
         return Result.ok(pageList);
     }
 
     /**
-     * 根据 orgCode 查询用户，包括子部门下的用户
-     * 针对通讯录模块做的接口，将多个部门的用户合并成一条记录，并转成对前端友好的格式
+     * * 根据 orgCode 查询用户，包括子部门下的用户
+     * * 针对通讯录模块做的接口，将多个部门的用户合并成一条记录，并转成对前端友好的格式
      */
     @GetMapping("/queryByOrgCodeForAddressList")
     public Result<?> queryByOrgCodeForAddressList(
@@ -913,7 +940,8 @@ public class SysUserController {
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "orgCode", required = false) String orgCode,
             SysUser userParams) {
-        IPage page = new Page(pageNo, pageSize);
+        // * 初始化分页参数
+        Page<SysUserSysDepartModel> page = new Page<>(pageNo, pageSize);
         IPage<SysUserSysDepartModel> pageList = sysUserService.queryUserByOrgCode(orgCode, userParams, page);
         List<SysUserSysDepartModel> list = pageList.getRecords();
 
