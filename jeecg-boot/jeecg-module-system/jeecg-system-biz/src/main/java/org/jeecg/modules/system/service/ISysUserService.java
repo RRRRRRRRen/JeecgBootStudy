@@ -269,7 +269,7 @@ public interface ISysUserService extends IService<SysUser> {
 	Result checkUserIsEffective(SysUser sysUser);
 
 	/**
-	 * 查询被逻辑删除的用户
+	 * * 查询被逻辑删除的用户
 	 * 
 	 * @return List<SysUser>
 	 */
@@ -284,7 +284,7 @@ public interface ISysUserService extends IService<SysUser> {
 	List<SysUser> queryLogicDeleted(LambdaQueryWrapper<SysUser> wrapper);
 
 	/**
-	 * 还原被逻辑删除的用户
+	 * * 还原被逻辑删除的用户
 	 * 
 	 * @param userIds      存放用户id集合
 	 * @param updateEntity
@@ -293,7 +293,7 @@ public interface ISysUserService extends IService<SysUser> {
 	boolean revertLogicDeleted(List<String> userIds, SysUser updateEntity);
 
 	/**
-	 * 彻底删除被逻辑删除的用户
+	 * * 彻底删除被逻辑删除的用户
 	 * 
 	 * @param userIds 存放用户id集合
 	 * @return boolean
@@ -316,7 +316,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void saveThirdUser(SysUser sysUser);
 
 	/**
-	 * 根据部门Ids查询
+	 * * 根据部门Ids查询
 	 * 
 	 * @param departIds 部门id集合
 	 * @param username  用户账户名称
@@ -362,14 +362,14 @@ public interface ISysUserService extends IService<SysUser> {
 	LoginUser getEncodeUserInfo(String username);
 
 	/**
-	 * 用户离职
+	 * * 用户离职
 	 * 
 	 * @param username
 	 */
 	void userQuit(String username);
 
 	/**
-	 * 获取离职人员列表
+	 * * 获取离职人员列表
 	 * 
 	 * @param tenantId 租户id
 	 * @return
@@ -395,14 +395,14 @@ public interface ISysUserService extends IService<SysUser> {
 
 	// --- author:taoyan date:20221231 for: QQYUN-3515【应用】应用下的组织机构管理功能，细节实现 ---
 	/**
-	 * 批量编辑用户信息
+	 * * 批量编辑用户信息
 	 * 
 	 * @param json
 	 */
 	void batchEditUsers(JSONObject json);
 
 	/**
-	 * 根据关键词查询用户和部门
+	 * * 根据关键词查询用户和部门
 	 * 
 	 * @param keyword
 	 * @return

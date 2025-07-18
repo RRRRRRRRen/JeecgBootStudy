@@ -58,7 +58,7 @@ public interface ISysUserDepartService extends IService<SysUserDepart> {
 			String id, String isMultiTranslate);
 
 	/**
-	 * 获取用户信息
+	 * * 获取用户信息
 	 * 
 	 * @param tenantId
 	 * @param departId
@@ -71,7 +71,7 @@ public interface ISysUserDepartService extends IService<SysUserDepart> {
 			Integer pageNo);
 
 	/**
-	 * 获取用户信息
+	 * * 获取用户信息
 	 * 
 	 * @param tenantId
 	 * @param departId

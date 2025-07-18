@@ -919,7 +919,7 @@ public class oConvertUtils {
 	}
 
 	/**
-	 * 判断 list 是否不为空
+	 * * 判断 list 是否不为空
 	 *
 	 * @param list
 	 * @return true or false

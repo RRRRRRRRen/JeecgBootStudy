@@ -17,21 +17,24 @@ import org.jeecg.modules.system.vo.thirdapp.JwUserDepartVo;
 /**
  * @Description: sys_user_tenant_relation
  * @Author: jeecg-boot
- * @Date:   2022-12-23
+ * @Date: 2022-12-23
  * @Version: V1.0
  */
 public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
 
     /**
      * 通过租户id获取数据
+     * 
      * @param page
      * @param userTenantId
      * @return
      */
-    List<SysUser> getPageUserList(@Param("page") Page<SysUser> page,@Param("userTenantId") Integer userTenantId,@Param("user") SysUser user);
+    List<SysUser> getPageUserList(@Param("page") Page<SysUser> page, @Param("userTenantId") Integer userTenantId,
+            @Param("user") SysUser user);
 
     /**
      * 根据租户id获取用户ids
+     * 
      * @param tenantId
      * @return
      */
@@ -39,46 +42,52 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
 
     /**
      * 通过用户id获取租户ids
+     * 
      * @param userId
      * @return
      */
     List<Integer> getTenantIdsByUserId(@Param("userId") String userId);
 
-
-    
-    //==============================================================================================================================
+    // ==============================================================================================================================
     /**
      * 通过用户id获取租户列表
+     * 
      * @param userId
      * @return
      */
-    List<SysUserTenantVo> getTenantListByUserId(@Param("userId") String userId, @Param("userTenantStatus") List<String> userTenantStatus);
-    
+    List<SysUserTenantVo> getTenantListByUserId(@Param("userId") String userId,
+            @Param("userTenantStatus") List<String> userTenantStatus);
+
     /**
      * 通过状态、当前登录人的用户名，租户id，查询用户id
+     * 
      * @param tenantId
      * @param statusList
      * @param username
      * @return
      */
-    List<String> getUserIdsByCreateBy(@Param("tenantId") Integer tenantId, @Param("userTenantStatus")  List<String> statusList, @Param("username") String username);
+    List<String> getUserIdsByCreateBy(@Param("tenantId") Integer tenantId,
+            @Param("userTenantStatus") List<String> statusList, @Param("username") String username);
 
     /**
      * 联查用户和租户审核状态
+     * 
      * @param page
      * @param status
      * @param tenantId
      * @return
      */
-    List<SysUserTenantVo> getUserTenantPageList(@Param("page") Page<SysUserTenantVo> page, @Param("status") List<String> status, @Param("user") SysUser user, @Param("tenantId") Integer tenantId);
+    List<SysUserTenantVo> getUserTenantPageList(@Param("page") Page<SysUserTenantVo> page,
+            @Param("status") List<String> status, @Param("user") SysUser user, @Param("tenantId") Integer tenantId);
 
     /**
      * 根据用户id获取租户id，没有状态值(如获取租户已经存在，只不过是被拒绝或者审批中)
+     * 
      * @param userId
      * @return
      */
     List<Integer> getTenantIdsNoStatus(@Param("userId") String userId);
-    //==============================================================================================================================
+    // ==============================================================================================================================
 
     /**
      * 统计一个人创建了多少个租户
@@ -89,7 +98,8 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
     Integer countCreateTenantNum(String userId);
 
     /**
-     * 取消离职
+     * * 取消离职
+     * 
      * @param userIds
      * @param tenantId
      */
@@ -97,6 +107,7 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
 
     /**
      * 判断当前用户是否已在该租户下面
+     * 
      * @param userId
      * @param tenantId
      */
@@ -104,6 +115,7 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
 
     /**
      * 查询未被注销的租户
+     * 
      * @param userId
      * @return
      */
@@ -111,15 +123,19 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
 
     /**
      * 根据用户id获取我的租户
+     * 
      * @param page
      * @param userId
      * @param userTenantStatus
      * @return
      */
-    List<SysTenant> getTenantPageListByUserId(@Param("page") Page<SysTenant> page, @Param("userId") String userId, @Param("userTenantStatus") List<String> userTenantStatus,@Param("sysUserTenantVo") SysUserTenantVo sysUserTenantVo);
+    List<SysTenant> getTenantPageListByUserId(@Param("page") Page<SysTenant> page, @Param("userId") String userId,
+            @Param("userTenantStatus") List<String> userTenantStatus,
+            @Param("sysUserTenantVo") SysUserTenantVo sysUserTenantVo);
 
     /**
      * 同意加入租户
+     * 
      * @param userId
      * @param tenantId
      */
@@ -128,6 +144,7 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
 
     /**
      * 拒绝加入租户
+     * 
      * @param userId
      * @param tenantId
      */
@@ -159,9 +176,10 @@ public interface SysUserTenantMapper extends BaseMapper<SysUserTenant> {
      * @return
      */
     Long getUserCount(Integer tenantId, String tenantStatus);
-    
+
     /**
      * 根据租户id和名称获取用户数据
+     * 
      * @param tenantId
      * @return
      */

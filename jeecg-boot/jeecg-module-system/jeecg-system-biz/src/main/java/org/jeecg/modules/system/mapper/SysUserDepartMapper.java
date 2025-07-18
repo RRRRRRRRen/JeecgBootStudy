@@ -45,7 +45,7 @@ public interface SysUserDepartMapper extends BaseMapper<SysUserDepart> {
 			@Param("username") String username, @Param("realname") String realname);
 
 	/**
-	 * 获取用户信息
+	 * * 获取用户信息
 	 * 
 	 * @param page
 	 * @param orgCode
@@ -56,7 +56,7 @@ public interface SysUserDepartMapper extends BaseMapper<SysUserDepart> {
 			@Param("keyword") String keyword, @Param("userId") String userId);
 
 	/**
-	 * 获取用户信息
+	 * * 获取用户信息
 	 * 
 	 * @param page
 	 * @param orgCode

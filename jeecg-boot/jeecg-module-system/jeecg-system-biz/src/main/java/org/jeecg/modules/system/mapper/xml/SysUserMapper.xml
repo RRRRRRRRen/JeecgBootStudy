@@ -151,7 +151,8 @@
 		</foreach>
 	</update>
 
-	<!-- 查询被逻辑删除的用户 -->
+	<!-- * 查询被逻辑删除的用户 -->
+	<!-- * ${ew.customSqlSegment} 用于拼接sql -->
 	<select id="selectLogicDeleted" resultType="org.jeecg.modules.system.entity.SysUser">
 		SELECT * FROM sys_user ${ew.customSqlSegment}
 	</select>

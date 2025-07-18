@@ -150,7 +150,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	void deleteBathRolePermissionRelation(@Param("roleIdArray") String[] roleIdArray);
 
 	/**
-	 * 查询被逻辑删除的用户
+	 * * 查询被逻辑删除的用户
 	 * 
 	 * @param wrapper
 	 * @return List<SysUser>
@@ -158,7 +158,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	List<SysUser> selectLogicDeleted(@Param(Constants.WRAPPER) Wrapper<SysUser> wrapper);
 
 	/**
-	 * 还原被逻辑删除的用户
+	 * * 还原被逻辑删除的用户
 	 * 
 	 * @param userIds 用户id
 	 * @param entity
@@ -167,7 +167,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	int revertLogicDeleted(@Param("userIds") List<String> userIds, @Param("entity") SysUser entity);
 
 	/**
-	 * 彻底删除被逻辑删除的用户
+	 * * 彻底删除被逻辑删除的用户
 	 * 
 	 * @param userIds 多个用户id
 	 * @return int
@@ -193,7 +193,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	List<SysUser> queryByDepIds(@Param("departIds") List<String> departIds, @Param("username") String username);
 
 	/**
-	 * 获取用户信息
+	 * * 获取用户信息
 	 * 
 	 * @param page
 	 * @param roleId
@@ -215,7 +215,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	void updateStatusAndFlag(@Param("userIds") List<String> userIds, @Param("sysUser") SysUser sysUser);
 
 	/**
-	 * 获取租户下的离职列表信息
+	 ** 获取租户下的离职列表信息
 	 * 
 	 * @param tenantId
 	 * @return

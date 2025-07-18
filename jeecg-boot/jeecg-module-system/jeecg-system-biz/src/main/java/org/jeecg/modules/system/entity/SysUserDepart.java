@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
- * *用户部门
+ * * 用户部门
  * 
  * @Description: 用户部门
  * @author: jeecg-boot

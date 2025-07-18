@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * * 职务表
+ * 
  * @Description: 职务表
  * @Author: jeecg-boot
  * @Date: 2019-09-19
@@ -20,6 +22,12 @@ import java.util.stream.Collectors;
 @Service
 public class SysPositionServiceImpl extends ServiceImpl<SysPositionMapper, SysPosition> implements ISysPositionService {
 
+    /**
+     * * 通过code查询
+     * 
+     * @param code 职务编码
+     * @return SysPosition
+     */
     @Override
     public SysPosition getByCode(String code) {
         LambdaQueryWrapper<SysPosition> queryWrapper = new LambdaQueryWrapper<>();
@@ -27,16 +35,29 @@ public class SysPositionServiceImpl extends ServiceImpl<SysPositionMapper, SysPo
         return super.getOne(queryWrapper);
     }
 
+    /**
+     * * 通过用户id获取职位名称列表
+     * 
+     * @param userId
+     * @return
+     */
     @Override
     public List<SysPosition> getPositionList(String userId) {
         return this.baseMapper.getPositionList(userId);
     }
 
+    /**
+     * * 获取职位名称
+     * 
+     * @param postList
+     * @return
+     */
     @Override
     public String getPositionName(List<String> postList) {
         List<SysPosition> positionNameList = this.baseMapper.getPositionName(postList);
-        if (null != positionNameList && positionNameList.size()>0) {
-            return positionNameList.stream().map(SysPosition::getName).collect(Collectors.joining(SymbolConstant.COMMA));
+        if (null != positionNameList && positionNameList.size() > 0) {
+            return positionNameList.stream().map(SysPosition::getName)
+                    .collect(Collectors.joining(SymbolConstant.COMMA));
         }
         return "";
     }

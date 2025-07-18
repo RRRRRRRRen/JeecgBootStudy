@@ -39,15 +39,16 @@ import java.util.stream.Collectors;
 /**
  * @Description: sys_user_tenant_relation
  * @Author: jeecg-boot
- * @Date:   2022-12-23
+ * @Date: 2022-12-23
  * @Version: V1.0
  */
 @Service
-public class SysUserTenantServiceImpl extends ServiceImpl<SysUserTenantMapper, SysUserTenant> implements ISysUserTenantService {
+public class SysUserTenantServiceImpl extends ServiceImpl<SysUserTenantMapper, SysUserTenant>
+        implements ISysUserTenantService {
 
     @Autowired
     private SysUserTenantMapper userTenantMapper;
-    
+
     @Autowired
     private SysUserMapper userMapper;
 
@@ -59,20 +60,20 @@ public class SysUserTenantServiceImpl extends ServiceImpl<SysUserTenantMapper, S
 
     @Override
     public Page<SysUser> getPageUserList(Page<SysUser> page, Integer userTenantId, SysUser user) {
-        return page.setRecords(userTenantMapper.getPageUserList(page,userTenantId,user));
+        return page.setRecords(userTenantMapper.getPageUserList(page, userTenantId, user));
     }
 
     @Override
     public List<SysUser> setUserTenantIds(List<SysUser> records) {
-        if(null == records || records.size() == 0){
+        if (null == records || records.size() == 0) {
             return records;
         }
-        for (SysUser sysUser:records) {
-            //查询租户id
+        for (SysUser sysUser : records) {
+            // 查询租户id
             List<Integer> list = userTenantMapper.getTenantIdsByUserId(sysUser.getId());
-            if(oConvertUtils.isNotEmpty(list)){
+            if (oConvertUtils.isNotEmpty(list)) {
                 sysUser.setRelTenantIds(StringUtils.join(list.toArray(), SymbolConstant.COMMA));
-            }else{
+            } else {
                 sysUser.setRelTenantIds("");
             }
         }
@@ -112,23 +113,24 @@ public class SysUserTenantServiceImpl extends ServiceImpl<SysUserTenantMapper, S
     }
 
     @Override
-    public IPage<SysUserTenantVo> getUserTenantPageList(Page<SysUserTenantVo> page, List<String> status, SysUser user, Integer tenantId) {
+    public IPage<SysUserTenantVo> getUserTenantPageList(Page<SysUserTenantVo> page, List<String> status, SysUser user,
+            Integer tenantId) {
         List<SysUserTenantVo> tenantPageList = userTenantMapper.getUserTenantPageList(page, status, user, tenantId);
         List<String> userIds = tenantPageList.stream().map(SysUserTenantVo::getId).collect(Collectors.toList());
         if (userIds != null && userIds.size() > 0) {
             Map<String, String> useDepNames = this.getDepNamesByUserIds(userIds);
             tenantPageList.forEach(item -> {
                 item.setOrgCodeTxt(useDepNames.get(item.getId()));
-                //查询用户的租户ids
+                // 查询用户的租户ids
                 List<Integer> list = userTenantMapper.getTenantIdsNoStatus(item.getId());
                 if (oConvertUtils.isNotEmpty(list)) {
                     item.setRelTenantIds(StringUtils.join(list.toArray(), SymbolConstant.COMMA));
                 } else {
                     item.setRelTenantIds("");
                 }
-                //查询用户职位，将租户id传到前台
+                // 查询用户职位，将租户id传到前台
                 List<String> positionList = userPositionMapper.getPositionIdByUserId(item.getId());
-                item.setPost(CommonUtils.getSplitText(positionList,SymbolConstant.COMMA));
+                item.setPost(CommonUtils.getSplitText(positionList, SymbolConstant.COMMA));
             });
         }
         return page.setRecords(tenantPageList);
@@ -144,18 +146,23 @@ public class SysUserTenantServiceImpl extends ServiceImpl<SysUserTenantMapper, S
         List<SysUserDepVo> list = userMapper.getDepNamesByUserIds(userIds);
         Map<String, String> res = new HashMap(5);
         list.forEach(item -> {
-                    if (res.get(item.getUserId()) == null) {
-                        res.put(item.getUserId(), item.getDepartName());
-                    } else {
-                        res.put(item.getUserId(), res.get(item.getUserId()) + "," + item.getDepartName());
-                    }
-                }
-        );
+            if (res.get(item.getUserId()) == null) {
+                res.put(item.getUserId(), item.getDepartName());
+            } else {
+                res.put(item.getUserId(), res.get(item.getUserId()) + "," + item.getDepartName());
+            }
+        });
         return res;
     }
 
+    /**
+     * * 取消离职
+     * 
+     * @param userIds
+     * @param tenantId
+     */
     @Override
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void putCancelQuit(List<String> userIds, Integer tenantId) {
         userTenantMapper.putCancelQuit(userIds, tenantId);
@@ -163,32 +170,34 @@ public class SysUserTenantServiceImpl extends ServiceImpl<SysUserTenantMapper, S
 
     @Override
     public Integer userTenantIzExist(String userId, Integer tenantId) {
-        return userTenantMapper.userTenantIzExist(userId,tenantId);
+        return userTenantMapper.userTenantIzExist(userId, tenantId);
     }
 
     @Override
-    public IPage<SysTenant> getTenantPageListByUserId(Page<SysTenant> page, String userId, List<String> userTenantStatus,SysUserTenantVo sysUserTenantVo) {
-        return page.setRecords(userTenantMapper.getTenantPageListByUserId(page,userId,userTenantStatus,sysUserTenantVo));
+    public IPage<SysTenant> getTenantPageListByUserId(Page<SysTenant> page, String userId,
+            List<String> userTenantStatus, SysUserTenantVo sysUserTenantVo) {
+        return page.setRecords(
+                userTenantMapper.getTenantPageListByUserId(page, userId, userTenantStatus, sysUserTenantVo));
     }
 
-    @CacheEvict(value={CacheConstant.SYS_USERS_CACHE}, allEntries=true)
+    @CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
     @Override
     public void agreeJoinTenant(String userId, Integer tenantId) {
-        userTenantMapper.agreeJoinTenant(userId,tenantId);
+        userTenantMapper.agreeJoinTenant(userId, tenantId);
     }
 
     @Override
     public void refuseJoinTenant(String userId, Integer tenantId) {
-        userTenantMapper.refuseJoinTenant(userId,tenantId);
+        userTenantMapper.refuseJoinTenant(userId, tenantId);
     }
 
     @Override
     public SysUserTenant getUserTenantByTenantId(String userId, Integer tenantId) {
-        return userTenantMapper.getUserTenantByTenantId(userId,tenantId);
+        return userTenantMapper.getUserTenantByTenantId(userId, tenantId);
     }
 
     @Override
     public Long getUserCount(Integer tenantId, String tenantStatus) {
-        return userTenantMapper.getUserCount(tenantId,tenantStatus);
+        return userTenantMapper.getUserCount(tenantId, tenantStatus);
     }
 }

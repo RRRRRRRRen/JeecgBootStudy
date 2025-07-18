@@ -6,6 +6,8 @@ import org.jeecg.modules.system.entity.SysPosition;
 import java.util.List;
 
 /**
+ * * 职务表
+ * 
  * @Description: 职务表
  * @Author: jeecg-boot
  * @Date: 2019-09-19
@@ -14,21 +16,24 @@ import java.util.List;
 public interface ISysPositionService extends IService<SysPosition> {
 
     /**
-     * 通过code查询
+     * * 通过code查询
+     * 
      * @param code 职务编码
      * @return SysPosition
      */
     SysPosition getByCode(String code);
 
     /**
-     * 通过用户id获取职位名称列表
+     * * 通过用户id获取职位名称列表
+     * 
      * @param userId
      * @return
      */
     List<SysPosition> getPositionList(String userId);
 
     /**
-     * 获取职位名称
+     * * 获取职位名称
+     * 
      * @param postList
      * @return
      */

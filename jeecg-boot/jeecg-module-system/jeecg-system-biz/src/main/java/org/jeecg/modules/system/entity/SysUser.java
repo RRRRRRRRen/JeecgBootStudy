@@ -232,7 +232,7 @@ public class SysUser implements Serializable {
     private Integer activitiSync;
 
     /**
-     * * 身份（0 普通成员 1 上级）
+     * * 身份（1 普通成员 1 上级）
      */
     @Excel(name = "（1普通成员 2上级）", width = 15)
     private Integer userIdentity;
