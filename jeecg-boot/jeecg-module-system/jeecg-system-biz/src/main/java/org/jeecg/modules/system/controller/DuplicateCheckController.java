@@ -47,7 +47,7 @@ public class DuplicateCheckController {
 
 		// * 1.填值为空，直接返回
 		if (StringUtils.isEmpty(duplicateCheckVo.getFieldVal())) {
-			Result rs = new Result();
+			Result<String> rs = new Result<>();
 			rs.setCode(500);
 			rs.setSuccess(true);
 			rs.setMessage("数据为空,不作处理！");

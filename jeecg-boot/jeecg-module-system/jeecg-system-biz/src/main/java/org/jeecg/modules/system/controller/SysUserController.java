@@ -1989,7 +1989,9 @@ public class SysUserController {
     }
 
     /**
-     * 编辑部门前获取部门相关信息 【low-app】
+     * * 编辑部门前获取部门相关信息
+     * 
+     * * - 低代码应用专用接口
      * 
      * @param id
      * @return
@@ -2001,7 +2003,9 @@ public class SysUserController {
     }
 
     /**
-     * 编辑部门 【low-app】
+     * * 编辑部门
+     * 
+     * * - 低代码应用专用接口
      * 
      * @param updateDepartInfo
      * @return

@@ -410,7 +410,7 @@ public interface ISysUserService extends IService<SysUser> {
 	DepartAndUserInfo searchByKeyword(String keyword);
 
 	/**
-	 * 查询 部门修改的信息
+	 * * 查询 部门修改的信息
 	 * 
 	 * @param departId
 	 * @return
@@ -418,7 +418,7 @@ public interface ISysUserService extends IService<SysUser> {
 	UpdateDepartInfo getUpdateDepartInfo(String departId);
 
 	/**
-	 * 修改部门相关信息
+	 * * 修改部门相关信息
 	 * 
 	 * @param updateDepartInfo
 	 */

@@ -12,12 +12,8 @@ import org.jeecg.common.system.query.QueryGenerator;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 /**
- * 规则值自动生成工具类
- *
- * @author qinfeng
- * @举例： 自动生成订单号；自动生成当前日期
+ * * 规则值自动生成工具类
  */
 @Slf4j
 public class FillRuleUtil {
@@ -53,7 +49,7 @@ public class FillRuleUtil {
                 // 优先级：queryString > 系统变量 > 默认值
                 for (String key : params.keySet()) {
                     // 1. 判断 queryString 中是否有该参数，如果有就优先取值
-                    //noinspection ConstantValue
+                    // noinspection ConstantValue
                     if (request != null) {
                         String parameter = request.getParameter(key);
                         if (oConvertUtils.isNotEmpty(parameter)) {

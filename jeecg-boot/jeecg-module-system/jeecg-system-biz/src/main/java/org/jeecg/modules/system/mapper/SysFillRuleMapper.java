@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.jeecg.modules.system.entity.SysFillRule;
 
 /**
+ * * 填值规则
+ * 
  * @Description: 填值规则
  * @Author: jeecg-boot
  * @Date: 2019-11-07

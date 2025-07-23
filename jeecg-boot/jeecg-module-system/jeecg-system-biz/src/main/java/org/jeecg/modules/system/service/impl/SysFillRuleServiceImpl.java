@@ -7,6 +7,8 @@ import org.jeecg.modules.system.service.ISysFillRuleService;
 import org.springframework.stereotype.Service;
 
 /**
+ * * 填值规则
+ * 
  * @Description: 填值规则
  * @Author: jeecg-boot
  * @Date: 2019-11-07

@@ -1375,16 +1375,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return departAndUserInfo;
 	}
 
+	/**
+	 * * 查询 部门修改的信息
+	 * 
+	 * @param departId
+	 * @return
+	 */
 	@Override
 	public UpdateDepartInfo getUpdateDepartInfo(String departId) {
+		// * 查找详情
 		SysDepart depart = sysDepartMapper.selectById(departId);
 		if (depart != null) {
+			// * 转化为 UpdateDepartInfo
 			UpdateDepartInfo info = new UpdateDepartInfo(depart);
+			// * 查询下级部门
 			List<SysDepart> subList = sysDepartMapper.queryDeptByPid(departId);
 			if (subList != null && subList.size() > 0) {
 				info.setHasSub(true);
 			}
-			// 获取部门负责人信息
+			// * 获取部门负责人信息
 			LambdaQueryWrapper<SysUser> query = new LambdaQueryWrapper<SysUser>()
 					.eq(SysUser::getUserIdentity, 2)
 					.like(SysUser::getDepartIds, depart.getId());
@@ -1398,12 +1407,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return null;
 	}
 
+	/**
+	 * * 修改部门相关信息
+	 * 
+	 * @param info
+	 */
 	@Override
 	public void doUpdateDepartInfo(UpdateDepartInfo info) {
+		// * 获取目标部门详情
 		String departId = info.getDepartId();
 		SysDepart depart = sysDepartMapper.selectById(departId);
+
 		if (depart != null) {
-			// 修改部门信息-上级和部门名称
+			// * 修改部门信息-上级
 			if (!depart.getParentId().equals(info.getParentId())) {
 				String pid = info.getParentId();
 				SysDepart parentDepart = sysDepartMapper.selectById(pid);
@@ -1413,15 +1429,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 					depart.setParentId(pid);
 				}
 			}
+			// * 修改部门信息-部门名称
 			depart.setDepartName(info.getDepartName());
 			sysDepartMapper.updateById(depart);
-			// 先查询这个部门的负责人
+
+			// * 先查询这个部门的负责人
 			List<SysUser> departChargeUsers = queryDepartChargePersons(departId);
 			List<String> departChargeUserIdList = departChargeUsers.stream().map(i -> i.getId()).collect(Collectors.toList());
-			// 修改部门负责人
+			// * 修改部门负责人
 			List<String> userIdList = info.getChargePersonList();
 			if (userIdList != null && userIdList.size() > 0) {
 				for (String userId : userIdList) {
+					// * 依次获取目标负责人详情
 					SysUser user = this.baseMapper.selectById(userId);
 					if (user != null) {
 						departChargeUserIdList.remove(user.getId());
@@ -1439,30 +1458,37 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 								user.setDepartIds(newDepartIds);
 							}
 						}
+						// * 更新用户表负责人
 						this.baseMapper.updateById(user);
 					}
 				}
-				// update-begin---author:wangshuai ---date:20230303 for：部门负责人不能被删除------------
 				this.removeDepartmentManager(departChargeUserIdList, departChargeUsers, departId);
 			} else {
+				// * 前端传过来用户列表id为空，说明数据库的负责部门人员均需要删除
 				if (CollectionUtil.isNotEmpty(departChargeUsers)) {
-					// 前端传过来用户列表id为空，说明数据库的负责部门人员均需要删除
 					this.removeDepartmentManager(departChargeUserIdList, departChargeUsers, departId);
 				}
-				// update-end---author:wangshuai ---date:20230303 for：部门负责人不能被删除------------
 
 			}
 		}
 	}
 
+	/**
+	 * * 查询部门的所有负责人
+	 * 
+	 * @param departId
+	 * @return
+	 */
 	private List<SysUser> queryDepartChargePersons(String departId) {
 		List<SysUser> result = new ArrayList<>();
-		// update-begin---author:wangshuai ---date:20230303 for：部门负责人不能被删除------------
+		// * 查询该部门的所有负责人
 		LambdaQueryWrapper<SysUser> userQuery = new LambdaQueryWrapper<>();
 		userQuery.like(SysUser::getDepartIds, departId);
 		List<SysUser> userList = userMapper.selectList(userQuery);
+
 		if (userList != null && userList.size() > 0) {
 			for (SysUser user : userList) {
+				// * 如果该用户是上级则加入结果集
 				Integer identity = user.getUserIdentity();
 				String deps = user.getDepartIds();
 				if (identity != null && identity == 2) {
@@ -1470,7 +1496,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 						if (deps.indexOf(departId) >= 0) {
 							result.add(user);
 						}
-						// update-end---author:wangshuai ---date:20230303 for：部门负责人不能被删除------------
 					}
 				}
 			}
@@ -1479,7 +1504,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 变更父级部门 修改编码
+	 * TODO 变更父级部门 修改编码
 	 * 
 	 * @param parentId
 	 * @return
