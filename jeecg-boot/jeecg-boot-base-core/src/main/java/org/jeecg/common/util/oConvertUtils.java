@@ -127,6 +127,15 @@ public class oConvertUtils {
 		}
 	}
 
+	/**
+	 * * 转化为数字
+	 * 
+	 * * 无法转化则为0
+	 * * 要求数字在整数范围内，并且字符串看起来就是只包含数字
+	 * 
+	 * @param s
+	 * @return
+	 */
 	public static int getInt(String s) {
 		if (s == null || "".equals(s)) {
 			return 0;

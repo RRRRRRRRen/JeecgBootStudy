@@ -1516,35 +1516,49 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return codeArray[0];
 	}
 
+	/**
+	 * * 设置负责人 取消负责人
+	 * 
+	 * @param json
+	 */
 	@Override
 	public void changeDepartChargePerson(JSONObject json) {
+		// * 获取参数
 		String userId = json.getString("userId");
 		String departId = json.getString("departId");
 		boolean status = json.getBoolean("status");
 		SysUser user = this.getById(userId);
+
 		if (user != null) {
+			// * 获取目标用户负责的部门
 			String ids = user.getDepartIds();
+
 			if (status == true) {
-				// 设置部门负责人
+				/**
+				 * * 设置部门负责人
+				 * 
+				 * * 目标负责部门为空 =》 直接赋值
+				 * * 目标负责部门不为空 =》 去重添加
+				 */
 				if (oConvertUtils.isEmpty(ids)) {
-					// 设置为上级
 					user.setUserIdentity(CommonConstant.USER_IDENTITY_2);
 					user.setDepartIds(departId);
 				} else {
 					List<String> list = new ArrayList<String>(Arrays.asList(ids.split(",")));
 					if (list.indexOf(departId) >= 0) {
-						// 啥也不干
 					} else {
 						list.add(departId);
 						String newIds = String.join(",", list);
-						// 设置为上级
 						user.setUserIdentity(CommonConstant.USER_IDENTITY_2);
 						user.setDepartIds(newIds);
 					}
 				}
 			} else {
-				// 取消负责人
+				/**
+				 * * 取消负责人
+				 */
 				if (oConvertUtils.isNotEmpty(ids)) {
+					// * 逐一删除
 					List<String> list = new ArrayList<String>();
 					for (String temp : ids.split(",")) {
 						if (oConvertUtils.isEmpty(temp)) {
@@ -1558,12 +1572,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 					if (list.size() > 0) {
 						newIds = String.join(",", list);
 					} else {
-						// 负责部门为空时，说明已经是普通用户
+						// * 负责部门为空时，说明已经是普通用户
 						user.setUserIdentity(CommonConstant.USER_IDENTITY_1);
 					}
 					user.setDepartIds(newIds);
 				}
 			}
+			// * 更新
 			this.updateById(user);
 		}
 	}
@@ -1586,26 +1601,32 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 	}
 
+	/**
+	 * * 编辑租户用户
+	 * 
+	 * @param sysUser
+	 * @param tenantId
+	 * @param departs
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	public void editTenantUser(SysUser sysUser, String tenantId, String departs, String roles) {
+		// * 初始化修改后的用户数据
 		SysUser user = new SysUser();
 		user.setWorkNo(sysUser.getWorkNo());
 		user.setId(sysUser.getId());
+		// * 修改
 		this.updateById(user);
-		// update-begin---author:wangshuai ---date:20230424
-		// for：【QQYUN-5251】人员与部门：部门删除不掉------------
+
 		if (oConvertUtils.isEmpty(departs)) {
-			// 直接删除用户下的的租户部门
+			// * 直接删除用户下的的租户部门
 			sysUserDepartMapper.deleteUserDepart(user.getId(), tenantId);
 		} else {
-			// 修改租户用户下的部门
+			// * 修改租户用户下的部门
 			this.updateTenantDepart(user, tenantId, departs);
 		}
-		// update-end---author:wangshuai ---date:20230424
-		// for：【QQYUN-5251】人员与部门：部门删除不掉------------
-		// 修改用户下的职位
+		// * 修改用户下的职位
 		this.editUserPosition(sysUser.getId(), sysUser.getPost());
 	}
 
@@ -1783,84 +1804,117 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 	}
 
-	// ======================================= begin 用户与部门 用户列表导出
-	// =========================================
+	/**
+	 * * 导出应用下的用户Excel
+	 * 
+	 * @param request
+	 * @return
+	 */
 	@Override
 	public ModelAndView exportAppUser(HttpServletRequest request) {
+		// * 获取 tenantId
 		Integer tenantId = oConvertUtils.getInt(TenantContext.getTenant());
-		// Step.1 组装查询条件，导出选中的部门id数据
+
+		// * 获取参数部门集合
 		String departIds = request.getParameter("departIds");
 		List<String> list = new ArrayList<>();
 		if (oConvertUtils.isNotEmpty(departIds)) {
 			list = Arrays.asList(departIds.split(SymbolConstant.COMMA));
 		}
-		// 查询用户数据
+
+		// * 根据部门id和租户id 查询用户数据
 		List<SysUser> userList = userMapper.getUserByDepartsTenantId(list, tenantId);
-		// 获取部门名称
+
+		// * 获取部门名称
 		List<SysUserDepVo> userDepVos = sysDepartMapper.getUserDepartByTenantUserId(userList, tenantId);
-		// 获取职位
+
+		// * 获取职位
 		List<SysUserPositionVo> positionVos = sysUserPositionMapper.getPositionIdByUsersTenantId(userList, tenantId);
-		// step2 根据用户id进行分类
-		// 循环用户数据将数据整合导出
+
+		// * 初始化导出用户集合
 		List<AppExportUserVo> exportUserVoList = new ArrayList<>();
+
 		for (SysUser sysUser : userList) {
+			// * SysUser 转化为 AppExportUserVo
 			AppExportUserVo exportUserVo = new AppExportUserVo();
 			BeanUtils.copyProperties(sysUser, exportUserVo);
+			// * 设置部门
 			String departNames = userDepVos.stream().filter(item -> item.getUserId().equals(sysUser.getId()))
 					.map(SysUserDepVo::getDepartName).collect(Collectors.joining(SymbolConstant.SEMICOLON));
 			exportUserVo.setDepart(departNames);
+			// * 设置职位
 			String posNames = positionVos.stream().filter(item -> item.getUserId().equals(sysUser.getId()))
 					.map(SysUserPositionVo::getName).collect(Collectors.joining(SymbolConstant.SEMICOLON));
 			exportUserVo.setPosition(posNames);
+			// * 加入集合
 			exportUserVoList.add(exportUserVo);
 		}
-		// step3 封装导出excel参数
+		// * 封装导出excel参数
 		ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
-		// 导出文件名称
+		// * 导出文件名称
 		mv.addObject(NormalExcelConstants.FILE_NAME, "用户列表");
+		// * 导出实体类
 		mv.addObject(NormalExcelConstants.CLASS, AppExportUserVo.class);
+
+		// * 获取当前登录人
 		LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+		// * 补充导出参数
 		ExportParams exportParams = new ExportParams("导入规则：\n" +
 				"1、存在用户编号时，数据会根据用户编号进行匹配，匹配成功后只会更新职位和工号;\n" +
 				"2、不存在用户编号时，支持手机号、邮箱、姓名、部们、职位、工号导入,其中手机号必填;\n" +
 				"3、上下级部门用英文字符 / 连接，如 财务部/财务一部，多个部门或者职位用英文字符 ; 进行连接,如 财务部;研发部", "导出人:" + user.getRealname(), "导出信息");
 		mv.addObject(NormalExcelConstants.PARAMS, exportParams);
+		// * 导出数据
 		mv.addObject(NormalExcelConstants.DATA_LIST, exportUserVoList);
 		return mv;
 	}
 
-	// ======================================= end 用户与部门 用户列表导出
-	// =========================================
-
-	// ======================================= begin 用户与部门 用户列表导入
-	// =========================================
+	/**
+	 * * 用户与部门 用户列表导入
+	 */
 	@Override
 	public Result<?> importAppUser(HttpServletRequest request) {
+		// * MultipartHttpServletRequest 用于接受文件类请求体
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+		// * 获取文件列表
 		Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
+
+		// * 获取当前登录人租户信息
 		Integer tenantId = oConvertUtils.getInt(TenantContext.getTenant());
 		SysTenant sysTenant = sysTenantMapper.selectById(tenantId);
-		// 错误信息
+
+		// * 初始化错误信息
 		List<String> errorMessage = new ArrayList<>();
 		int successLines = 0, errorLines = 0;
+
 		for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
+			// * 获取文件对象
 			MultipartFile file = entity.getValue();
+
+			// * 初始化导出配置参数
 			ImportParams params = new ImportParams();
 			params.setTitleRows(2);
 			params.setHeadRows(1);
 			params.setNeedSave(true);
-			// 存放职位的map;key为名称 value为职位id。避免多次导入和查询
+
+			// * 存放职位的map;key为名称 value为职位id。避免多次导入和查询
 			Map<String, String> positionMap = new HashMap<>();
-			// 存放部门的map;key为名称 value为SysDepart对象。避免多次导入和查询
+			// * 存放部门的map;key为名称 value为SysDepart对象。避免多次导入和查询
 			Map<String, SysDepart> departMap = new HashMap<>();
+
 			try {
+				// * 读取文件中的数据
 				List<AppExportUserVo> listSysUsers = ExcelImportUtil.importExcel(file.getInputStream(), AppExportUserVo.class,
 						params);
+
 				for (int i = 0; i < listSysUsers.size(); i++) {
-					// 记录现在是多少行
+					// * 记录现在是多少行
 					int lineNumber = i + 1;
-					// 记录是编辑还是添加
+					// * 记录是编辑还是添加
 					boolean isEdit = false;
+
+					// * 当前处理的数据条目详情
 					AppExportUserVo sysUserExcel = listSysUsers.get(i);
 					String id = sysUserExcel.getId();
 					String workNo = sysUserExcel.getWorkNo();
@@ -1869,8 +1923,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 					String realname = sysUserExcel.getRealname();
 					String depart = sysUserExcel.getDepart();
 					String position = sysUserExcel.getPosition();
+
+					// * 初始化数据库保存的用户对象
 					SysUser sysUser = new SysUser();
-					// 判断id是否存在，如果存在的话就是更新
+
+					/**
+					 * * 设置id
+					 * 
+					 * * 判断id是否存在，如果存在的话就是更新
+					 * * 不存在该用户则添加
+					 */
 					if (oConvertUtils.isNotEmpty(id)) {
 						SysUser user = userMapper.selectById(id);
 						if (null == user) {
@@ -1881,24 +1943,34 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 						isEdit = true;
 						sysUser.setId(id);
 					} else {
-						// 处理租户中是否已存在，用户是否已存在，已存在的用户直接更新
 						isEdit = false;
 					}
+
+					// * 设置工号
 					if (oConvertUtils.isNotEmpty(workNo)) {
 						sysUser.setWorkNo(workNo);
 					}
+
 					try {
 						if (isEdit) {
+							// * 只更新工号？
 							userMapper.updateById(sysUser);
 						} else {
+							// * 手机号为空不导入
 							if (oConvertUtils.isEmpty(phone)) {
 								errorMessage.add("第 " + lineNumber + " 行：手机号为空，忽略导入。");
 								errorLines++;
 								continue;
 							}
+							// * 手机号是否存在处理
 							SysUser userByPhone = userMapper.getUserByPhone(phone);
 							if (null != userByPhone) {
-								// 查看看是否已经存在此租户中，存在禁止导入，否则直接更新即可
+								/**
+								 * * 查看看是否已经存在此租户中
+								 * 
+								 * * - 存在禁止导入
+								 * * - 否则直接更新即可
+								 */
 								Integer tenantCount = userTenantMapper.userTenantIzExist(userByPhone.getId(), tenantId);
 								if (tenantCount > 0) {
 									errorMessage.add("第 " + lineNumber + " 行：成员已存在该组织中，如果列表中不存在，请确认该成员是否在审核中或者已离职，忽略导入。");
@@ -1909,11 +1981,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 								userMapper.updateById(sysUser);
 								this.addUserTenant(sysUser.getId(), tenantId, userByPhone.getUsername(), sysTenant.getName());
 							} else {
-								// 密码默认为 “租户门牌号+手机号”
+								// * 手机号不存在 id不存在则新建
 								String password = sysTenant.getHouseNumber() + phone;
 								String salt = oConvertUtils.randomGen(8);
 								sysUser.setSalt(salt);
-								// 密码加密加盐
 								String passwordEncode = PasswordUtil.encrypt(phone, password, salt);
 								sysUser.setPassword(passwordEncode);
 								sysUser.setUsername(phone);
@@ -1927,13 +1998,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 								this.addUserTenant(sysUser.getId(), tenantId, sysUser.getUsername(), sysTenant.getName());
 							}
 						}
-						// 新增或编辑职位
+
+						// * 新增或编辑职位
 						if (oConvertUtils.isNotEmpty(position)) {
 							this.addOrEditPosition(sysUser.getId(), position, isEdit, tenantId, positionMap);
 						}
-						// 新增的时候才可以添加部门
+						// * 新增的时候才可以添加部门
 						if (!isEdit) {
-							// 新增或编辑部门
+							// * 新增或编辑部门
 							this.addOrEditDepart(sysUser.getId(), depart, tenantId, departMap);
 						}
 						successLines++;
@@ -1941,7 +2013,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 						errorLines++;
 						String message = e.getMessage().toLowerCase();
 
-						// 通过索引名判断出错信息
+						// * 通过索引名判断出错信息
 						if (message.contains(CommonConstant.SQL_INDEX_UNIQ_SYS_USER_USERNAME)) {
 							errorMessage.add("第 " + lineNumber + " 行：用户名已经存在，忽略导入。");
 						} else if (message.contains(CommonConstant.SQL_INDEX_UNIQ_SYS_USER_WORK_NO)) {
@@ -1962,6 +2034,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				errorMessage.add("发生异常：" + e.getMessage());
 				log.error(e.getMessage(), e);
 			} finally {
+				// * 结束后关闭资源
 				try {
 					file.getInputStream().close();
 				} catch (IOException e) {
@@ -1969,6 +2042,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				}
 			}
 		}
+
 		try {
 			return ImportExcelUtil.imporReturnRes(errorLines, successLines, errorMessage);
 		} catch (IOException e) {

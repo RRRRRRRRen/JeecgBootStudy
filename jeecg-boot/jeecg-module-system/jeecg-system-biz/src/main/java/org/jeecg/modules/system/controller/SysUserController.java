@@ -44,6 +44,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+/**
+ * * 在 JEECG 框架中，Controller 返回一个配置好的 ModelAndView，只要你正确设置了 JeecgEntityExcelView 和相关参数
+ * * Spring MVC 就会自动执行 Excel 导出流程，客户端会收到一个 Excel 文件下载。
+ */
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,9 +57,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * <p>
- * 用户表 前端控制器
- * </p>
+ * * 用户表 前端控制器
  *
  * @Author scott
  * @since 2018-12-20
@@ -2017,7 +2019,7 @@ public class SysUserController {
     }
 
     /**
-     * 设置负责人 取消负责人
+     * * 设置负责人 取消负责人
      * 
      * @param json
      * @return
@@ -2029,7 +2031,9 @@ public class SysUserController {
     }
 
     /**
-     * 修改租户下的用户【低代码应用专用接口】
+     * * 修改租户下的用户
+     * 
+     * * - 低代码应用专用接口
      * 
      * @param sysUser
      * @param req
@@ -2037,26 +2041,34 @@ public class SysUserController {
      */
     @RequestMapping(value = "/editTenantUser", method = { RequestMethod.PUT, RequestMethod.POST })
     public Result<String> editTenantUser(@RequestBody SysUser sysUser, HttpServletRequest req) {
+        // * 初始化结果
         Result<String> result = new Result<>();
+        // * 获取当前登录人的租户id
         String tenantId = TokenUtils.getTenantIdByRequest(req);
+        // * 没有租户id不允许修改
         if (oConvertUtils.isEmpty(tenantId)) {
             return result.error500("无权修改他人信息！");
         }
+
+        // * 租户表中查询指定用户的指定租户
         LambdaQueryWrapper<SysUserTenant> query = new LambdaQueryWrapper<>();
         query.eq(SysUserTenant::getTenantId, Integer.valueOf(tenantId));
         query.eq(SysUserTenant::getUserId, sysUser.getId());
         SysUserTenant one = userTenantService.getOne(query);
+        // * 没找到不允许修改
         if (null == one) {
             return result.error500("非当前租户下的用户，不允许修改！");
         }
+        // * 找到了则修改
         String departs = req.getParameter("selecteddeparts");
         sysUserService.editTenantUser(sysUser, tenantId, departs, null);
         return Result.ok("修改成功");
     }
 
     /**
-     * 切换租户时 需要修改 loginTenantId
-     * QQYUN-4491 【应用】一些小问题 1、上次选中登录的租户，下次登录未记忆
+     * * 切换租户
+     * 
+     * * - 需要修改 loginTenantId
      * 
      * @param sysUser
      * @return
@@ -2068,7 +2080,7 @@ public class SysUserController {
         LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
         String userId = loginUser.getId();
 
-        // 判断 指定的租户ID是不是当前登录用户的租户
+        // * 判断 指定的租户ID是不是当前登录用户的租户
         LambdaQueryWrapper<SysUserTenant> query = new LambdaQueryWrapper<>();
         query.eq(SysUserTenant::getTenantId, tenantId);
         query.eq(SysUserTenant::getUserId, userId);
@@ -2077,7 +2089,7 @@ public class SysUserController {
             return result.error500("非租户下的用户，不允许修改！");
         }
 
-        // 修改 loginTenantId
+        // * 修改 loginTenantId
         LambdaQueryWrapper<SysUser> update = new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getId, userId);
         SysUser updateUser = new SysUser();
@@ -2087,7 +2099,7 @@ public class SysUserController {
     }
 
     /**
-     * 应用用户导出
+     * * 应用用户导出
      * 
      * @param request
      * @return
@@ -2098,7 +2110,7 @@ public class SysUserController {
     }
 
     /**
-     * 应用用户导入
+     * * 应用用户导入
      * 
      * @param request
      * @return

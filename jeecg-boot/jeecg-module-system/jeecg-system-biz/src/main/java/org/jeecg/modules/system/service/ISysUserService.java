@@ -425,15 +425,14 @@ public interface ISysUserService extends IService<SysUser> {
 	void doUpdateDepartInfo(UpdateDepartInfo updateDepartInfo);
 
 	/**
-	 * 设置负责人 取消负责人
+	 * * 设置负责人 取消负责人
 	 * 
 	 * @param json
 	 */
 	void changeDepartChargePerson(JSONObject json);
-	// --- author:taoyan date:20221231 for: QQYUN-3515【应用】应用下的组织机构管理功能，细节实现 ---
 
 	/**
-	 * 编辑租户用户
+	 * * 编辑租户用户
 	 * 
 	 * @param sysUser
 	 * @param tenantId
@@ -450,7 +449,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void updateStatus(String id, String status);
 
 	/**
-	 * 导出应用下的用户Excel
+	 * * 导出应用下的用户Excel
 	 * 
 	 * @param request
 	 * @return
@@ -458,7 +457,7 @@ public interface ISysUserService extends IService<SysUser> {
 	ModelAndView exportAppUser(HttpServletRequest request);
 
 	/**
-	 * 导入应用下的用户
+	 * * 导入应用下的用户
 	 * 
 	 * @param request
 	 * @return
@@ -466,7 +465,7 @@ public interface ISysUserService extends IService<SysUser> {
 	Result<?> importAppUser(HttpServletRequest request);
 
 	/**
-	 * 验证用户是否为管理员
+	 * * 验证用户是否为管理员
 	 * 
 	 * @param ids
 	 */

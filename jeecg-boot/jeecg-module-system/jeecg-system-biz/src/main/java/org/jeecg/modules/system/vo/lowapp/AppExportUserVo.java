@@ -1,48 +1,70 @@
 package org.jeecg.modules.system.vo.lowapp;
 
 import lombok.Data;
+/**
+ * * 你需要定义一个 Java 实体类（POJO），然后用 @Excel 注解标注字段名。
+ * * JEECG 使用 easypoi 实现 Excel 生成，它会根据注解来自动生成 Excel 列标题和数据。
+ */
 import org.jeecgframework.poi.excel.annotation.Excel;
 
 import java.util.Date;
 
 /**
-* @Description: 应用用户与部门 用户导出/导入实体类
-*
-* @author: wangshuai
-* @date: 2023/6/14 16:42
-*/
+ * * 应用用户与部门 用户导出/导入实体类
+ * 
+ * @Description: 应用用户与部门 用户导出/导入实体类
+ *
+ * @author: wangshuai
+ * @date: 2023/6/14 16:42
+ */
 @Data
 public class AppExportUserVo {
 
-    /**用户编号*/
-    @Excel(name="用户编号",width=30)
+    /**
+     * * 用户编号
+     */
+    @Excel(name = "用户编号", width = 30)
     private String id;
 
-    /**姓名*/
-    @Excel(name="姓名",width=30)
+    /**
+     * * 姓名
+     */
+    @Excel(name = "姓名", width = 30)
     private String realname;
-    
-    /**职位*/
-    @Excel(name = "职位",width = 30)
+
+    /**
+     * * 职位
+     */
+    @Excel(name = "职位", width = 30)
     private String position;
 
-    /**部门*/
-    @Excel(name = "部门",width = 30)
+    /**
+     * * 部门
+     */
+    @Excel(name = "部门", width = 30)
     private String depart;
 
-    /**工号*/
-    @Excel(name = "工号",width = 30)
+    /**
+     * * 工号
+     */
+    @Excel(name = "工号", width = 30)
     private String workNo;
-    
-    /**手机号*/
-    @Excel(name = "手机号",width = 30)
+
+    /**
+     * * 手机号
+     */
+    @Excel(name = "手机号", width = 30)
     private String phone;
-    
-    /**邮箱*/
-    @Excel(name = "邮箱",width = 30)
+
+    /**
+     * * 邮箱
+     */
+    @Excel(name = "邮箱", width = 30)
     private String email;
 
-    /**加入时间*/
-    @Excel(name = "加入时间",width = 30, format = "yyyy-MM-dd")
+    /**
+     * * 加入时间
+     */
+    @Excel(name = "加入时间", width = 30, format = "yyyy-MM-dd")
     private Date createTime;
 }
