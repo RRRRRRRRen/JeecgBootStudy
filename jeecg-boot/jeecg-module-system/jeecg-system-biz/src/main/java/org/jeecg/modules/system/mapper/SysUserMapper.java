@@ -3,11 +3,13 @@ package org.jeecg.modules.system.mapper;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
 import org.jeecg.modules.system.entity.SysUser;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.jeecg.modules.system.model.SysUserSysDepartModel;
 import org.jeecg.modules.system.vo.SysUserDepVo;
 
@@ -29,7 +31,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	public SysUser getUserByName(@Param("username") String username);
 
 	/**
-	 * 通过用户账号查询用户Id
+	 * * 通过用户账号查询用户Id
 	 * 
 	 * @param username
 	 * @return
@@ -37,17 +39,18 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	public String getUserIdByName(@Param("username") String username);
 
 	/**
-	 * 根据部门Id查询用户信息
+	 * * 根据部门Id查询用户信息
 	 * 
 	 * @param page
 	 * @param departId
 	 * @param username 用户登录账户
 	 * @return
 	 */
-	IPage<SysUser> getUserByDepId(Page page, @Param("departId") String departId, @Param("username") String username);
+	IPage<SysUser> getUserByDepId(Page<SysUser> page, @Param("departId") String departId,
+			@Param("username") String username);
 
 	/**
-	 * 根据部门和子部门下的所有用户账号
+	 * * 根据部门和子部门下的所有用户账号
 	 *
 	 * @param orgCode 部门编码
 	 * @return
@@ -63,7 +66,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	List<SysUserDepVo> getDepNamesByUserIds(@Param("userIds") List<String> userIds);
 
 	/**
-	 * 根据部门Ids,查询部门下用户信息
+	 * * 根据部门Ids,查询部门下用户信息
 	 * 
 	 * @param page
 	 * @param departIds
@@ -86,7 +89,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	IPage<SysUser> getUserByRoleId(Page page, @Param("roleId") String roleId, @Param("username") String username);
 
 	/**
-	 * 根据用户名设置部门ID
+	 * * 根据用户名设置部门ID
 	 * 
 	 * @param username
 	 * @param orgCode
@@ -103,7 +106,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	public SysUser getUserByPhone(@Param("phone") String phone);
 
 	/**
-	 * 根据邮箱查询用户信息
+	 * * 根据邮箱查询用户信息
 	 * 
 	 * @param email
 	 * @return
@@ -132,7 +135,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	Integer getUserByOrgCodeTotal(@Param("orgCode") String orgCode, @Param("userParams") SysUser userParams);
 
 	/**
-	 * 批量删除角色与用户关系
+	 * * 批量删除角色与用户关系
 	 * 
 	 * @Author scott
 	 * @Date 2019/12/13 16:10
@@ -141,7 +144,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	void deleteBathRoleUserRelation(@Param("roleIdArray") String[] roleIdArray);
 
 	/**
-	 * 批量删除角色与权限关系
+	 * * 批量删除角色与权限关系
 	 * 
 	 * @Author scott
 	 * @Date 2019/12/13 16:10
@@ -175,7 +178,9 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	int deleteLogicDeleted(@Param("userIds") List<String> userIds);
 
 	/**
-	 * 更新空字符串为null【此写法有sql注入风险，禁止随便用】
+	 * * 更新空字符串为null
+	 * 
+	 * * - 此写法有sql注入风险，禁止随便用
 	 * 
 	 * @param fieldName
 	 * @return int
@@ -184,7 +189,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	int updateNullByEmptyString(@Param("fieldName") String fieldName);
 
 	/**
-	 * 根据部门Ids,查询部门下用户信息
+	 * * 根据部门Ids,查询部门下用户信息
 	 * 
 	 * @param departIds
 	 * @param username  用户账户名称
@@ -206,7 +211,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 			@Param("excludeUserIdList") List<String> excludeUserIdList);
 
 	/**
-	 * 更新刪除状态和离职状态
+	 * * 更新刪除状态和离职状态
 	 * 
 	 * @param userIds 存放用户id集合
 	 * @param sysUser
@@ -223,7 +228,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	List<SysUser> getTenantQuitList(@Param("tenantId") Integer tenantId);
 
 	/**
-	 * 获取租户下的有效用户ids
+	 * * 获取租户下的有效用户ids
 	 * 
 	 * @param tenantId
 	 * @return
@@ -231,7 +236,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 	List<String> getTenantUserIdList(@Param("tenantId") Integer tenantId);
 
 	/**
-	 * 根据部门id和租户id获取用户数据
+	 * * 根据部门id和租户id获取用户数据
 	 * 
 	 * @param departIds
 	 * @param tenantId
