@@ -377,13 +377,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 	}
 
+	/**
+	 * * 修改用户和用户角色关系
+	 * 
+	 * @param user
+	 * @param roles
+	 */
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	@Transactional(rollbackFor = Exception.class)
 	public void editUserWithRole(SysUser user, String roles) {
+		// * 暴力更新用户表
 		this.updateById(user);
-		// 先删后加
+		// * 删除角色
 		sysUserRoleMapper.delete(new QueryWrapper<SysUserRole>().lambda().eq(SysUserRole::getUserId, user.getId()));
+		// * 添加角色表
 		if (oConvertUtils.isNotEmpty(roles)) {
 			String[] arr = roles.split(",");
 			for (String roleId : arr) {
@@ -393,6 +401,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 	}
 
+	/**
+	 * * 获取用户的授权角色
+	 * 
+	 * @param username
+	 * @return
+	 */
 	@Override
 	public List<String> getRole(String username) {
 		return sysUserRoleMapper.getRoleByUserName(username);
@@ -455,14 +469,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 通过用户名获取用户角色集合
+	 * * 通过用户名获取用户角色集合
 	 * 
 	 * @param username 用户名
 	 * @return 角色集合
 	 */
 	@Override
 	public Set<String> getUserRolesSet(String username) {
-		// 查询用户拥有的角色集合
+		// * 查询用户拥有的角色集合
 		List<String> roles = sysUserRoleMapper.getRoleByUserName(username);
 		log.info(
 				"-------通过数据库读取用户拥有的角色Rules------username： " + username + ",Roles size: " + (roles == null ? 0 : roles.size()));
@@ -470,14 +484,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 通过用户名获取用户角色集合
+	 * * 通过用户名获取用户角色集合
 	 * 
 	 * @param userId 用户ID
 	 * @return 角色集合
 	 */
 	@Override
 	public Set<String> getUserRoleSetById(String userId) {
-		// 查询用户拥有的角色集合
+		// * 查询用户拥有的角色集合
 		List<String> roles = sysUserRoleMapper.getRoleCodeByUserId(userId);
 		log.info(
 				"-------通过数据库读取用户拥有的角色Rules------userId： " + userId + ",Roles size: " + (roles == null ? 0 : roles.size()));
@@ -485,16 +499,20 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 通过用户名获取用户权限集合
+	 * * 通过用户名获取用户权限集合
 	 *
 	 * @param userId 用户ID
 	 * @return 权限集合
 	 */
 	@Override
 	public Set<String> getUserPermissionsSet(String userId) {
+		// * 初始化set
 		Set<String> permissionSet = new HashSet<>();
+
+		// * 查询目标用户的所有菜单权限
 		List<SysPermission> permissionList = sysPermissionMapper.queryByUser(userId);
-		// ================= begin 开启租户的时候 如果没有test角色，默认加入test角色================
+
+		// * 开启租户的时候 如果没有test角色，默认加入test角色
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			if (permissionList == null) {
 				permissionList = new ArrayList<>();
@@ -502,23 +520,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 			List<SysPermission> testRoleList = sysPermissionMapper.queryPermissionByTestRoleId();
 			permissionList.addAll(testRoleList);
 		}
-		// ================= end 开启租户的时候 如果没有test角色，默认加入test角色================
+
+		// * 所有获取权限标识符
 		for (SysPermission po : permissionList) {
-			// // TODO URL规则有问题？
-			// if (oConvertUtils.isNotEmpty(po.getUrl())) {
-			// permissionSet.add(po.getUrl());
-			// }
 			if (oConvertUtils.isNotEmpty(po.getPerms())) {
 				permissionSet.add(po.getPerms());
 			}
 		}
+
 		log.info("-------通过数据库读取用户拥有的权限Perms------userId： " + userId + ",Perms size: "
 				+ (permissionSet == null ? 0 : permissionSet.size()));
 		return permissionSet;
 	}
 
 	/**
-	 * 升级SpringBoot2.6.6,不允许循环依赖
+	 * * 查询用户信息包括 部门信息
 	 * 
 	 * @author:qinfeng
 	 * @update: 2022-04-07
@@ -561,7 +577,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 根据部门Id查询
+	 * * 根据部门Id查询
 	 * 
 	 * @param page
 	 * @param departId 部门id
@@ -663,6 +679,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userRoleList;
 	}
 
+	/**
+	 * * 根据用户名设置部门ID
+	 * 
+	 * @param username
+	 * @param orgCode
+	 */
 	@Override
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, key = "#username")
 	public void updateUserDepart(String username, String orgCode, Integer loginTenantId) {
@@ -841,6 +863,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return line != 0;
 	}
 
+	/**
+	 * * 更新手机号、邮箱空字符串为 null
+	 * 
+	 * @return boolean
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public boolean updateNullPhoneEmail() {

@@ -100,7 +100,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public void addUserWithRole(SysUser user, String roles);
 
 	/**
-	 * 修改用户和用户角色关系
+	 * * 修改用户和用户角色关系
 	 * 
 	 * @param user
 	 * @param roles
@@ -108,7 +108,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public void editUserWithRole(SysUser user, String roles);
 
 	/**
-	 * 获取用户的授权角色
+	 * * 获取用户的授权角色
 	 * 
 	 * @param username
 	 * @return
@@ -125,7 +125,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public SysRoleIndex getDynamicIndexByUserRole(String username, String version);
 
 	/**
-	 * 查询用户信息包括 部门信息
+	 * * 查询用户信息包括 部门信息
 	 * 
 	 * @param username
 	 * @return
@@ -134,7 +134,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public SysUserCacheInfo getCacheUser(String username);
 
 	/**
-	 * 根据部门Id查询
+	 * * 根据部门Id查询
 	 * 
 	 * @param page
 	 * @param departId 部门id
@@ -197,7 +197,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public IPage<SysUser> getUserByRoleId(Page<SysUser> page, String roleId, String username);
 
 	/**
-	 * 通过用户名获取用户角色集合
+	 * * 通过用户名获取用户角色集合
 	 *
 	 * @param username 用户名
 	 * @return 角色集合
@@ -205,7 +205,7 @@ public interface ISysUserService extends IService<SysUser> {
 	Set<String> getUserRolesSet(String username);
 
 	/**
-	 * 通过用户名获取用户角色集合
+	 * * 通过用户名获取用户角色集合
 	 *
 	 * @param userId 用户id
 	 * @return 角色集合
@@ -213,7 +213,7 @@ public interface ISysUserService extends IService<SysUser> {
 	Set<String> getUserRoleSetById(String userId);
 
 	/**
-	 * 通过用户名获取用户权限集合
+	 * * 通过用户名获取用户权限集合
 	 *
 	 * @param userId 用户id
 	 * @return 权限集合
@@ -221,7 +221,7 @@ public interface ISysUserService extends IService<SysUser> {
 	Set<String> getUserPermissionsSet(String userId);
 
 	/**
-	 * 根据用户名设置部门ID
+	 * * 根据用户名设置部门ID
 	 * 
 	 * @param username
 	 * @param orgCode
@@ -301,7 +301,7 @@ public interface ISysUserService extends IService<SysUser> {
 	boolean removeLogicDeleted(List<String> userIds);
 
 	/**
-	 * 更新手机号、邮箱空字符串为 null
+	 * * 更新手机号、邮箱空字符串为 null
 	 * 
 	 * @return boolean
 	 */

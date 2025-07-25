@@ -5,6 +5,8 @@ import java.util.List;
 import org.jeecg.common.util.DateUtils;
 
 /**
+ * TODO 用户缓存信息
+ * 
  * @Description: 用户缓存信息
  * @author: jeecg-boot
  */
@@ -13,9 +15,9 @@ public class SysUserCacheInfo {
 	private String sysUserId;
 
 	private String sysUserCode;
-	
+
 	private String sysUserName;
-	
+
 	private String sysOrgCode;
 
 	/**
@@ -24,7 +26,7 @@ public class SysUserCacheInfo {
 	private String sysOrgId;
 
 	private List<String> sysMultiOrgCode;
-	
+
 	private boolean oneDepart;
 
 	/**
