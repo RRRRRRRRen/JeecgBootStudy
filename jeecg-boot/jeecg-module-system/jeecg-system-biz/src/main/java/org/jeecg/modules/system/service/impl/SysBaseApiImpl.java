@@ -138,19 +138,21 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 	private IDictTableWhiteListHandler dictTableWhiteListHandler;
 
 	/**
-	 * 根据用户名查询用户信息
-	 * 相同类中方法间调用时脱敏解密 Aop会失效，获取用户信息太重要，此处采用原生解密方法，不采用@SensitiveDecodeAble注解方式
+	 * * 根据用户名查询用户信息
+	 * 
+	 * * - 相同类中方法间调用时脱敏解密 Aop会失效，获取用户信息太重要，此处采用原生解密方法，不采用@SensitiveDecodeAble注解方式
 	 */
 	@Override
-	// @SensitiveDecode
 	public LoginUser getUserByName(String username) {
-		// 用户名为空返回null
+		// * 用户名为空返回null
 		if (oConvertUtils.isEmpty(username)) {
 			return null;
 		}
-		// 1、通过我发起的流程或者流程实例，查看历史，流程图预览问题
+
+		// * 返回登录信息
 		LoginUser user = sysUserService.getEncodeUserInfo(username);
 
+		// * 脱敏处理
 		try {
 			SensitiveInfoUtil.handlerObject(user, false);
 		} catch (IllegalAccessException e) {

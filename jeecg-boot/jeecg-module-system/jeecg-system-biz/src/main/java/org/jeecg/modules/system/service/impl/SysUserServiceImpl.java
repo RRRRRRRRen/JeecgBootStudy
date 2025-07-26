@@ -1069,6 +1069,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userList.stream().map(SysUser::getUsername).collect(Collectors.toList());
 	}
 
+	/**
+	 * * 获取用户信息 字段信息是加密后的 【加密用户信息】
+	 * 
+	 * @param username
+	 * @return
+	 */
 	@Override
 	@Cacheable(cacheNames = CacheConstant.SYS_USERS_CACHE, key = "#username")
 	@SensitiveEncode
