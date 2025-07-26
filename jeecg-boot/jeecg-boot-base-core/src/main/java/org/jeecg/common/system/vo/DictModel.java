@@ -19,6 +19,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
+ * * 字典类
+ * 
  * @Description: 字典类
  * @author: jeecg-boot
  */
@@ -44,20 +46,20 @@ public class DictModel implements Serializable {
 	}
 
 	/**
-	 * 字典value
+	 * * 字典value
 	 */
 	private String value;
 	/**
-	 * 字典文本
+	 * * 字典文本
 	 */
 	private String text;
 	/**
-	 * 字典颜色
+	 * * 字典颜色
 	 */
 	private String color;
 
 	/**
-	 * 特殊用途： JgEditableTable
+	 * * 特殊用途： JgEditableTable
 	 * 
 	 * @return
 	 */
@@ -66,7 +68,7 @@ public class DictModel implements Serializable {
 	}
 
 	/**
-	 * 特殊用途： vue3 Select组件
+	 * * 特殊用途： vue3 Select组件
 	 */
 	public String getLabel() {
 		return this.text;

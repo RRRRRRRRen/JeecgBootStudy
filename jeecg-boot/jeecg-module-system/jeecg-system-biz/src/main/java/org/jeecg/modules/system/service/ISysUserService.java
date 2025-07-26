@@ -309,7 +309,7 @@ public interface ISysUserService extends IService<SysUser> {
 	boolean updateNullPhoneEmail();
 
 	/**
-	 * 保存第三方用户信息
+	 * * 保存第三方用户信息
 	 * 
 	 * @param sysUser
 	 */
@@ -346,7 +346,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void editUser(SysUser user, String roles, String departs, String relTenantIds, String updateFromPage);
 
 	/**
-	 * userId转为username
+	 * * userId转为username
 	 * 
 	 * @param userIdList
 	 * @return List<String>
@@ -354,7 +354,7 @@ public interface ISysUserService extends IService<SysUser> {
 	List<String> userIdToUsername(Collection<String> userIdList);
 
 	/**
-	 * 获取用户信息 字段信息是加密后的 【加密用户信息】
+	 * * 获取用户信息 字段信息是加密后的 【加密用户信息】
 	 * 
 	 * @param username
 	 * @return
@@ -377,7 +377,7 @@ public interface ISysUserService extends IService<SysUser> {
 	List<SysUser> getQuitList(Integer tenantId);
 
 	/**
-	 * 更新刪除状态和离职状态
+	 * * 更新刪除状态和离职状态
 	 * 
 	 * @param userIds 存放用户id集合
 	 * @param sysUser
@@ -498,7 +498,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void sendLogOffPhoneSms(JSONObject jsonObject, String username, String ipAddress);
 
 	/**
-	 * 用户注销[敲敲云专用]
+	 * * 用户注销[敲敲云专用]
 	 * 
 	 * @param jsonObject
 	 * @param username

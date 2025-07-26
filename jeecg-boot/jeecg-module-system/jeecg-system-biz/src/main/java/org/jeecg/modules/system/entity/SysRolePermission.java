@@ -13,9 +13,7 @@ import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * <p>
- * 角色权限表
- * </p>
+ * * 角色权限表
  *
  * @Author scott
  * @since 2018-12-21
@@ -28,44 +26,44 @@ public class SysRolePermission implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * id
+     * * id
      */
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
-    
+
     /**
-     * 角色id
+     * * 角色id
      */
     private String roleId;
 
     /**
-     * 权限id
+     * * 权限id
      */
     private String permissionId;
-    
+
     /**
-     * 数据权限
+     * * 数据权限
      */
     private String dataRuleIds;
 
     /**
-     * 操作时间
+     * * 操作时间
      */
-    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date operateDate;
 
     /**
-     * 操作ip
+     * * 操作ip
      */
     private String operateIp;
 
     public SysRolePermission() {
-   	}
-       
-   	public SysRolePermission(String roleId, String permissionId) {
-   		this.roleId = roleId;
-   		this.permissionId = permissionId;
-   	}
+    }
+
+    public SysRolePermission(String roleId, String permissionId) {
+        this.roleId = roleId;
+        this.permissionId = permissionId;
+    }
 
 }

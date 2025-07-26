@@ -907,19 +907,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 保存第三方用户信息
+	 * * 保存第三方用户信息
 	 * 
 	 * @param sysUser
 	 */
 	@Override
 	public void saveThirdUser(SysUser sysUser) {
-		// 保存用户
+		// * 生成并保存id
 		String userid = UUIDGenerator.generate();
 		sysUser.setId(userid);
 		baseMapper.insert(sysUser);
-		// 获取第三方角色
+		// * 获取第三方角色
 		SysRole sysRole = sysRoleMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getRoleCode, "third_role"));
-		// 保存用户角色
+		// * 保存用户角色
 		SysUserRole userRole = new SysUserRole();
 		userRole.setRoleId(sysRole.getId());
 		userRole.setUserId(userid);
@@ -1053,11 +1053,19 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		this.editUserPosition(user.getId(), user.getPost());
 	}
 
+	/**
+	 * * userId转为username
+	 * 
+	 * @param userIdList
+	 * @return List<String>
+	 */
 	@Override
 	public List<String> userIdToUsername(Collection<String> userIdList) {
+		// * 查询用户表
 		LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
 		queryWrapper.in(SysUser::getId, userIdList);
 		List<SysUser> userList = super.list(queryWrapper);
+		// * 读取username
 		return userList.stream().map(SysUser::getUsername).collect(Collectors.toList());
 	}
 
@@ -1065,22 +1073,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	@Cacheable(cacheNames = CacheConstant.SYS_USERS_CACHE, key = "#username")
 	@SensitiveEncode
 	public LoginUser getEncodeUserInfo(String username) {
+		// * 非空判断
 		if (oConvertUtils.isEmpty(username)) {
 			return null;
 		}
+		// * 初始化登录用户
 		LoginUser loginUser = new LoginUser();
+		// * 获取用户详情
 		SysUser sysUser = userMapper.getUserByName(username);
-		// 查询用户的租户ids
+		// * 查询用户的租户ids
 		this.setUserTenantIds(sysUser);
-		// 设置职位id
+		// * 设置职位id
 		this.userPositionId(sysUser);
+
 		if (sysUser == null) {
 			return null;
 		}
+
+		// * 将 sysUser转为 loginUser
 		BeanUtils.copyProperties(sysUser, loginUser);
-		// 查询当前登录用户的部门id
+		// * 查询当前登录用户的部门id
 		loginUser.setOrgId(this.getDepartIdByOrCode(sysUser.getOrgCode()));
-		// 查询当前登录用户的角色code（多个逗号分割）
+		// * 查询当前登录用户的角色code（多个逗号分割）
 		loginUser.setRoleCode(this.getJoinRoleCodeByUserId(sysUser.getId()));
 		return loginUser;
 	}
@@ -1124,52 +1138,33 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userMapper.getTenantQuitList(tenantId);
 	}
 
+	/**
+	 * * 更新刪除状态和离职状态
+	 * 
+	 * @param userIds 存放用户id集合
+	 * @param sysUser
+	 * @return boolean
+	 */
 	@Override
 	public void updateStatusAndFlag(List<String> userIds, SysUser sysUser) {
 		userMapper.updateStatusAndFlag(userIds, sysUser);
 	}
 
 	/**
-	 * 设置登录租户
+	 * TODO 设置登录租户
 	 * 
 	 * @param sysUser
 	 * @return
 	 */
 	@Override
-	public Result<JSONObject> setLoginTenant(SysUser sysUser, JSONObject obj, String username,
+	public Result<JSONObject> setLoginTenant(
+			SysUser sysUser,
+			JSONObject obj,
+			String username,
 			Result<JSONObject> result) {
-		// update-begin--Author:sunjianlei Date:20210802 for：获取用户租户信息
-		// 用户有哪些租户
-		// List<SysTenant> tenantList = null;
-		// update-begin---author:wangshuai ---date:20221223
-		// for：[QQYUN-3371]租户逻辑改造，改成关系表------------
-		// update-begin---author:wangshuai ---date:20230427
-		// for：【QQYUN-5270】名下租户全部退出后，再次登录出现租户冻结------------
+
 		List<SysTenant> tenantList = relationMapper.getTenantNoCancel(sysUser.getId());
 		obj.put("tenantList", tenantList);
-		// update-end---author:wangshuai ---date:20230427
-		// for：【QQYUN-5270】名下租户全部退出后，再次登录出现租户冻结------------
-		// if (null!=tenantIdList && tenantIdList.size()>0) {
-		// //update-end---author:wangshuai ---date:20221223
-		// for：[QQYUN-3371]租户逻辑改造，改成关系表--------------
-		// //-------------------------------------------------------------------------------------
-		// //查询有效的租户集合
-		// LambdaQueryWrapper<SysTenant> queryWrapper = new LambdaQueryWrapper<>();
-		// queryWrapper.in(SysTenant::getId, tenantIdList);
-		// queryWrapper.eq(SysTenant::getStatus,
-		// Integer.valueOf(CommonConstant.STATUS_1));
-		// tenantList = sysTenantMapper.selectList(queryWrapper);
-		// //-------------------------------------------------------------------------------------
-		//
-		// if (tenantList.size() == 0) {
-		// return result.error500("与该用户关联的租户均已被冻结，无法登录！");
-		// } else {
-		// obj.put("tenantList", tenantList);
-		// }
-		// }
-		// update-end---author:wangshuai ---date:20221223
-		// for：[QQYUN-3371]租户逻辑改造，改成关系表--------------
-		// update-end--Author:sunjianlei Date:20210802 for：获取用户租户信息
 
 		// 登录会话租户ID，有效性重置
 		if (tenantList != null && tenantList.size() > 0) {
@@ -1198,7 +1193,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 获取租户id
+	 * TODO 获取租户id
 	 * 
 	 * @param sysUser
 	 */
@@ -1214,7 +1209,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 保存租户
+	 * TODO 保存租户
 	 * 
 	 * @param userId
 	 * @param relTenantIds
@@ -1262,7 +1257,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 编辑租户
+	 * TODO 编辑租户
 	 * 
 	 * @param userId
 	 * @param relTenantIds
@@ -1299,12 +1294,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 删除租户通过用户id
+	 * * 删除租户通过用户id
 	 * 
 	 * @param tenantId
 	 * @param userId
 	 */
 	private void deleteTenantByUserId(String userId, Integer tenantId) {
+		// * 删除指定租户的指定用户
 		LambdaQueryWrapper<SysUserTenant> query = new LambdaQueryWrapper<>();
 		query.eq(SysUserTenant::getUserId, userId);
 		if (oConvertUtils.isNotEmpty(tenantId)) {
@@ -1789,19 +1785,22 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 设置用户职位id(已逗号拼接起来)
+	 * * 设置用户职位id
+	 * 
+	 * * - 逗号拼接
 	 * 
 	 * @param sysUser
 	 */
 	private void userPositionId(SysUser sysUser) {
 		if (null != sysUser) {
+			// * 查询职位表id
 			List<String> positionList = sysUserPositionMapper.getPositionIdByUserId(sysUser.getId());
 			sysUser.setPost(CommonUtils.getSplitText(positionList, SymbolConstant.COMMA));
 		}
 	}
 
 	/**
-	 * 查询用户当前登录部门的id
+	 * * 查询用户当前登录部门的id
 	 *
 	 * @param orgCode
 	 */
@@ -1811,6 +1810,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 		LambdaQueryWrapper<SysDepart> queryWrapper = new LambdaQueryWrapper<>();
 		queryWrapper.eq(SysDepart::getOrgCode, orgCode);
+		// * select 和 selectOne 冲突，依然会返回完整的字段
 		queryWrapper.select(SysDepart::getId);
 		SysDepart depart = sysDepartMapper.selectOne(queryWrapper);
 		if (depart == null || oConvertUtils.isEmpty(depart.getId())) {
@@ -1820,7 +1820,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 查询用户的角色code（多个逗号分割）
+	 * * 查询用户的角色code
 	 *
 	 * @param userId
 	 */
@@ -1828,36 +1828,52 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		if (oConvertUtils.isEmpty(userId)) {
 			return null;
 		}
-		// 判断是否开启saas模式，根据租户id过滤
+		// * 判断是否开启saas模式，根据租户id过滤
 		Integer tenantId = null;
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
-			// 开启了但是没有租户ID，默认-1，使其查询不到任何数据
+			// * 开启了但是没有租户ID，默认-1，使其查询不到任何数据
 			tenantId = oConvertUtils.getInt(TenantContext.getTenant(), -1);
 		}
+		// * 查询角色列表
 		List<SysRole> roleList = sysRoleMapper.getRoleCodeListByUserId(userId, tenantId);
 		if (CollectionUtils.isEmpty(roleList)) {
 			return null;
 		}
+		// * 拼接字符串
 		return roleList.stream().map(SysRole::getRoleCode).collect(Collectors.joining(SymbolConstant.COMMA));
 	}
 
 	/**
-	 * 移除部门负责人
+	 * * 移除指定部门关联的所有负责人
 	 * 
-	 * @param departChargeUserIdList
-	 * @param departChargeUsers
-	 * @param departId
+	 * @param departChargeUserIdList 需要被移除的负责人ID列表（不能为null）
+	 * @param departChargeUsers      当前部门的所有负责人用户对象列表（不能为null）
+	 * @param departId               要移除的部门ID（不能为空）
 	 */
-	private void removeDepartmentManager(List<String> departChargeUserIdList, List<SysUser> departChargeUsers,
+	private void removeDepartmentManager(
+			List<String> departChargeUserIdList,
+			List<SysUser> departChargeUsers,
 			String departId) {
-		// 移除部门负责人
+
+		// * 遍历所有需要移除的负责人ID
 		for (String chargeUserId : departChargeUserIdList) {
+			// * 在当前部门负责人列表中查找匹配的用户
 			for (SysUser chargeUser : departChargeUsers) {
+				// * 找到ID匹配的用户
 				if (chargeUser.getId().equals(chargeUserId)) {
+					// * 获取该用户当前管理的所有部门ID字符串（格式如："dept1,dept2,dept3"）
 					String departIds = chargeUser.getDepartIds();
-					List<String> list = new ArrayList<String>(Arrays.asList(departIds.split(",")));
+
+					// * 将部门ID字符串转换为List便于操作
+					List<String> list = new ArrayList<>(Arrays.asList(departIds.split(",")));
+
+					// * 从列表中移除目标部门ID
 					list.remove(departId);
+
+					// * 将处理后的List重新拼接为字符串
 					String newDepartIds = String.join(",", list);
+
+					// * 更新用户对象
 					chargeUser.setDepartIds(newDepartIds);
 					this.baseMapper.updateById(chargeUser);
 					break;
@@ -2114,22 +2130,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 新增或者编辑职位
+	 * * 新增或者编辑职位
 	 *
 	 * @param userId      用户id
 	 * @param position    职位名称 已/拼接
 	 * @param isEdit      新增或编辑
 	 * @param positionMap 职位map key为name，value为职位id
 	 */
-	private void addOrEditPosition(String userId, String position, Boolean isEdit, Integer tenantId,
+	private void addOrEditPosition(
+			String userId,
+			String position,
+			Boolean isEdit,
+			Integer tenantId,
 			Map<String, String> positionMap) {
+		// * 初始化分页结果
 		Page<SysPosition> page = new Page<>(1, 1);
+		// * 分割职位id为list
 		String[] positions = position.split(SymbolConstant.SEMICOLON);
 		List<String> positionList = Arrays.asList(positions);
+		// * 去重
 		positionList = positionList.stream().distinct().collect(Collectors.toList());
-		// 删除当前租户下的职位，根据职位名称、租户id、用户id
+
+		// * 删除当前租户下的职位，根据职位名称、租户id、用户id
 		sysUserPositionMapper.deleteUserPosByNameAndTenantId(positionList, tenantId, userId);
-		// 循环需要添加或修改的数据
+
+		// * 循环需要添加或修改的数据
 		for (String pos : positionList) {
 			String posId = "";
 			if (positionMap.containsKey(pos)) {
@@ -2142,15 +2167,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				}
 			}
 
-			// 职位id不为空直接新增
+			// * 职位id不为空直接新增
 			if (oConvertUtils.isNotEmpty(posId)) {
 				this.addSysUserPosition(userId, posId);
 				continue;
 			}
 
-			// 不是编辑的情况下职位才会新增
+			// * 不是编辑的情况下职位才会新增
 			if (!isEdit) {
-				// 新增职位和用户职位关系
 				SysPosition sysPosition = new SysPosition();
 				sysPosition.setName(pos);
 				sysPosition.setCode(RandomUtil.randomString(10));
@@ -2163,10 +2187,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 添加用户职位
+	 * * 添加用户职位
 	 */
 	private void addSysUserPosition(String userId, String positionId) {
+		// * 查询职位表个数
 		Long count = sysUserPositionMapper.getUserPositionCount(userId, positionId);
+		// * 如果用户没有该值为则添加
 		if (count == 0) {
 			SysUserPosition userPosition = new SysUserPosition();
 			userPosition.setUserId(userId);
@@ -2176,7 +2202,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 新增或编辑部门
+	 * * 新增或编辑部门
 	 *
 	 * @param userId    用户id
 	 * @param depart    部门名称
@@ -2186,33 +2212,40 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	private void addOrEditDepart(String userId, String depart, Integer tenantId, Map<String, SysDepart> departMap) {
 		// 批量将部门和用户信息建立关联关系
 		if (StringUtils.isNotEmpty(depart)) {
+			// * 初始化分页
 			Page<SysDepart> page = new Page<>(1, 1);
-			// 多个部门分离开
+
+			// * 多个部门分离开 并去重
 			String[] departNames = depart.split(SymbolConstant.SEMICOLON);
 			List<String> departNameList = Arrays.asList(departNames);
 			departNameList = departNameList.stream().distinct().collect(Collectors.toList());
-			// 部门id
+
+			// * 父级部门id
 			String parentId = "";
+
 			for (String departName : departNameList) {
+				// * 分离多级部门
 				String[] names = departName.split(SymbolConstant.SINGLE_SLASH);
-				// 部门名称拼接
+
+				// * 部门名称拼接
 				String nameStr = "";
 				for (int i = 0; i < names.length; i++) {
 					String name = names[i];
-					// 拼接name
+					// * 拼接name 去除空
 					if (oConvertUtils.isNotEmpty(nameStr)) {
 						nameStr = nameStr + SymbolConstant.SINGLE_SLASH + name;
 					} else {
 						nameStr = name;
 					}
+
 					SysDepart sysDepart = null;
-					// 判断map中是否存在该部门名称
+					// * 判断map中是否存在该部门名称
 					if (departMap.containsKey(nameStr)) {
 						sysDepart = departMap.get(nameStr);
 					} else {
-						// 不存在需要去查询
+						// * 不存在需要去查询
 						List<SysDepart> departPageByName = sysDepartMapper.getDepartPageByName(page, name, tenantId, parentId);
-						// 部门为空需要新增部门
+						// * 部门为空需要新增部门
 						if (CollectionUtil.isEmpty(departPageByName)) {
 							JSONObject formData = new JSONObject();
 							formData.put("parentId", parentId);
@@ -2230,14 +2263,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 						} else {
 							sysDepart = departPageByName.get(0);
 						}
-						// 父级id不为空那么就将父级部门改成不是叶子节点
+						// * 父级id不为空那么就将父级部门改成不是叶子节点
 						if (oConvertUtils.isNotEmpty(parentId)) {
 							sysDepartMapper.setMainLeaf(parentId, CommonConstant.NOT_LEAF);
 						}
 						parentId = sysDepart.getId();
 						departMap.put(nameStr, sysDepart);
 					}
-					// 最后一位新增部门用户关系表
+					// * 最后一位新增部门用户关系表
 					if (i == names.length - 1) {
 						Long count = sysUserDepartMapper.getCountByDepartIdAndUserId(userId, sysDepart.getId());
 						if (count == 0) {
@@ -2252,7 +2285,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * 添加用户租户
+	 * * 添加用户租户
 	 *
 	 * @param userId
 	 * @param tenantId
@@ -2260,34 +2293,32 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	 * @param tenantName      租户名称
 	 */
 	private void addUserTenant(String userId, Integer tenantId, String invitedUsername, String tenantName) {
+		// * 初始化用户租户表
 		SysUserTenant userTenant = new SysUserTenant();
 		userTenant.setTenantId(tenantId);
 		userTenant.setUserId(userId);
 		userTenant.setStatus(CommonConstant.USER_TENANT_INVITE);
+		// * 插入租户表
 		userTenantMapper.insert(userTenant);
-		// update-begin---author:wangshuai ---date:20230710
-		// for：【QQYUN-5731】导入用户时，没有提醒------------
-		// 发送系统消息通知
+
+		// * 获取当前登录人
 		LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+
+		// * 初始化消息对象
 		MessageDTO messageDTO = new MessageDTO();
 		String title = sysUser.getRealname() + " 邀请您加入 " + tenantName + "。";
 		messageDTO.setTitle(title);
+
 		Map<String, Object> data = new HashMap<>();
-		// update-begin---author:wangshuai---date:2024-03-11---for:【QQYUN-8425】用户导入成功后
-		// 消息提醒 跳转至同意页面---
+		// * 消息提醒 定义系统公告类型
 		data.put(CommonConstant.NOTICE_MSG_BUS_TYPE, SysAnnmentTypeEnum.TENANT_INVITE.getType());
-		// update-end---author:wangshuai---date:2024-03-11---for:【QQYUN-8425】用户导入成功后
-		// 消息提醒 跳转至同意页面---
+		// * 消息提醒 跳转至同意页面
 		messageDTO.setData(data);
 		messageDTO.setContent(title);
 		messageDTO.setToUser(invitedUsername);
 		messageDTO.setFromUser("system");
 		systemSendMsgHandle.sendMessage(messageDTO);
-		// update-end---author:wangshuai ---date:20230710
-		// for：【QQYUN-5731】导入用户时，没有提醒------------
 	}
-	// ======================================= end 用户与部门 用户列表导入
-	// =========================================
 
 	/**
 	 * * 验证是否为管理员
@@ -2444,16 +2475,24 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		this.sendPhoneSms(phone, ipAddress, code);
 	}
 
+	/**
+	 * * 用户注销[敲敲云专用]
+	 * 
+	 * @param jsonObject
+	 * @param username
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void userLogOff(JSONObject jsonObject, String username) {
+		// * 获取参数
 		String phone = jsonObject.getString("phone");
 		String smsCode = jsonObject.getString("smscode");
-		// 通过用户名查询数据库中的手机号
+		// * 通过用户名查询数据库中的手机号
 		SysUser userByNameAndPhone = userMapper.getUserByNameAndPhone(phone, username);
 		if (null == userByNameAndPhone) {
 			throw new JeecgBootException("当前用户手机号不匹配，无法注销！");
 		}
+		// * 验证验证码
 		String code = CommonConstant.LOG_OFF_PHONE_REDIS_KEY_PRE + phone;
 		Object redisSmdCode = redisUtil.get(code);
 		if (null == redisSmdCode) {
