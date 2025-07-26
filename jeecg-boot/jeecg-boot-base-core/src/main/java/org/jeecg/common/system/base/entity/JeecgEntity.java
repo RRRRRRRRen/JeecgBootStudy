@@ -15,6 +15,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
+ * * Entity基类
+ * 
  * @Description: Entity基类
  * @Author: dangzhenghui@163.com
  * @Date: 2019-4-28
@@ -27,21 +29,21 @@ public class JeecgEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * ID
+     * * ID
      */
     @TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "ID")
     private java.lang.String id;
 
     /**
-     * 创建人
+     * * 创建人
      */
     @Schema(description = "创建人")
     @Excel(name = "创建人", width = 15)
     private java.lang.String createBy;
 
     /**
-     * 创建时间
+     * * 创建时间
      */
     @Schema(description = "创建时间")
     @Excel(name = "创建时间", width = 20, format = "yyyy-MM-dd HH:mm:ss")
@@ -50,14 +52,14 @@ public class JeecgEntity implements Serializable {
     private java.util.Date createTime;
 
     /**
-     * 更新人
+     * * 更新人
      */
     @Schema(description = "更新人")
     @Excel(name = "更新人", width = 15)
     private java.lang.String updateBy;
 
     /**
-     * 更新时间
+     * * 更新时间
      */
     @Schema(description = "更新时间")
     @Excel(name = "更新时间", width = 20, format = "yyyy-MM-dd HH:mm:ss")

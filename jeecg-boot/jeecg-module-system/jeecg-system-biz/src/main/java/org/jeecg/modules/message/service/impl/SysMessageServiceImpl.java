@@ -7,6 +7,7 @@ import org.jeecg.modules.message.service.ISysMessageService;
 import org.springframework.stereotype.Service;
 
 /**
+ * * 消息
  * @Description: 消息
  * @Author: jeecg-boot
  * @Date:  2019-04-09
