@@ -253,7 +253,7 @@ public interface ISysUserService extends IService<SysUser> {
 	void addUserWithDepart(SysUser user, String selectedParts);
 
 	/**
-	 * 编辑用户和用户部门关系
+	 * * 编辑用户和用户部门关系
 	 * 
 	 * @param user
 	 * @param departs
@@ -266,7 +266,7 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @param sysUser
 	 * @return
 	 */
-	Result checkUserIsEffective(SysUser sysUser);
+	Result<?> checkUserIsEffective(SysUser sysUser);
 
 	/**
 	 * * 查询被逻辑删除的用户

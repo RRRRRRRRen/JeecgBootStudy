@@ -534,7 +534,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * TODO 查询用户信息包括 部门信息
+	 * * 查询用户信息包括 部门信息
 	 * 
 	 * @author:qinfeng
 	 * @update: 2022-04-07
@@ -543,29 +543,34 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	 */
 	@Override
 	public SysUserCacheInfo getCacheUser(String username) {
+		// * 初始化
 		SysUserCacheInfo info = new SysUserCacheInfo();
 		info.setOneDepart(true);
 		if (oConvertUtils.isEmpty(username)) {
 			return null;
 		}
 
-		// 查询用户信息
+		// * 查询用户信息
 		SysUser sysUser = userMapper.getUserByName(username);
 		if (sysUser != null) {
 			info.setSysUserCode(sysUser.getUsername());
 			info.setSysUserName(sysUser.getRealname());
 			info.setSysOrgCode(sysUser.getOrgCode());
+		} else {
+			return null;
 		}
 
-		// 多部门支持in查询
+		// * 查询用户所有的部门
 		List<SysDepart> list = sysDepartMapper.queryUserDeparts(sysUser.getId());
 		List<String> sysMultiOrgCode = new ArrayList<String>();
+
 		if (list == null || list.size() == 0) {
-			// 当前用户无部门
-			// sysMultiOrgCode.add("0");
+			// * 当前用户无部门
 		} else if (list.size() == 1) {
+			// * 当前单部门
 			sysMultiOrgCode.add(list.get(0).getOrgCode());
 		} else {
+			// * 当前多部门
 			info.setOneDepart(false);
 			for (SysDepart dpt : list) {
 				sysMultiOrgCode.add(dpt.getOrgCode());
@@ -743,19 +748,29 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	@Transactional(rollbackFor = Exception.class)
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
 	public void editUserWithDepart(SysUser user, String departs) {
-		// 更新角色的时候已经更新了一次了，可以再跟新一次
+		// * 更新用户
 		this.updateById(user);
+
+		// * 处理部门参数转为数组
 		String[] arr = {};
 		if (oConvertUtils.isNotEmpty(departs)) {
 			arr = departs.split(",");
 		}
-		// 查询已关联部门
+
+		// * 查询已关联部门
 		List<SysUserDepart> userDepartList = sysUserDepartMapper
 				.selectList(new QueryWrapper<SysUserDepart>().lambda().eq(SysUserDepart::getUserId, user.getId()));
+
 		if (userDepartList != null && userDepartList.size() > 0) {
 			for (SysUserDepart depart : userDepartList) {
-				// 修改已关联部门删除部门用户角色关系
+
 				if (!Arrays.asList(arr).contains(depart.getDepId())) {
+					/**
+					 * * 目标部门不包含数据库保存的数据
+					 * 
+					 * * - 查询数据库保存的部门角色关系表
+					 * * - 删除角色关系
+					 */
 					List<SysDepartRole> sysDepartRoleList = sysDepartRoleMapper.selectList(
 							new QueryWrapper<SysDepartRole>().lambda().eq(SysDepartRole::getDepartId, depart.getDepId()));
 					List<String> roleIds = sysDepartRoleList.stream().map(SysDepartRole::getId).collect(Collectors.toList());
@@ -767,8 +782,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 				}
 			}
 		}
-		// 先删后加
+
+		// * 删除所有该用户的部门
 		sysUserDepartMapper.delete(new QueryWrapper<SysUserDepart>().lambda().eq(SysUserDepart::getUserId, user.getId()));
+		// * 插入所有部门数据
 		if (oConvertUtils.isNotEmpty(departs)) {
 			for (String departId : arr) {
 				SysUserDepart userDepart = new SysUserDepart(user.getId(), departId);
@@ -889,6 +906,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return true;
 	}
 
+	/**
+	 * 保存第三方用户信息
+	 * 
+	 * @param sysUser
+	 */
 	@Override
 	public void saveThirdUser(SysUser sysUser) {
 		// 保存用户
