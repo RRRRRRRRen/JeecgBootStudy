@@ -940,7 +940,9 @@ public class oConvertUtils {
 	}
 
 	/**
-	 * 读取静态文本内容
+	 * * 读取静态文本内容
+	 * 
+	 * * - 解决springboot读取jar包中文件的问题
 	 * 
 	 * @param url
 	 * @return
@@ -948,8 +950,26 @@ public class oConvertUtils {
 	public static String readStatic(String url) {
 		String json = "";
 		try {
-			// 换个写法，解决springboot读取jar包中文件的问题
-			InputStream stream = oConvertUtils.class.getClassLoader().getResourceAsStream(url.replace("classpath:", ""));
+			/**
+			 * * 使用类加载器从 classpath 中获取资源文件的输入流。
+			 * 
+			 * * - Spring Boot 中，如果使用 new File("xxx") 或 getFile() 等方式
+			 * * - 可能在打包为 jar 后失效，因为资源不再是物理文件，而是嵌入在 jar 中了。
+			 * * - 而 getResourceAsStream() 能兼容这种情况。
+			 */
+			InputStream stream = oConvertUtils.class
+					/**
+					 * * oConvertUtils.class.getClassLoader()
+					 * * - 获取当前类的类加载器
+					 */
+					.getClassLoader()
+					/**
+					 * * getResourceAsStream
+					 * * - 用于从 classpath 路径中读取资源文件为 InputStream 流对象。
+					 */
+					.getResourceAsStream(
+							// * 把传入的路径中 "classpath:" 前缀移除。
+							url.replace("classpath:", ""));
 			json = IOUtils.toString(stream, "UTF-8");
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);

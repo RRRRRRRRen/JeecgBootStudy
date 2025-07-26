@@ -245,7 +245,7 @@ public interface ISysUserService extends IService<SysUser> {
 	public SysUser getUserByEmail(String email);
 
 	/**
-	 * 添加用户和用户部门关系
+	 * * 添加用户和用户部门关系
 	 * 
 	 * @param user
 	 * @param selectedParts

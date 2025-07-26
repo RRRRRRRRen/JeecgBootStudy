@@ -3,18 +3,16 @@ package org.jeecg.common.constant;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.util.oConvertUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.List;
 
 /**
+ * * 省市区
+ * 
  * @Description: 省市区
  * @author: jeecg-boot
  */
@@ -22,39 +20,49 @@ import java.util.List;
 public class ProvinceCityArea {
     List<Area> areaList;
 
-    public String getText(String code){
-        if(StringUtils.isNotBlank(code)){
+    /**
+     * * 获取省市区text
+     * 
+     * @param code
+     * @return
+     */
+    public String getText(String code) {
+        if (StringUtils.isNotBlank(code)) {
             this.initAreaList();
-            if(this.areaList!=null || this.areaList.size()>0){
+            if (this.areaList != null || this.areaList.size() > 0) {
                 List<String> ls = new ArrayList<String>();
-                getAreaByCode(code,ls);
-                return String.join("/",ls);
+                getAreaByCode(code, ls);
+                return String.join("/", ls);
             }
         }
         return "";
     }
 
-    public String getCode(String text){
-        if(StringUtils.isNotBlank(text)){
+    /**
+     * * 获取省市区code，精准匹配
+     * 
+     * @param text
+     * @return
+     */
+    public String getCode(String text) {
+        if (StringUtils.isNotBlank(text)) {
             this.initAreaList();
-            if(areaList!=null && areaList.size()>0){
-                for(int i=areaList.size()-1;i>=0;i--){
-                    //update-begin-author:taoyan date:2022-5-24 for:VUEN-1088 online 导入 省市区导入后 导入数据错乱 北京市/市辖区/西城区-->山西省/晋城市/城区
+            if (areaList != null && areaList.size() > 0) {
+                for (int i = areaList.size() - 1; i >= 0; i--) {
                     String areaText = areaList.get(i).getText();
                     String cityText = areaList.get(i).getAheadText();
-                    if(text.indexOf(areaText)>=0 && (cityText!=null && text.indexOf(cityText)>=0)){
+                    if (text.indexOf(areaText) >= 0 && (cityText != null && text.indexOf(cityText) >= 0)) {
                         return areaList.get(i).getId();
                     }
-                    //update-end-author:taoyan date:2022-5-24 for:VUEN-1088 online 导入 省市区导入后 导入数据错乱 北京市/市辖区/西城区-->山西省/晋城市/城区
                 }
             }
         }
         return null;
     }
 
-    // update-begin-author:sunjianlei date:20220121 for:【JTC-704】数据导入错误 省市区组件，文件中为北京市，导入后，导为了山西省
     /**
-     * 获取省市区code，精准匹配
+     * * 获取省市区code，精准匹配
+     * 
      * @param texts 文本数组，省，市，区
      * @return 返回 省市区的code
      */
@@ -87,7 +95,8 @@ public class ProvinceCityArea {
     }
 
     /**
-     * 根据text获取area
+     * * 根据text获取area
+     * 
      * @param text
      * @return
      */
@@ -101,13 +110,16 @@ public class ProvinceCityArea {
     }
 
     /**
-     * 通过pid获取 area 对象
+     * * 通过pid获取 area 对象
+     * 
      * @param pCode 父级编码
      * @param text
      * @return
      */
     public Area getAreaByPidAndText(String pCode, String text) {
+        // * 初始化
         this.initAreaList();
+        // * 返回查找到到对象
         if (this.areaList != null && this.areaList.size() > 0) {
             for (Area area : this.areaList) {
                 if (area.getPid().equals(pCode) && area.getText().equals(text)) {
@@ -117,46 +129,53 @@ public class ProvinceCityArea {
         }
         return null;
     }
-    // update-end-author:sunjianlei date:20220121 for:【JTC-704】数据导入错误 省市区组件，文件中为北京市，导入后，导为了山西省
 
-    public void getAreaByCode(String code,List<String> ls){
-        for(Area area: areaList){
-            if(area.getId().equals(code)){
+    /**
+     * * 根据 areacode 获取 地区对象及其父节点
+     * 
+     * @param code
+     * @param ls
+     */
+    public void getAreaByCode(String code, List<String> ls) {
+        for (Area area : areaList) {
+            if (area.getId().equals(code)) {
                 String pid = area.getPid();
-                ls.add(0,area.getText());
-                getAreaByCode(pid,ls);
+                ls.add(0, area.getText());
+                getAreaByCode(pid, ls);
             }
         }
     }
 
-    private void initAreaList(){
-        //System.out.println("=====================");
-        if(this.areaList==null || this.areaList.size()==0){
+    /**
+     * * 初始化 areaList 为扁平化的List
+     */
+    private void initAreaList() {
+        if (this.areaList == null || this.areaList.size() == 0) {
             this.areaList = new ArrayList<Area>();
             try {
+                // * 读取json为字符串
                 String jsonData = oConvertUtils.readStatic("classpath:static/pca.json");
+                // * 解析json为json对象
                 JSONObject baseJson = JSONObject.parseObject(jsonData);
-                //第一层 省
+
+                // * 解析 第一层 省
                 JSONObject provinceJson = baseJson.getJSONObject("86");
-                for(String provinceKey: provinceJson.keySet()){
-                    //System.out.println("===="+provinceKey);
-                    Area province = new Area(provinceKey,provinceJson.getString(provinceKey),"86");
+                for (String provinceKey : provinceJson.keySet()) {
+                    Area province = new Area(provinceKey, provinceJson.getString(provinceKey), "86");
                     this.areaList.add(province);
-                    //第二层 市
+
+                    // * 解析 第二层 市
                     JSONObject cityJson = baseJson.getJSONObject(provinceKey);
-                    for(String cityKey:cityJson.keySet()){
-                        //System.out.println("-----"+cityKey);
-                        Area city = new Area(cityKey,cityJson.getString(cityKey),provinceKey);
+                    for (String cityKey : cityJson.keySet()) {
+                        Area city = new Area(cityKey, cityJson.getString(cityKey), provinceKey);
                         this.areaList.add(city);
-                        //第三层 区
-                        JSONObject areaJson =  baseJson.getJSONObject(cityKey);
-                        if(areaJson!=null){
-                            for(String areaKey:areaJson.keySet()){
-                                //System.out.println("········"+areaKey);
-                                Area area = new Area(areaKey,areaJson.getString(areaKey),cityKey);
-                                //update-begin-author:taoyan date:2022-5-24 for:VUEN-1088 online 导入 省市区导入后 导入数据错乱 北京市/市辖区/西城区-->山西省/晋城市/城区
+
+                        // * 解析 第三层 区
+                        JSONObject areaJson = baseJson.getJSONObject(cityKey);
+                        if (areaJson != null) {
+                            for (String areaKey : areaJson.keySet()) {
+                                Area area = new Area(areaKey, areaJson.getString(areaKey), cityKey);
                                 area.setAheadText(cityJson.getString(cityKey));
-                                //update-end-author:taoyan date:2022-5-24 for:VUEN-1088 online 导入 省市区导入后 导入数据错乱 北京市/市辖区/西城区-->山西省/晋城市/城区
                                 this.areaList.add(area);
                             }
                         }
@@ -169,8 +188,15 @@ public class ProvinceCityArea {
 
     }
 
-
-    private String jsonRead(File file){
+    /**
+     * * 读取 文件字符串数据
+     * 
+     * * - 被 oConvertUtils.readStatic 取代
+     * 
+     * @param file
+     * @return
+     */
+    private String jsonRead(File file) {
         Scanner scanner = null;
         StringBuilder buffer = new StringBuilder();
         try {
@@ -188,14 +214,20 @@ public class ProvinceCityArea {
         return buffer.toString();
     }
 
-    class Area{
+    /**
+     * * 地区类
+     */
+    class Area {
         String id;
         String text;
         String pid;
-        // 用于存储上级文本数据，区的上级文本 是市的数据
+
+        /**
+         * * 用于存储上级文本数据，区的上级文本 是市的数据
+         */
         String aheadText;
 
-        public Area(String id,String text,String pid){
+        public Area(String id, String text, String pid) {
             this.id = id;
             this.text = text;
             this.pid = pid;
@@ -216,6 +248,7 @@ public class ProvinceCityArea {
         public String getAheadText() {
             return aheadText;
         }
+
         public void setAheadText(String aheadText) {
             this.aheadText = aheadText;
         }

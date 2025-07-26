@@ -534,7 +534,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	}
 
 	/**
-	 * * 查询用户信息包括 部门信息
+	 * TODO 查询用户信息包括 部门信息
 	 * 
 	 * @author:qinfeng
 	 * @update: 2022-04-07
@@ -713,10 +713,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		return userMapper.getUserByEmail(email);
 	}
 
+	/**
+	 * * 添加用户和用户部门关系
+	 * 
+	 * * - 暂时只添加用户部门关系（貌似弃用）
+	 * 
+	 * @param user
+	 * @param selectedParts
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void addUserWithDepart(SysUser user, String selectedParts) {
-		// this.save(user); //保存角色的时候已经添加过一次了
 		if (oConvertUtils.isNotEmpty(selectedParts)) {
 			String[] arr = selectedParts.split(",");
 			for (String deaprtId : arr) {
@@ -726,6 +733,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		}
 	}
 
+	/**
+	 * 编辑用户和用户部门关系
+	 * 
+	 * @param user
+	 * @param departs
+	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	@CacheEvict(value = { CacheConstant.SYS_USERS_CACHE }, allEntries = true)
