@@ -19,7 +19,7 @@
 	    <result column="is_leaf" property="leaf"/>
 	</resultMap>
 	
-	
+	<!-- * 通过父id查询菜单 -->
 	<select id="queryListByParentId" parameterType="Object"  resultMap="TreeModel">
 		   SELECT   
                    id

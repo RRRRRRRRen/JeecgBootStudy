@@ -376,7 +376,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 添加菜单
+	 * * 添加菜单
 	 * 
 	 * @param permission
 	 * @return
@@ -384,8 +384,10 @@ public class SysPermissionController {
 	@RequiresPermissions("system:permission:add")
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public Result<SysPermission> add(@RequestBody SysPermission permission) {
+		// * 初始化
 		Result<SysPermission> result = new Result<SysPermission>();
 		try {
+			// * 处理参数
 			permission = PermissionDataUtil.intelligentProcessData(permission);
 			sysPermissionService.addPermission(permission);
 			result.success("添加成功！");
@@ -397,7 +399,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 编辑菜单
+	 * * 编辑菜单
 	 * 
 	 * @param permission
 	 * @return
@@ -418,15 +420,17 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 检测菜单路径是否存在
+	 * * 检测菜单路径是否存在
 	 * 
 	 * @param id
 	 * @param url
 	 * @return
 	 */
 	@RequestMapping(value = "/checkPermDuplication", method = RequestMethod.GET)
-	public Result<String> checkPermDuplication(@RequestParam(name = "id", required = false) String id,
-			@RequestParam(name = "url") String url, @RequestParam(name = "alwaysShow") Boolean alwaysShow) {
+	public Result<String> checkPermDuplication(
+			@RequestParam(name = "id", required = false) String id,
+			@RequestParam(name = "url") String url,
+			@RequestParam(name = "alwaysShow") Boolean alwaysShow) {
 		Result<String> result = new Result<>();
 		try {
 			boolean check = sysPermissionService.checkPermDuplication(id, url, alwaysShow);
@@ -495,16 +499,18 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 获取全部的权限树
+	 * * 获取全部的权限树
 	 *
 	 * @return
 	 */
 	@RequestMapping(value = "/queryTreeList", method = RequestMethod.GET)
 	public Result<Map<String, Object>> queryTreeList() {
 		Result<Map<String, Object>> result = new Result<>();
-		// 全部权限ids
+		// * 全部权限ids
 		List<String> ids = new ArrayList<>();
+
 		try {
+			// * 查询全部 SysPermission
 			LambdaQueryWrapper<SysPermission> query = new LambdaQueryWrapper<SysPermission>();
 			query.eq(SysPermission::getDelFlag, CommonConstant.DEL_FLAG_0);
 			query.orderByAsc(SysPermission::getSortNo);
@@ -512,13 +518,14 @@ public class SysPermissionController {
 			for (SysPermission sysPer : list) {
 				ids.add(sysPer.getId());
 			}
+			// * 转化为树
 			List<TreeModel> treeList = new ArrayList<>();
 			getTreeModelList(treeList, list, null);
 
 			Map<String, Object> resMap = new HashMap<String, Object>(5);
-			// 全部树节点数据
+			// * 全部树节点数据
 			resMap.put("treeList", treeList);
-			// 全部树ids
+			// * 全部树ids
 			resMap.put("ids", ids);
 			result.setResult(resMap);
 			result.setSuccess(true);
@@ -529,7 +536,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 异步加载数据节点 [接口是废的,没有用到]
+	 * * 异步加载数据节点
 	 *
 	 * @return
 	 */
@@ -552,7 +559,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 查询角色授权
+	 * * 查询角色授权
 	 *
 	 * @return
 	 */
@@ -572,7 +579,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 保存角色授权
+	 * * 保存角色授权
 	 *
 	 * @return
 	 */
@@ -632,6 +639,13 @@ public class SysPermissionController {
 		}
 	}
 
+	/**
+	 * * 转化为权限树
+	 * 
+	 * @param treeList
+	 * @param metaList
+	 * @param temp
+	 */
 	private void getTreeModelList(List<TreeModel> treeList, List<SysPermission> metaList, TreeModel temp) {
 		for (SysPermission permission : metaList) {
 			String tempPid = permission.getParentId();

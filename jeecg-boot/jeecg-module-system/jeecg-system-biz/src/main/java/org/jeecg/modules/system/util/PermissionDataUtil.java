@@ -90,7 +90,7 @@ public class PermissionDataUtil {
 	}
 
 	/**
-	 * 如果没有index页面 需要new 一个放到list中
+	 * * 如果没有index页面 需要new 一个放到list中
 	 * 
 	 * @param metaList
 	 */
@@ -126,7 +126,7 @@ public class PermissionDataUtil {
 	}
 
 	/**
-	 * 通过id判断是否授权某个页面
+	 * * 通过id判断是否授权某个页面
 	 *
 	 * @param metaList
 	 * @return

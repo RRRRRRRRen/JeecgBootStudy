@@ -4,9 +4,7 @@ import org.jeecg.modules.system.entity.SysRolePermission;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * <p>
- * 角色权限表 Mapper 接口
- * </p>
+ * * 角色权限表 Mapper 接口
  *
  * @Author scott
  * @since 2018-12-21

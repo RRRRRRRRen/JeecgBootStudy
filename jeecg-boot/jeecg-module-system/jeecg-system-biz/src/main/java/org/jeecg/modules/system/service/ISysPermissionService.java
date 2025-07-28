@@ -2,7 +2,6 @@ package org.jeecg.modules.system.service;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
 import org.jeecg.common.exception.JeecgBootException;
 import org.jeecg.modules.system.entity.SysPermission;
 import org.jeecg.modules.system.model.TreeModel;
@@ -24,7 +23,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public void switchVue3Menu();
 
 	/**
-	 * 通过父id查询菜单
+	 * * 通过父id查询菜单
 	 * 
 	 * @param parentId 父id
 	 * @return
@@ -48,7 +47,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public void deletePermissionLogical(String id) throws JeecgBootException;
 
 	/**
-	 * 添加菜单
+	 * * 添加菜单
 	 * 
 	 * @param sysPermission SysPermission对象
 	 * @throws JeecgBootException
@@ -56,7 +55,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public void addPermission(SysPermission sysPermission) throws JeecgBootException;
 
 	/**
-	 * 编辑菜单
+	 * * 编辑菜单
 	 * 
 	 * @param sysPermission SysPermission对象
 	 * @throws JeecgBootException
@@ -113,7 +112,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	List<SysPermission> queryDepartPermissionList(String departId);
 
 	/**
-	 * 检测地址是否存在(聚合路由的情况下允许使用子菜单路径作为父菜单的路由地址)
+	 * * 检测地址是否存在(聚合路由的情况下允许使用子菜单路径作为父菜单的路由地址)
 	 * 
 	 * @param id
 	 * @param url

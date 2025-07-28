@@ -64,6 +64,12 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		sysPermissionMapper.changeVue3Menu();
 	}
 
+	/**
+	 * * 通过父id查询菜单
+	 * 
+	 * @param parentId 父id
+	 * @return
+	 */
 	@Override
 	public List<TreeModel> queryListByParentId(String parentId) {
 		return sysPermissionMapper.queryListByParentId(parentId);
@@ -130,7 +136,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 			// 再遍历刚才查出的集合, 根据每个对象,查找其是否仍有子级
 			for (int i = 0, len = permissionList.size(); i < len; i++) {
 				id = permissionList.get(i).getId();
-				Map map = new HashMap(5);
+				Map<String, Object> map = new HashMap<>(5);
 				map.put("permission_id", id);
 				// 删除数据规则
 				this.deletePermRuleByPermId(id);
@@ -171,57 +177,68 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		this.updateById(sysPermission);
 	}
 
+	/**
+	 * * 添加菜单
+	 * 
+	 * @param sysPermission SysPermission对象
+	 * @throws JeecgBootException
+	 */
 	@Override
 	@CacheEvict(value = CacheConstant.SYS_DATA_PERMISSIONS_CACHE, allEntries = true)
 	public void addPermission(SysPermission sysPermission) throws JeecgBootException {
-		// ----------------------------------------------------------------------
-		// 判断是否是一级菜单，是的话清空父菜单
+		// * 判断是否是一级菜单，是的话清空父菜单
 		if (CommonConstant.MENU_TYPE_0.equals(sysPermission.getMenuType())) {
 			sysPermission.setParentId(null);
 		}
-		// ----------------------------------------------------------------------
+
+		// * 设置父节点不为叶子节点
 		String pid = sysPermission.getParentId();
 		if (oConvertUtils.isNotEmpty(pid)) {
-			// 设置父节点不为叶子节点
 			this.sysPermissionMapper.setMenuLeaf(pid, 0);
 		}
+
+		// * 设置参数
 		sysPermission.setCreateTime(new Date());
 		sysPermission.setDelFlag(0);
 		sysPermission.setLeaf(true);
 		this.save(sysPermission);
 	}
 
+	/**
+	 * * 编辑菜单
+	 * 
+	 * @param sysPermission SysPermission对象
+	 * @throws JeecgBootException
+	 */
 	@Override
 	@CacheEvict(value = CacheConstant.SYS_DATA_PERMISSIONS_CACHE, allEntries = true)
 	public void editPermission(SysPermission sysPermission) throws JeecgBootException {
 		SysPermission p = this.getById(sysPermission.getId());
-		// TODO 该节点判断是否还有子节点
 		if (p == null) {
 			throw new JeecgBootException("未找到菜单信息");
 		} else {
 			sysPermission.setUpdateTime(new Date());
-			// ----------------------------------------------------------------------
-			// Step1.判断是否是一级菜单，是的话清空父菜单ID
+			// * Step1.判断是否是一级菜单，是的话清空父菜单ID
 			if (CommonConstant.MENU_TYPE_0.equals(sysPermission.getMenuType())) {
 				sysPermission.setParentId("");
 			}
-			// Step2.判断菜单下级是否有菜单，无则设置为叶子节点
+			// * Step2.判断菜单下级是否有菜单，无则设置为叶子节点
 			Long count = this
 					.count(new QueryWrapper<SysPermission>().lambda().eq(SysPermission::getParentId, sysPermission.getId()));
 			if (count == 0) {
 				sysPermission.setLeaf(true);
 			}
-			// ----------------------------------------------------------------------
+			// * 更新
 			this.updateById(sysPermission);
 
-			// 如果当前菜单的父菜单变了，则需要修改新父菜单和老父菜单的，叶子节点状态
+			// * 如果当前菜单的父菜单变了，则需要修改新父菜单和老父菜单的，叶子节点状态
 			String pid = sysPermission.getParentId();
 			boolean flag = (oConvertUtils.isNotEmpty(pid) && !pid.equals(p.getParentId()))
 					|| oConvertUtils.isEmpty(pid) && oConvertUtils.isNotEmpty(p.getParentId());
 			if (flag) {
-				// a.设置新的父菜单不为叶子节点
+				// * a.设置新的父菜单不为叶子节点
 				this.sysPermissionMapper.setMenuLeaf(pid, 0);
-				// b.判断老的菜单下是否还有其他子菜单，没有的话则设置为叶子节点
+				// * b.判断老的菜单下是否还有其他子菜单，没有的话则设置为叶子节点
 				Long cc = this
 						.count(new QueryWrapper<SysPermission>().lambda().eq(SysPermission::getParentId, p.getParentId()));
 				if (cc == 0) {
@@ -229,10 +246,9 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 						this.sysPermissionMapper.setMenuLeaf(p.getParentId(), 1);
 					}
 				}
-
 			}
 
-			// 同步更改默认菜单
+			// * 同步更改默认菜单
 			SysRoleIndex defIndexCfg = this.roleIndexService.queryDefaultIndex();
 			boolean isDefIndex = defIndexCfg.getUrl().equals(p.getUrl());
 			if (isDefIndex) {
@@ -323,9 +339,17 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		return sysPermissionMapper.queryDepartPermissionList(departId);
 	}
 
+	/**
+	 * * 检测地址是否存在(聚合路由的情况下允许使用子菜单路径作为父菜单的路由地址)
+	 * 
+	 * @param id
+	 * @param url
+	 * @param alwaysShow 是否是聚合路由
+	 * @return
+	 */
 	@Override
 	public boolean checkPermDuplication(String id, String url, Boolean alwaysShow) {
-		QueryWrapper<SysPermission> qw = new QueryWrapper();
+		QueryWrapper<SysPermission> qw = new QueryWrapper<>();
 		qw.lambda().eq(true, SysPermission::getUrl, url).ne(oConvertUtils.isNotEmpty(id), SysPermission::getId, id).eq(true,
 				SysPermission::isAlwaysShow, alwaysShow);
 		return count(qw) == 0;
