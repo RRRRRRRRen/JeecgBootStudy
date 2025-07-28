@@ -296,6 +296,7 @@ public class oConvertUtils {
 		return result;
 	}
 
+	// * 返回字符串 附带默认值
 	public static String getString(String s, String defval) {
 		if (isEmpty(s)) {
 			return (defval);

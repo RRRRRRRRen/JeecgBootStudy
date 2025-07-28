@@ -589,30 +589,25 @@ public class SysPermissionController {
 		long start = System.currentTimeMillis();
 		Result<String> result = new Result<>();
 		try {
+			// * 保存角色和权限关系表
 			String roleId = json.getString("roleId");
 			String permissionIds = json.getString("permissionIds");
 			String lastPermissionIds = json.getString("lastpermissionIds");
 			this.sysRolePermissionService.saveRolePermission(roleId, permissionIds, lastPermissionIds);
-			// update-begin---author:wangshuai ---date:20220316
-			// for：[VUEN-234]用户管理角色授权添加敏感日志------------
+
+			// * 用户管理角色授权添加敏感日志
 			LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 			baseCommonService.addLog("修改角色ID: " + roleId + " 的权限配置，操作人： " + loginUser.getUsername(),
 					CommonConstant.LOG_TYPE_2, 2);
-			// update-end---author:wangshuai ---date:20220316
-			// for：[VUEN-234]用户管理角色授权添加敏感日志------------
 			result.success("保存成功！");
 			log.info("======角色授权成功=====耗时:" + (System.currentTimeMillis() - start) + "毫秒");
 
-			// update-begin---author:scott ---date:2024-06-18
-			// for：【TV360X-1320】分配权限必须退出重新登录才生效，造成很多用户困扰---
-			// 清除当前用户的授权缓存信息
+			// TODO 清除当前用户的授权缓存信息
+			// * - 分配权限必须退出重新登录才生效，造成很多用户困扰
 			Subject currentUser = SecurityUtils.getSubject();
 			if (currentUser.isAuthenticated()) {
 				shiroRealm.clearCache(currentUser.getPrincipals());
 			}
-			// update-end---author:scott ---date::2024-06-18
-			// for：【TV360X-1320】分配权限必须退出重新登录才生效，造成很多用户困扰---
-
 		} catch (Exception e) {
 			result.error500("授权失败！");
 			log.error(e.getMessage(), e);
@@ -620,6 +615,13 @@ public class SysPermissionController {
 		return result;
 	}
 
+	/**
+	 * * 转化为权限树 SysPermissionTree
+	 * 
+	 * @param treeList
+	 * @param metaList
+	 * @param temp
+	 */
 	private void getTreeList(List<SysPermissionTree> treeList, List<SysPermission> metaList, SysPermissionTree temp) {
 		for (SysPermission permission : metaList) {
 			String tempPid = permission.getParentId();
@@ -640,7 +642,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * * 转化为权限树
+	 * * 转化为权限树 TreeModel
 	 * 
 	 * @param treeList
 	 * @param metaList
@@ -666,7 +668,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 一级菜单的子菜单全部是隐藏路由，则一级菜单不显示
+	 * * 一级菜单的子菜单全部是隐藏路由，则一级菜单不显示
 	 * 
 	 * @param jsonArray
 	 */
@@ -675,13 +677,12 @@ public class SysPermissionController {
 			JSONObject returnObj = new JSONObject();
 			JSONObject jsonObj = (JSONObject) obj;
 			if (jsonObj.containsKey(CHILDREN)) {
+				// * 过滤数据
 				JSONArray childrens = jsonObj.getJSONArray(CHILDREN);
 				childrens = childrens.stream().filter(arrObj -> !"true".equals(((JSONObject) arrObj).getString("hidden")))
 						.collect(Collectors.toCollection(JSONArray::new));
 				if (childrens == null || childrens.size() == 0) {
 					jsonObj.put("hidden", true);
-
-					// vue3版本兼容代码
 					JSONObject meta = new JSONObject();
 					meta.put("hideMenu", true);
 					jsonObj.put("meta", meta);
@@ -692,7 +693,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 获取权限JSON数组
+	 * * 获取权限JSON数组
 	 * 
 	 * @param jsonArray
 	 * @param allList
@@ -700,10 +701,10 @@ public class SysPermissionController {
 	private void getAllAuthJsonArray(JSONArray jsonArray, List<SysPermission> allList) {
 		JSONObject json = null;
 		for (SysPermission permission : allList) {
+			// * 变更字段名称
 			json = new JSONObject();
 			json.put("action", permission.getPerms());
 			json.put("status", permission.getStatus());
-			// 1显示2禁用
 			json.put("type", permission.getPermsType());
 			json.put("describe", permission.getName());
 			jsonArray.add(json);
@@ -711,7 +712,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 获取权限JSON数组
+	 * * 获取按钮权限JSON数组
 	 * 
 	 * @param jsonArray
 	 * @param metaList
@@ -734,7 +735,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 获取菜单JSON数组
+	 * * 获取菜单JSON数组
 	 * 
 	 * @param jsonArray
 	 * @param metaList
@@ -757,7 +758,7 @@ public class SysPermissionController {
 				}
 			} else if (parentJson != null && oConvertUtils.isNotEmpty(tempPid)
 					&& tempPid.equals(parentJson.getString("id"))) {
-				// 类型( 0：一级菜单 1：子菜单 2：按钮 )
+				// * 类型( 0：一级菜单 1：子菜单 2：按钮 )
 				if (permission.getMenuType().equals(CommonConstant.MENU_TYPE_2)) {
 					JSONObject metaJson = parentJson.getJSONObject("meta");
 					if (metaJson.containsKey("permissionList")) {
@@ -767,7 +768,7 @@ public class SysPermissionController {
 						permissionList.add(json);
 						metaJson.put("permissionList", permissionList);
 					}
-					// 类型( 0：一级菜单 1：子菜单 2：按钮 )
+					// * 类型( 0：一级菜单 1：子菜单 2：按钮 )
 				} else if (permission.getMenuType().equals(CommonConstant.MENU_TYPE_1)
 						|| permission.getMenuType().equals(CommonConstant.MENU_TYPE_0)) {
 					if (parentJson.containsKey("children")) {
@@ -788,37 +789,37 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 根据菜单配置生成路由json
+	 * * 根据菜单配置生成路由json
 	 * 
 	 * @param permission
 	 * @return
 	 */
 	private JSONObject getPermissionJsonObject(SysPermission permission) {
 		JSONObject json = new JSONObject();
-		// 类型(0：一级菜单 1：子菜单 2：按钮)
+		// * 类型(0：一级菜单 1：子菜单 2：按钮)
 		if (permission.getMenuType().equals(CommonConstant.MENU_TYPE_2)) {
-			// json.put("action", permission.getPerms());
-			// json.put("type", permission.getPermsType());
-			// json.put("describe", permission.getName());
+			// * 丢弃按钮配置
 			return null;
 		} else if (permission.getMenuType().equals(CommonConstant.MENU_TYPE_0)
 				|| permission.getMenuType().equals(CommonConstant.MENU_TYPE_1)) {
+			// * 处理一级二级菜单
 			json.put("id", permission.getId());
 			if (permission.isRoute()) {
-				// 表示生成路由
+				// * 表示生成路由
 				json.put("route", "1");
 			} else {
-				// 表示不生成路由
+				// * 表示不生成路由
 				json.put("route", "0");
 			}
 
+			// * 外网地址需要编码处理
 			if (isWwwHttpUrl(permission.getUrl())) {
 				json.put("path", Md5Util.md5Encode(permission.getUrl(), "utf-8"));
 			} else {
 				json.put("path", permission.getUrl());
 			}
 
-			// 重要规则：路由name (通过URL生成路由name,路由name供前端开发，页面跳转使用)
+			// * 重要规则：路由name (通过URL生成路由name,路由name供前端开发，页面跳转使用)
 			if (oConvertUtils.isNotEmpty(permission.getComponentName())) {
 				json.put("name", permission.getComponentName());
 			} else {
@@ -826,45 +827,43 @@ public class SysPermissionController {
 			}
 
 			JSONObject meta = new JSONObject();
-			// 是否隐藏路由，默认都是显示的
+			// * 是否隐藏路由，默认都是显示的
 			if (permission.isHidden()) {
 				json.put("hidden", true);
-				// vue3版本兼容代码
 				meta.put("hideMenu", true);
 			}
-			// 聚合路由
+			// * 聚合路由
 			if (permission.isAlwaysShow()) {
 				json.put("alwaysShow", true);
 			}
+			// * 组件
 			json.put("component", permission.getComponent());
-			// 由用户设置是否缓存页面 用布尔值
+			// * 由用户设置是否缓存页面 用布尔值
 			if (permission.isKeepAlive()) {
 				meta.put("keepAlive", true);
 			} else {
 				meta.put("keepAlive", false);
 			}
 
-			/* update_begin author:wuxianquan date:20190908 for:往菜单信息里添加外链菜单打开方式 */
-			// 外链菜单打开方式
+			// * 外链菜单打开方式
 			if (permission.isInternalOrExternal()) {
 				meta.put("internalOrExternal", true);
 			} else {
 				meta.put("internalOrExternal", false);
 			}
-			/* update_end author:wuxianquan date:20190908 for: 往菜单信息里添加外链菜单打开方式 */
 
+			// * 菜单名称
 			meta.put("title", permission.getName());
 
-			// update-begin--Author:scott Date:20201015 for：路由缓存问题，关闭了tab页时再打开就不刷新 #842
+			// * 路由缓存问题，关闭了tab页时再打开就不刷新
 			String component = permission.getComponent();
 			if (oConvertUtils.isNotEmpty(permission.getComponentName()) || oConvertUtils.isNotEmpty(component)) {
 				meta.put("componentName", oConvertUtils.getString(permission.getComponentName(),
 						component.substring(component.lastIndexOf("/") + 1)));
 			}
-			// update-end--Author:scott Date:20201015 for：路由缓存问题，关闭了tab页时再打开就不刷新 #842
 
 			if (oConvertUtils.isEmpty(permission.getParentId())) {
-				// 一级菜单跳转地址
+				// * 一级菜单跳转地址
 				json.put("redirect", permission.getRedirect());
 				if (oConvertUtils.isNotEmpty(permission.getIcon())) {
 					meta.put("icon", permission.getIcon());
@@ -877,11 +876,10 @@ public class SysPermissionController {
 			if (isWwwHttpUrl(permission.getUrl())) {
 				meta.put("url", permission.getUrl());
 			}
-			// update-begin--Author:sunjianlei Date:20210918 for：新增适配vue3项目的隐藏tab功能
+			// * 隐藏tab功能
 			if (permission.isHideTab()) {
 				meta.put("hideTab", true);
 			}
-			// update-end--Author:sunjianlei Date:20210918 for：新增适配vue3项目的隐藏tab功能
 			json.put("meta", meta);
 		}
 
@@ -889,8 +887,11 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 判断是否外网URL 例如： http://localhost:8080/jeecg-boot/swagger-ui.html#/ 支持特殊格式： {{
-	 * window._CONFIG['domianURL'] }}/druid/ {{ JS代码片段 }}，前台解析会自动执行JS代码片段
+	 * * 判断是否外网URL
+	 * 
+	 * * - 例如： http://localhost:8080/jeecg-boot/swagger-ui.html#/
+	 * * - 支持特殊格式： {{ window._CONFIG['domianURL'] }}/druid/
+	 * * - {{ JS代码片段 }}，前台解析会自动执行JS代码片段
 	 *
 	 * @return
 	 */
@@ -904,8 +905,8 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 通过URL生成路由name（去掉URL前缀斜杠，替换内容中的斜杠‘/’为-） 举例： URL = /isystem/role RouteName =
-	 * isystem-role
+	 * * 通过URL生成路由name（去掉URL前缀斜杠，替换内容中的斜杠‘/’为-）
+	 * * 举例： URL = /isystem/role RouteName = isystem-role
 	 *
 	 * @return
 	 */
