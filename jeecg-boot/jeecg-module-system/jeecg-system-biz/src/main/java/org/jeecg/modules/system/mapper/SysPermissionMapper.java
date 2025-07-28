@@ -12,16 +12,14 @@ import org.jeecg.modules.system.model.TreeModel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * <p>
- * 菜单权限表 Mapper 接口
- * </p>
+ * * 菜单权限表 Mapper 接口
  *
  * @Author scott
  * @since 2018-12-21
  */
 public interface SysPermissionMapper extends BaseMapper<SysPermission> {
 	/**
-	 * 通过父菜单ID查询子菜单
+	 * * 通过父菜单ID查询子菜单
 	 * 
 	 * @param parentId
 	 * @return
@@ -29,7 +27,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
 	public List<TreeModel> queryListByParentId(@Param("parentId") String parentId);
 
 	/**
-	 * 根据用户查询用户权限
+	 * * 根据用户查询用户权限
 	 * 
 	 * @param userId 用户ID
 	 * @return List<SysPermission>
@@ -47,16 +45,23 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
 	public int setMenuLeaf(@Param("id") String id, @Param("leaf") int leaf);
 
 	/**
-	 * 切换vue3菜单
+	 * * 切换vue3菜单
+	 * 
+	 * * - 当前表改为 v2 菜单
 	 */
 	@Update("alter table sys_permission rename to sys_permission_v2")
 	public void backupVue2Menu();
 
+	/**
+	 * * 切换vue3菜单
+	 * 
+	 * * v3 菜单改为当前表
+	 */
 	@Update("alter table sys_permission_v3 rename to sys_permission")
 	public void changeVue3Menu();
 
 	/**
-	 * 获取模糊匹配规则的数据权限URL
+	 * * 获取模糊匹配规则的数据权限URL
 	 * 
 	 * @return List<String>
 	 */
@@ -64,7 +69,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
 	public List<String> queryPermissionUrlWithStar();
 
 	/**
-	 * 根据用户账号查询菜单权限
+	 * * 根据用户账号查询菜单权限
 	 * 
 	 * @param sysPermission
 	 * @param username
@@ -73,7 +78,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
 	public int queryCountByUsername(@Param("username") String username, @Param("permission") SysPermission sysPermission);
 
 	/**
-	 * 查询部门权限数据
+	 * * 查询部门权限数据
 	 * 
 	 * @param departId
 	 * @return

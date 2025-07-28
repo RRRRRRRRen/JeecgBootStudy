@@ -9,16 +9,14 @@ import org.jeecg.modules.system.model.TreeModel;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * <p>
- * 菜单权限表 服务类
- * </p>
+ * * 菜单权限表 服务类
  *
  * @Author scott
  * @since 2018-12-21
  */
 public interface ISysPermissionService extends IService<SysPermission> {
 	/**
-	 * 切换vue3菜单
+	 * * 切换vue3菜单
 	 */
 	public void switchVue3Menu();
 
@@ -39,7 +37,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public void deletePermission(String id) throws JeecgBootException;
 
 	/**
-	 * 逻辑删除
+	 * * 逻辑删除
 	 * 
 	 * @param id 菜单id
 	 * @throws JeecgBootException
@@ -71,7 +69,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public List<SysPermission> queryByUser(String username);
 
 	/**
-	 * 根据permissionId删除其关联的SysPermissionDataRule表中的数据
+	 * * 根据permissionId删除其关联的SysPermissionDataRule表中的数据
 	 * 
 	 * @param id
 	 * @return
@@ -79,14 +77,14 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public void deletePermRuleByPermId(String id);
 
 	/**
-	 * 查询出带有特殊符号的菜单地址的集合
+	 * * 查询出带有特殊符号 * 的菜单地址的集合
 	 * 
 	 * @return
 	 */
 	public List<String> queryPermissionUrlWithStar();
 
 	/**
-	 * 判断用户否拥有权限
+	 * * 判断用户否拥有权限
 	 * 
 	 * @param username
 	 * @param sysPermission
@@ -95,7 +93,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public boolean hasPermission(String username, SysPermission sysPermission);
 
 	/**
-	 * 根据用户和请求地址判断是否有此权限
+	 * * 根据用户和请求地址判断是否有此权限
 	 * 
 	 * @param username
 	 * @param url
@@ -104,7 +102,7 @@ public interface ISysPermissionService extends IService<SysPermission> {
 	public boolean hasPermission(String username, String url);
 
 	/**
-	 * 查询部门权限数据
+	 * * 查询部门权限数据
 	 * 
 	 * @param departId
 	 * @return

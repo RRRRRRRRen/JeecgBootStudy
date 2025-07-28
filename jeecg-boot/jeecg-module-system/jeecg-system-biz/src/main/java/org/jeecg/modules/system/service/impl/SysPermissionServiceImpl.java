@@ -29,9 +29,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 /**
- * <p>
- * 菜单权限表 服务实现类
- * </p>
+ * * 菜单权限表 服务实现类
  *
  * @Author scott
  * @since 2018-12-21
@@ -58,6 +56,9 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	@Autowired
 	private ISysRoleIndexService roleIndexService;
 
+	/**
+	 * * 切换vue3菜单
+	 */
 	@Override
 	public void switchVue3Menu() {
 		sysPermissionMapper.backupVue2Menu();
@@ -116,35 +117,35 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	}
 
 	/**
-	 * 根据父id删除其关联的子节点数据
+	 * * 根据父id删除其关联的子节点数据
 	 * 
 	 * @return
 	 */
 	public void removeChildrenBy(String parentId) {
+		// * 封装查询条件parentId为主键
 		LambdaQueryWrapper<SysPermission> query = new LambdaQueryWrapper<>();
-		// 封装查询条件parentId为主键,
 		query.eq(SysPermission::getParentId, parentId);
-		// 查出该主键下的所有子级
 		List<SysPermission> permissionList = this.list(query);
+
 		if (permissionList != null && permissionList.size() > 0) {
-			// id
 			String id = "";
-			// 查出的子级数量
 			Long num = Long.valueOf(0);
-			// 如果查出的集合不为空, 则先删除所有
+
+			// * 如果查出的集合不为空, 则先删除所有
 			this.remove(query);
-			// 再遍历刚才查出的集合, 根据每个对象,查找其是否仍有子级
+
+			// * 再遍历刚才查出的集合, 根据每个对象,查找其是否仍有子级
 			for (int i = 0, len = permissionList.size(); i < len; i++) {
 				id = permissionList.get(i).getId();
 				Map<String, Object> map = new HashMap<>(5);
 				map.put("permission_id", id);
-				// 删除数据规则
+				// * 删除数据规则
 				this.deletePermRuleByPermId(id);
-				// 删除角色授权表
+				// * 删除角色授权表
 				sysRolePermissionMapper.deleteByMap(map);
-				// 删除部门权限表
+				// * 删除部门权限表
 				sysDepartPermissionMapper.deleteByMap(map);
-				// 删除部门角色授权
+				// * 删除部门角色授权
 				sysDepartRolePermissionMapper.deleteByMap(map);
 				num = this.count(new LambdaQueryWrapper<SysPermission>().eq(SysPermission::getParentId, id));
 				// 如果有, 则递归
@@ -156,12 +157,10 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	}
 
 	/**
-	 * 逻辑删除
+	 * * 逻辑删除
 	 */
 	@Override
 	@CacheEvict(value = CacheConstant.SYS_DATA_PERMISSIONS_CACHE, allEntries = true)
-	// @CacheEvict(value =
-	// CacheConstant.SYS_DATA_PERMISSIONS_CACHE,allEntries=true,condition="#sysPermission.menuType==2")
 	public void deletePermissionLogical(String id) throws JeecgBootException {
 		SysPermission sysPermission = this.getById(id);
 		if (sysPermission == null) {
@@ -170,7 +169,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		String pid = sysPermission.getParentId();
 		Long count = this.count(new QueryWrapper<SysPermission>().lambda().eq(SysPermission::getParentId, pid));
 		if (count == 1) {
-			// 若父节点无其他子节点，则该父节点是叶子节点
+			// * 若父节点无其他子节点，则该父节点是叶子节点
 			this.sysPermissionMapper.setMenuLeaf(pid, 1);
 		}
 		sysPermission.setDelFlag(1);
@@ -291,7 +290,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	}
 
 	/**
-	 * 根据permissionId删除其关联的SysPermissionDataRule表中的数据
+	 * * 根据permissionId删除其关联的SysPermissionDataRule表中的数据
 	 */
 	@Override
 	public void deletePermRuleByPermId(String id) {
@@ -304,7 +303,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	}
 
 	/**
-	 * 获取模糊匹配规则的数据权限URL
+	 * * 获取模糊匹配规则的数据权限URL
 	 */
 	@Override
 	@Cacheable(value = CacheConstant.SYS_DATA_PERMISSIONS_CACHE)
@@ -312,6 +311,13 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		return this.baseMapper.queryPermissionUrlWithStar();
 	}
 
+	/**
+	 * * 判断用户否拥有权限
+	 * 
+	 * @param username
+	 * @param sysPermission
+	 * @return
+	 */
 	@Override
 	public boolean hasPermission(String username, SysPermission sysPermission) {
 		int count = baseMapper.queryCountByUsername(username, sysPermission);
@@ -322,6 +328,13 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 	}
 
+	/**
+	 * * 判断用户否拥有权限
+	 * 
+	 * @param username
+	 * @param sysPermission
+	 * @return
+	 */
 	@Override
 	public boolean hasPermission(String username, String url) {
 		SysPermission sysPermission = new SysPermission();
@@ -334,6 +347,12 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 	}
 
+	/**
+	 * * 查询部门权限数据
+	 * 
+	 * @param departId
+	 * @return
+	 */
 	@Override
 	public List<SysPermission> queryDepartPermissionList(String departId) {
 		return sysPermissionMapper.queryDepartPermissionList(departId);

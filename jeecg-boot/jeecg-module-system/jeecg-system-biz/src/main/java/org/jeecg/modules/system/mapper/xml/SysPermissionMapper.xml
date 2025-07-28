@@ -3,6 +3,7 @@
 <mapper namespace="org.jeecg.modules.system.mapper.SysPermissionMapper">
 
 
+	<!-- * TreeModel 数据结构 -->
 	<resultMap id="TreeModel" type="org.jeecg.modules.system.model.TreeModel" >
 		<result column="id" property="key" jdbcType="VARCHAR"/>
 		<result column="name" property="title" jdbcType="VARCHAR"/>
@@ -11,9 +12,8 @@
 		<result column="is_leaf" property="isLeaf" jdbcType="INTEGER"/>
 	</resultMap>
 	
-	<!-- 通过<resultMap>映射实体类属性名和表的字段名对应关系 -->
+	<!-- * 通过<resultMap>映射实体类属性名和表的字段名对应关系 -->
 	<resultMap id="SysPermission" type="org.jeecg.modules.system.entity.SysPermission">
-	   <!-- result属性映射非匹配字段 -->
 	    <result column="is_route" property="route"/>
 	    <result column="keep_alive" property="keepAlive"/>
 	    <result column="is_leaf" property="leaf"/>
@@ -39,7 +39,7 @@
 		    </choose>
 	</select>
 	
-	<!-- 获取登录用户拥有的权限 -->
+	<!-- * 获取登录用户拥有的权限 -->
 	<select id="queryByUser" parameterType="Object"  resultMap="SysPermission">
 		   SELECT * FROM (
 				SELECT  p.id,
@@ -146,7 +146,7 @@
 	</select>
 
 
-	<!-- 根据用户账号查询菜单权限 -->
+	<!-- * 根据用户账号查询菜单权限 -->
 	<select id="queryCountByUsername" parameterType="Object" resultType="int">
 		select sum(cnt) from (
 		  select count(*) as cnt
@@ -179,7 +179,7 @@
 		) temp
 	</select>
 
-	<!-- 查询部门权限数据 -->
+	<!-- * 查询部门权限数据 -->
 	<select id="queryDepartPermissionList" parameterType="String"  resultType="org.jeecg.modules.system.entity.SysPermission">
 		SELECT
 			id,

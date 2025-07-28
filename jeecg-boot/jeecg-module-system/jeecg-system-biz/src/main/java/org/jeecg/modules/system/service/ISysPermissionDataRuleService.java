@@ -7,9 +7,7 @@ import org.jeecg.modules.system.entity.SysPermissionDataRule;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * <p>
- * 菜单权限规则 服务类
- * </p>
+ * * 菜单权限规则 服务类
  *
  * @Author huangzhilin
  * @since 2019-04-01

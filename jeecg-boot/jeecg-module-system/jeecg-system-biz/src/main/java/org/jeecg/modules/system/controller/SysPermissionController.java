@@ -926,13 +926,14 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 根据菜单id来获取其对应的权限数据
+	 * * 根据菜单id来获取其对应的权限数据
 	 *
 	 * @param sysPermissionDataRule
 	 * @return
 	 */
 	@RequestMapping(value = "/getPermRuleListByPermId", method = RequestMethod.GET)
 	public Result<List<SysPermissionDataRule>> getPermRuleListByPermId(SysPermissionDataRule sysPermissionDataRule) {
+		// * 使用 permissionId 查询对应的数据权限
 		List<SysPermissionDataRule> permRuleList = sysPermissionDataRuleService
 				.getPermRuleListByPermId(sysPermissionDataRule.getPermissionId());
 		Result<List<SysPermissionDataRule>> result = new Result<>();
@@ -942,7 +943,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 添加菜单权限数据
+	 * * 添加菜单权限数据
 	 *
 	 * @param sysPermissionDataRule
 	 * @return
@@ -952,6 +953,7 @@ public class SysPermissionController {
 	public Result<SysPermissionDataRule> addPermissionRule(@RequestBody SysPermissionDataRule sysPermissionDataRule) {
 		Result<SysPermissionDataRule> result = new Result<SysPermissionDataRule>();
 		try {
+			// * 保存
 			sysPermissionDataRule.setCreateTime(new Date());
 			sysPermissionDataRuleService.savePermissionDataRule(sysPermissionDataRule);
 			result.success("添加成功！");
@@ -962,6 +964,12 @@ public class SysPermissionController {
 		return result;
 	}
 
+	/**
+	 * * 编辑数据权限
+	 * 
+	 * @param sysPermissionDataRule
+	 * @return
+	 */
 	@RequiresPermissions("system:permission:editRule")
 	@RequestMapping(value = "/editPermissionRule", method = { RequestMethod.PUT, RequestMethod.POST })
 	public Result<SysPermissionDataRule> editPermissionRule(@RequestBody SysPermissionDataRule sysPermissionDataRule) {
@@ -977,7 +985,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 删除菜单权限数据
+	 * * 删除菜单权限数据
 	 *
 	 * @param id
 	 * @return
@@ -997,7 +1005,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 查询菜单权限数据
+	 * * 过滤 查询菜单权限数据
 	 *
 	 * @param sysPermissionDataRule
 	 * @return
@@ -1017,7 +1025,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 部门权限表
+	 * * 部门权限表
 	 * 
 	 * @param departId
 	 * @return
@@ -1026,8 +1034,10 @@ public class SysPermissionController {
 	public Result<List<String>> queryDepartPermission(@RequestParam(name = "departId", required = true) String departId) {
 		Result<List<String>> result = new Result<>();
 		try {
+			// * 查询部门绑定的菜单权限
 			List<SysDepartPermission> list = sysDepartPermissionService
 					.list(new QueryWrapper<SysDepartPermission>().lambda().eq(SysDepartPermission::getDepartId, departId));
+			// * 返回菜单权限id
 			result.setResult(list.stream().map(sysDepartPermission -> String.valueOf(sysDepartPermission.getPermissionId()))
 					.collect(Collectors.toList()));
 			result.setSuccess(true);
@@ -1038,7 +1048,7 @@ public class SysPermissionController {
 	}
 
 	/**
-	 * 保存部门授权
+	 * * 保存部门授权
 	 *
 	 * @return
 	 */
