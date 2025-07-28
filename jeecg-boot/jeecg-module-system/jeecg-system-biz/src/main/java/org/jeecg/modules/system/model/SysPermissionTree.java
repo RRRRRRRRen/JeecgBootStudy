@@ -7,6 +7,8 @@ import java.util.List;
 import org.jeecg.modules.system.entity.SysPermission;
 
 /**
+ * * 菜单树，封装树结构
+ * 
  * @Description: 菜单树，封装树结构
  * @author: jeecg-boot
  */
@@ -15,133 +17,149 @@ public class SysPermissionTree implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * id
+	 * * SysPermission 表 id
 	 */
 	private String id;
 
+	/**
+	 * * SysPermission 表 id
+	 */
 	private String key;
+
+	/**
+	 * * 菜单名称
+	 */
 	private String title;
 
 	/**
-	 * 父id
+	 * * 父id
 	 */
 	private String parentId;
 
 	/**
-	 * 菜单名称
+	 * * 菜单名称
 	 */
 	private String name;
 
 	/**
-	 * 菜单权限编码
+	 * * 菜单权限编码
 	 */
 	private String perms;
 	/**
-	 * 权限策略1显示2禁用
+	 * * 权限策略1显示2禁用
 	 */
 	private String permsType;
 
 	/**
-	 * 菜单图标
+	 * * 菜单图标
 	 */
 	private String icon;
 
 	/**
-	 * 组件
+	 * * 组件
 	 */
 	private String component;
 
 	/**
-	 * 组件名字
+	 * * 组件名字
 	 */
 	private String componentName;
 
 	/**
-	 * 跳转网页链接
+	 * * 跳转网页链接
 	 */
 	private String url;
-	
+
 	/**
-	 * 一级菜单跳转地址
+	 * * 一级菜单跳转地址
 	 */
 	private String redirect;
 
 	/**
-	 * 菜单排序
+	 * * 菜单排序
 	 */
 	private Double sortNo;
 
 	/**
-	 * 类型（0：一级菜单；1：子菜单 ；2：按钮权限）
+	 * * 类型（0：一级菜单；1：子菜单 ；2：按钮权限）
 	 */
 	private Integer menuType;
 
 	/**
-	 * 是否叶子节点: 1:是 0:不是
+	 * * 是否叶子节点: 1:是 0:不是
 	 */
 	private boolean isLeaf;
-	
+
 	/**
-	 * 是否路由菜单: 0:不是  1:是（默认值1）
+	 * * 是否路由菜单: 0:不是 1:是（默认值1）
 	 */
 	private boolean route;
 
-
 	/**
-	 * 是否路缓存页面: 0:不是  1:是（默认值1）
+	 * * 是否路缓存页面: 0:不是 1:是（默认值1）
 	 */
 	private boolean keepAlive;
 
-
 	/**
-	 * 描述
+	 * * 描述
 	 */
 	private String description;
 
 	/**
-	 * 删除状态 0正常 1已删除
+	 * * 删除状态 0正常 1已删除
 	 */
 	private Integer delFlag;
 
 	/**
-	 * 创建人
+	 * * 创建人
 	 */
 	private String createBy;
 
 	/**
-	 * 创建时间
+	 * * 创建时间
 	 */
 	private Date createTime;
 
 	/**
-	 * 更新人
+	 * * 更新人
 	 */
 	private String updateBy;
 
 	/**
-	 * 更新时间
+	 * * 更新时间
 	 */
 	private Date updateTime;
 
-	/**alwaysShow*/
-    private boolean alwaysShow;
-    /**是否隐藏路由菜单: 0否,1是（默认值0）*/
-    private boolean hidden;
-    
-    /**按钮权限状态(0无效1有效)*/
+	/**
+	 * * alwaysShow
+	 */
+	private boolean alwaysShow;
+
+	/**
+	 * * 是否隐藏路由菜单
+	 * 
+	 * * - 0否,1是（默认值0）
+	 */
+	private boolean hidden;
+
+	/**
+	 * * 按钮权限状态
+	 * * - (0无效1有效)
+	 */
 	private java.lang.String status;
 
-	/*update_begin author:wuxianquan date:20190908 for:model增加字段 */
-	/** 外链菜单打开方式 0/内部打开 1/外部打开 */
-	private boolean internalOrExternal;
-	/*update_end author:wuxianquan date:20190908 for:model增加字段 */
-
-	/*update_begin author:liusq date:20230601 for:【issues/4986】model增加hideTab字段 */
 	/**
-	 * 是否隐藏Tab: 0否,1是（默认值0）
+	 * * 外链菜单打开方式
+	 * * - 0/内部打开 1/外部打开
+	 */
+	private boolean internalOrExternal;
+
+	/**
+	 * * 是否隐藏Tab
+	 * 
+	 * * - 0否,1是（默认值0）
 	 */
 	private boolean hideTab;
-	/*update_end author:liusq date:20230601 for:【issues/4986】model增加hideTab字段 */
 
 	public SysPermissionTree() {
 	}
@@ -170,14 +188,12 @@ public class SysPermissionTree implements Serializable {
 		this.hidden = permission.isHidden();
 		this.route = permission.isRoute();
 		this.keepAlive = permission.isKeepAlive();
-		this.alwaysShow= permission.isAlwaysShow();
-		/*update_begin author:wuxianquan date:20190908 for:赋值 */
+		this.alwaysShow = permission.isAlwaysShow();
 		this.internalOrExternal = permission.isInternalOrExternal();
-		/*update_end author:wuxianquan date:20190908 for:赋值 */
-		this.title=permission.getName();
-		/*update_end author:liusq date:20230601 for:【issues/4986】model增加hideTab字段 */
+		this.title = permission.getName();
 		this.hideTab = permission.isHideTab();
-		/*update_end author:liusq date:20230601 for:【issues/4986】model增加hideTab字段 */
+
+		// * 不是叶子节点初始化一个子节点容器
 		if (!permission.isLeaf()) {
 			this.children = new ArrayList<SysPermissionTree>();
 		}
@@ -217,6 +233,7 @@ public class SysPermissionTree implements Serializable {
 	public void setAlwaysShow(boolean alwaysShow) {
 		this.alwaysShow = alwaysShow;
 	}
+
 	public List<SysPermissionTree> getChildren() {
 		return children;
 	}
@@ -409,7 +426,6 @@ public class SysPermissionTree implements Serializable {
 		this.status = status;
 	}
 
-	/*update_begin author:wuxianquan date:20190908 for:get set方法 */
 	public boolean isInternalOrExternal() {
 		return internalOrExternal;
 	}
@@ -417,7 +433,6 @@ public class SysPermissionTree implements Serializable {
 	public void setInternalOrExternal(boolean internalOrExternal) {
 		this.internalOrExternal = internalOrExternal;
 	}
-	/*update_end author:wuxianquan date:20190908 for:get set 方法 */
 
 	public boolean isHideTab() {
 		return hideTab;

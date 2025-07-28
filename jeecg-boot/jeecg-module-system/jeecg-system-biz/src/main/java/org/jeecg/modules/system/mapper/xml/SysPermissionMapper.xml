@@ -211,7 +211,7 @@
 		order by sort_no ASC 
 	</select>
 	
-	<!--根据用户名称和test角色id查询权限-->
+	<!-- * 根据用户名称和test角色id查询权限 -->
 	<select id="queryPermissionByTestRoleId" resultType="org.jeecg.modules.system.entity.SysPermission">
 		SELECT p.*
 		FROM  sys_permission p
