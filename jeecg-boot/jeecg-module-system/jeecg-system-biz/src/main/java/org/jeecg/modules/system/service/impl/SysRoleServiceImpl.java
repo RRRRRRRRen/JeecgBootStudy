@@ -24,9 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>
- * 角色表 服务实现类
- * </p>
+ * * 角色表 服务实现类
  *
  * @Author scott
  * @since 2018-12-19
@@ -38,29 +36,48 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     @Autowired
     SysUserMapper sysUserMapper;
 
-    
+    /**
+     * * 查询全部的角色（不做租户隔离）
+     * 
+     * @param page
+     * @param role
+     * @return
+     */
     @Override
     public Page<SysRole> listAllSysRole(Page<SysRole> page, SysRole role) {
-        return page.setRecords(sysRoleMapper.listAllSysRole(page,role));
+        return page.setRecords(sysRoleMapper.listAllSysRole(page, role));
     }
 
+    /**
+     * * 查询角色是否存在不做租户隔离
+     *
+     * @param roleCode
+     * @return
+     */
     @Override
     public SysRole getRoleNoTenant(String roleCode) {
         return sysRoleMapper.getRoleNoTenant(roleCode);
     }
 
+    /**
+     * * 导入 excel ，检查 roleCode 的唯一性
+     *
+     * @param file
+     * @param params
+     * @return
+     * @throws Exception
+     */
     @Override
-    public Result importExcelCheckRoleCode(MultipartFile file, ImportParams params) throws Exception {
+    public Result<?> importExcelCheckRoleCode(MultipartFile file, ImportParams params) throws Exception {
         List<Object> listSysRoles = ExcelImportUtil.importExcel(file.getInputStream(), SysRole.class, params);
-        int totalCount = listSysRoles.size();
         List<String> errorStrs = new ArrayList<>();
 
-        // 去除 listSysRoles 中重复的数据
+        // * 去除 listSysRoles 中重复的数据
         for (int i = 0; i < listSysRoles.size(); i++) {
-            String roleCodeI =((SysRole)listSysRoles.get(i)).getRoleCode();
+            String roleCodeI = ((SysRole) listSysRoles.get(i)).getRoleCode();
             for (int j = i + 1; j < listSysRoles.size(); j++) {
-                String roleCodeJ =((SysRole)listSysRoles.get(j)).getRoleCode();
-                // 发现重复数据
+                String roleCodeJ = ((SysRole) listSysRoles.get(j)).getRoleCode();
+                // * 发现重复数据
                 if (roleCodeI.equals(roleCodeJ)) {
                     errorStrs.add("第 " + (j + 1) + " 行的 roleCode 值：" + roleCodeI + " 已存在，忽略导入");
                     listSysRoles.remove(j);
@@ -68,51 +85,75 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 }
             }
         }
-        // 去掉 sql 中的重复数据
-        Integer errorLines=0;
-        Integer successLines=0;
-        List<String> list = ImportExcelUtil.importDateSave(listSysRoles, ISysRoleService.class, errorStrs, CommonConstant.SQL_INDEX_UNIQ_SYS_ROLE_CODE);
-         errorLines+=list.size();
-         successLines+=(listSysRoles.size()-errorLines);
-        return ImportExcelUtil.imporReturnRes(errorLines,successLines,list);
+        // * 去掉 sql 中的重复数据
+        Integer errorLines = 0;
+        Integer successLines = 0;
+        List<String> list = ImportExcelUtil.importDateSave(listSysRoles, ISysRoleService.class, errorStrs,
+                CommonConstant.SQL_INDEX_UNIQ_SYS_ROLE_CODE);
+        errorLines += list.size();
+        successLines += (listSysRoles.size() - errorLines);
+        return ImportExcelUtil.imporReturnRes(errorLines, successLines, list);
     }
 
+    /**
+     * * 删除角色
+     * 
+     * @param roleid
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteRole(String roleid) {
-        //1.删除角色和用户关系
+        // * 1.删除角色和用户关系
         sysRoleMapper.deleteRoleUserRelation(roleid);
-        //2.删除角色和权限关系
+        // * 2.删除角色和权限关系
         sysRoleMapper.deleteRolePermissionRelation(roleid);
-        //3.删除角色
+        // * 3.删除角色
         this.removeById(roleid);
         return true;
     }
 
+    /**
+     * * 批量删除角色
+     * 
+     * @param roleids
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteBatchRole(String[] roleIds) {
-        //1.删除角色和用户关系
+        // * 1.删除角色和用户关系
         sysUserMapper.deleteBathRoleUserRelation(roleIds);
-        //2.删除角色和权限关系
+        // * 2.删除角色和权限关系
         sysUserMapper.deleteBathRolePermissionRelation(roleIds);
-        //3.删除角色
+        // * 3.删除角色
         this.removeByIds(Arrays.asList(roleIds));
         return true;
     }
 
+    /**
+     * * 根据角色id和当前租户判断当前角色是否存在这个租户中
+     * 
+     * @param id
+     * @return
+     */
     @Override
     public Long getRoleCountByTenantId(String id, Integer tenantId) {
-        return sysRoleMapper.getRoleCountByTenantId(id,tenantId);
+        return sysRoleMapper.getRoleCountByTenantId(id, tenantId);
     }
 
+    /**
+     * * 验证是否为admin角色
+     * 
+     * @param ids
+     */
     @Override
     public void checkAdminRoleRejectDel(String ids) {
-        LambdaQueryWrapper<SysRole> query = new  LambdaQueryWrapper<>();
-        query.in(SysRole::getId,Arrays.asList(ids.split(SymbolConstant.COMMA)));
-        query.eq(SysRole::getRoleCode,"admin");
+        LambdaQueryWrapper<SysRole> query = new LambdaQueryWrapper<>();
+        query.in(SysRole::getId, Arrays.asList(ids.split(SymbolConstant.COMMA)));
+        query.eq(SysRole::getRoleCode, "admin");
         Long adminRoleCount = sysRoleMapper.selectCount(query);
-        if(adminRoleCount>0){
+        if (adminRoleCount > 0) {
             throw new JeecgBootException("admin角色，不允许删除！");
         }
     }

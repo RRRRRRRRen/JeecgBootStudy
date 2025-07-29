@@ -1,9 +1,7 @@
 package org.jeecg.modules.system.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +14,9 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.common.base.BaseMap;
 import org.jeecg.common.config.TenantContext;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.constant.SymbolConstant;
-import org.jeecg.common.modules.redis.client.JeecgRedisClient;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.config.mybatis.MybatisPlusSaasConfig;
@@ -57,9 +53,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * <p>
- * 角色表 前端控制器
- * </p>
+ * * 角色表 前端控制器
  *
  * @Author scott
  * @since 2018-12-19
@@ -84,11 +78,11 @@ public class SysRoleController {
 	private ISysUserRoleService sysUserRoleService;
 	@Autowired
 	private BaseCommonService baseCommonService;
-	@Autowired
-	private JeecgRedisClient jeecgRedisClient;
 
 	/**
-	 * 分页列表查询 【系统角色，不做租户隔离】
+	 * * 分页列表查询
+	 * 
+	 * * - 系统角色，不做租户隔离
 	 * 
 	 * @param role
 	 * @param pageNo
@@ -98,22 +92,18 @@ public class SysRoleController {
 	 */
 	@RequiresPermissions("system:role:list")
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public Result<IPage<SysRole>> queryPageList(SysRole role,
+	public Result<IPage<SysRole>> queryPageList(
+			SysRole role,
 			@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
 			@RequestParam(name = "isMultiTranslate", required = false) Boolean isMultiTranslate,
 			HttpServletRequest req) {
-		// update-begin---author:wangshuai---date:2025-03-26---for:【issues/7948】角色解决根据id查询回显不对---
+		// * isMultiTranslate 查询一百条
 		if (null != isMultiTranslate && isMultiTranslate) {
 			pageSize = 100;
 		}
-		// update-end---author:wangshuai---date:2025-03-26---for:【issues/7948】角色解决根据id查询回显不对---
 		Result<IPage<SysRole>> result = new Result<IPage<SysRole>>();
-		// QueryWrapper<SysRole> queryWrapper = QueryGenerator.initQueryWrapper(role,
-		// req.getParameterMap());
-		// IPage<SysRole> pageList = sysRoleService.page(page, queryWrapper);
 		Page<SysRole> page = new Page<SysRole>(pageNo, pageSize);
-		// 换成不做租户隔离的方法，实际上还是存在缺陷（缺陷：如果开启租户隔离，虽然能看到其他租户下的角色，编辑会提示报错）
 		IPage<SysRole> pageList = sysRoleService.listAllSysRole(page, role);
 		result.setSuccess(true);
 		result.setResult(pageList);
@@ -121,7 +111,9 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 分页列表查询【租户角色，做租户隔离】
+	 * * 分页列表查询
+	 * 
+	 * * - 租户角色，做租户隔离
 	 * 
 	 * @param role
 	 * @param pageNo
@@ -135,7 +127,7 @@ public class SysRoleController {
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
 			HttpServletRequest req) {
 		Result<IPage<SysRole>> result = new Result<IPage<SysRole>>();
-		// 此接口必须通过租户来隔离查询
+		// * 此接口必须通过租户来隔离查询
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			role.setTenantId(
 					oConvertUtils.getInt(!"0".equals(TenantContext.getTenant()) ? TenantContext.getTenant() : "", -1));
@@ -150,7 +142,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 添加
+	 * * 添加
 	 * 
 	 * @param role
 	 * @return
@@ -160,10 +152,8 @@ public class SysRoleController {
 	public Result<SysRole> add(@RequestBody SysRole role) {
 		Result<SysRole> result = new Result<SysRole>();
 		try {
-			// 开启多租户隔离,角色id自动生成10位
-			// update-begin---author:wangshuai---date:2024-05-23---for:【TV360X-42】角色新增时设置的编码，保存后不一致---
+			// * 开启多租户隔离,角色id自动生成10位
 			if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL && oConvertUtils.isEmpty(role.getRoleCode())) {
-				// update-end---author:wangshuai---date:2024-05-23---for:【TV360X-42】角色新增时设置的编码，保存后不一致---
 				role.setRoleCode(RandomUtil.randomString(10));
 			}
 			role.setCreateTime(new Date());
@@ -177,7 +167,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 编辑
+	 * * 编辑
 	 * 
 	 * @param role
 	 * @return
@@ -191,11 +181,9 @@ public class SysRoleController {
 			result.error500("未找到对应角色！");
 		} else {
 			role.setUpdateTime(new Date());
-
-			// ------------------------------------------------------------------
-			// 如果是saas隔离的情况下，判断当前租户id是否是当前租户下的
+			// * 如果是saas隔离的情况下，判断当前租户id是否是当前租户下的
 			if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
-				// 获取当前用户
+				// * 获取当前用户
 				LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 				Integer tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
 				String username = "admin";
@@ -205,8 +193,6 @@ public class SysRoleController {
 					return Result.error("修改角色失败,当前角色不在此租户中。");
 				}
 			}
-			// ------------------------------------------------------------------
-
 			boolean ok = sysRoleService.updateById(role);
 			if (ok) {
 				result.success("修改成功!");
@@ -216,7 +202,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 通过id删除
+	 * * 通过id删除
 	 * 
 	 * @param id
 	 * @return
@@ -224,11 +210,12 @@ public class SysRoleController {
 	@RequiresPermissions("system:role:delete")
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
-		// 如果是saas隔离的情况下，判断当前租户id是否是当前租户下的
+		// * 如果是saas隔离的情况下，判断当前租户id是否是当前租户下的
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
-			// 获取当前用户
+			// * 获取当前用户
 			LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 			int tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
+			// * 判断用户是否在当前租户内
 			Long getRoleCount = sysRoleService.getRoleCountByTenantId(id, tenantId);
 			String username = "admin";
 			if (getRoleCount == 0 && !username.equals(sysUser.getUsername())) {
@@ -251,7 +238,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 批量删除
+	 * * 批量删除
 	 * 
 	 * @param ids
 	 * @return
@@ -264,7 +251,7 @@ public class SysRoleController {
 		if (oConvertUtils.isEmpty(ids)) {
 			result.error500("未选中角色！");
 		} else {
-			// 如果是saas隔离的情况下，判断当前租户id是否是当前租户下的
+			// * 如果是saas隔离的情况下，判断当前租户id是否是当前租户下的
 			if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 				int tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
 				String[] roleIds = ids.split(SymbolConstant.COMMA);
@@ -272,7 +259,7 @@ public class SysRoleController {
 				String username = "admin";
 				for (String id : roleIds) {
 					Long getRoleCount = sysRoleService.getRoleCountByTenantId(id, tenantId);
-					// 如果存在角色id为0，即不存在，则删除角色
+					// * 如果存在角色id为0，即不存在
 					if (getRoleCount == 0 && !username.equals(sysUser.getUsername())) {
 						baseCommonService.addLog("未经授权，删除非本租户下的角色ID：" + id + "，操作人：" + sysUser.getUsername(),
 								CommonConstant.LOG_TYPE_2, CommonConstant.OPERATE_TYPE_4);
@@ -280,7 +267,7 @@ public class SysRoleController {
 					}
 				}
 			}
-			// 验证是否为admin角色
+			// * 验证是否为admin角色
 			sysRoleService.checkAdminRoleRejectDel(ids);
 			sysRoleService.deleteBatchRole(ids.split(","));
 			result.success("删除角色成功!");
@@ -289,7 +276,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 通过id查询
+	 * * 通过id查询
 	 * 
 	 * @param id
 	 * @return
@@ -308,7 +295,9 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 查询全部角色（参与租户隔离）
+	 * * 查询全部角色
+	 * 
+	 * * - 参与租户隔离
 	 * 
 	 * @return
 	 */
@@ -316,12 +305,10 @@ public class SysRoleController {
 	public Result<List<SysRole>> queryall() {
 		Result<List<SysRole>> result = new Result<>();
 		LambdaQueryWrapper<SysRole> query = new LambdaQueryWrapper<SysRole>();
-		// ------------------------------------------------------------------------------------------------
-		// 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
+		// * 多租户模式
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			query.eq(SysRole::getTenantId, oConvertUtils.getInt(TenantContext.getTenant(), 0));
 		}
-		// ------------------------------------------------------------------------------------------------
 		List<SysRole> list = sysRoleService.list(query);
 		if (list == null || list.size() <= 0) {
 			result.error500("未找到角色信息");
@@ -333,7 +320,9 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 查询全部系统角色（不做租户隔离）
+	 * * 查询全部系统角色
+	 * 
+	 * * - 不做租户隔离
 	 *
 	 * @return
 	 */
@@ -353,31 +342,30 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 校验角色编码唯一
+	 * * 校验角色编码唯一
 	 */
 	@RequestMapping(value = "/checkRoleCode", method = RequestMethod.GET)
 	public Result<Boolean> checkUsername(String id, String roleCode) {
+		// * 初始化返回
 		Result<Boolean> result = new Result<>();
-		// 如果此参数为false则程序发生异常
 		result.setResult(true);
 		log.info("--验证角色编码是否唯一---id:" + id + "--roleCode:" + roleCode);
+
 		try {
 			SysRole role = null;
 			if (oConvertUtils.isNotEmpty(id)) {
+				// * 查询 id 是否存在
 				role = sysRoleService.getById(id);
 			}
-			// SysRole newRole = sysRoleService.getOne(new
-			// QueryWrapper<SysRole>().lambda().eq(SysRole::getRoleCode, roleCode));
+			// * 查询 roleCode 是否存在
 			SysRole newRole = sysRoleService.getRoleNoTenant(roleCode);
+			// * 如果根据传入的roleCode查询到信息了，那么就需要做校验了。
 			if (newRole != null) {
-				// 如果根据传入的roleCode查询到信息了，那么就需要做校验了。
 				if (role == null) {
-					// role为空=>新增模式=>只要roleCode存在则返回false
 					result.setSuccess(false);
 					result.setMessage("角色编码已存在");
 					return result;
 				} else if (!id.equals(newRole.getId())) {
-					// 否则=>编辑模式=>判断两者ID是否一致-
 					result.setSuccess(false);
 					result.setMessage("角色编码已存在");
 					return result;
@@ -394,22 +382,18 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 导出excel
+	 * * 导出excel
 	 * 
 	 * @param request
 	 */
 	@RequestMapping(value = "/exportXls")
 	public ModelAndView exportXls(SysRole sysRole, HttpServletRequest request) {
-		// ------------------------------------------------------------------------------------------------
-		// 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			sysRole.setTenantId(oConvertUtils.getInt(TenantContext.getTenant(), 0));
 		}
-		// ------------------------------------------------------------------------------------------------
-
-		// Step.1 组装查询条件
+		// * Step.1 组装查询条件
 		QueryWrapper<SysRole> queryWrapper = QueryGenerator.initQueryWrapper(sysRole, request.getParameterMap());
-		// Step.2 AutoPoi 导出Excel
+		// * Step.2 AutoPoi 导出Excel
 		ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
 		List<SysRole> pageList = sysRoleService.list(queryWrapper);
 		// 导出文件名称
@@ -422,7 +406,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 通过excel导入数据
+	 * * 通过excel导入数据
 	 * 
 	 * @param request
 	 * @param response
@@ -433,7 +417,7 @@ public class SysRoleController {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
 		for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
-			// 获取上传文件对象
+			// * 获取上传文件对象 固定写法
 			MultipartFile file = entity.getValue();
 			ImportParams params = new ImportParams();
 			params.setTitleRows(2);
@@ -456,24 +440,28 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 查询数据规则数据
+	 * * 查询数据规则数据
 	 */
 	@GetMapping(value = "/datarule/{permissionId}/{roleId}")
-	public Result<?> loadDatarule(@PathVariable("permissionId") String permissionId,
+	public Result<?> loadDatarule(
+			@PathVariable("permissionId") String permissionId,
 			@PathVariable("roleId") String roleId) {
+		// * 查询该菜单权限下的数据权限
 		List<SysPermissionDataRule> list = sysPermissionDataRuleService.getPermRuleListByPermId(permissionId);
 		if (list == null || list.size() == 0) {
 			return Result.error("未找到权限配置信息");
 		} else {
-			Map<String, Object> map = new HashMap(5);
+			Map<String, Object> map = new HashMap<>(5);
 			map.put("datarule", list);
+			// * 查询角色和权限对应关系
 			LambdaQueryWrapper<SysRolePermission> query = new LambdaQueryWrapper<SysRolePermission>()
 					.eq(SysRolePermission::getPermissionId, permissionId)
 					.isNotNull(SysRolePermission::getDataRuleIds)
 					.eq(SysRolePermission::getRoleId, roleId);
 			SysRolePermission sysRolePermission = sysRolePermissionService.getOne(query);
+
 			if (sysRolePermission == null) {
-				// return Result.error("未找到角色菜单配置信息");
+
 			} else {
 				String drChecked = sysRolePermission.getDataRuleIds();
 				if (oConvertUtils.isNotEmpty(drChecked)) {
@@ -481,12 +469,11 @@ public class SysRoleController {
 				}
 			}
 			return Result.ok(map);
-			// TODO 以后按钮权限的查询也走这个请求 无非在map中多加两个key
 		}
 	}
 
 	/**
-	 * 保存数据规则至角色菜单关联表
+	 * * 保存数据规则至角色菜单关联表
 	 */
 	@PostMapping(value = "/datarule")
 	public Result<?> saveDatarule(@RequestBody JSONObject jsonObject) {
@@ -513,7 +500,7 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 用户角色授权功能，查询菜单权限树
+	 * * 用户角色授权功能，查询菜单权限树
 	 * 
 	 * @param request
 	 * @return
@@ -521,9 +508,9 @@ public class SysRoleController {
 	@RequestMapping(value = "/queryTreeList", method = RequestMethod.GET)
 	public Result<Map<String, Object>> queryTreeList(HttpServletRequest request) {
 		Result<Map<String, Object>> result = new Result<>();
-		// 全部权限ids
 		List<String> ids = new ArrayList<>();
 		try {
+			// * 全部权限ids
 			LambdaQueryWrapper<SysPermission> query = new LambdaQueryWrapper<SysPermission>();
 			query.eq(SysPermission::getDelFlag, CommonConstant.DEL_FLAG_0);
 			query.orderByAsc(SysPermission::getSortNo);
@@ -531,12 +518,13 @@ public class SysRoleController {
 			for (SysPermission sysPer : list) {
 				ids.add(sysPer.getId());
 			}
+			// * 转化为树
 			List<TreeModel> treeList = new ArrayList<>();
 			getTreeModelList(treeList, list, null);
-			Map<String, Object> resMap = new HashMap(5);
-			// 全部树节点数据
+			Map<String, Object> resMap = new HashMap<>(5);
+			// * 全部树节点数据
 			resMap.put("treeList", treeList);
-			// 全部树ids
+			// * 全部树ids
 			resMap.put("ids", ids);
 			result.setResult(resMap);
 			result.setSuccess(true);
@@ -546,6 +534,13 @@ public class SysRoleController {
 		return result;
 	}
 
+	/**
+	 * * 转化为权限树
+	 * 
+	 * @param treeList
+	 * @param metaList
+	 * @param temp
+	 */
 	private void getTreeModelList(List<TreeModel> treeList, List<SysPermission> metaList, TreeModel temp) {
 		for (SysPermission permission : metaList) {
 			String tempPid = permission.getParentId();
@@ -567,7 +562,9 @@ public class SysRoleController {
 	}
 
 	/**
-	 * 分页获取全部角色列表（包含每个角色的数量）
+	 * * 分页获取全部角色列表
+	 * 
+	 * * - 包含每个角色的数量
 	 * 
 	 * @return
 	 */
@@ -575,20 +572,28 @@ public class SysRoleController {
 	public Result<IPage<SysUserRoleCountVo>> queryPageRoleCount(
 			@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		// * 初始化返回 SysUserRoleCountVo
 		Result<IPage<SysUserRoleCountVo>> result = new Result<>();
+
+		// * 初始化查询
 		LambdaQueryWrapper<SysRole> query = new LambdaQueryWrapper<SysRole>();
-		// ------------------------------------------------------------------------------------------------
-		// 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
+
+		// * 多租户模式
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			query.eq(SysRole::getTenantId, oConvertUtils.getInt(TenantContext.getTenant(), 0));
 		}
-		// ------------------------------------------------------------------------------------------------
+
+		// * 获取所有角色
 		Page<SysRole> page = new Page<>(pageNo, pageSize);
 		IPage<SysRole> pageList = sysRoleService.page(page, query);
 		List<SysRole> records = pageList.getRecords();
+
+		// * 手动初始化分页
 		IPage<SysUserRoleCountVo> sysRoleCountPage = new PageDTO<>();
+		// * 初始化 SysUserRoleCountVo 列表
 		List<SysUserRoleCountVo> sysCountVoList = new ArrayList<>();
-		// 循环角色数据获取每个角色下面对应的角色数量
+
+		// * 循环角色数据获取每个角色下面对应的角色数量
 		for (SysRole role : records) {
 			LambdaQueryWrapper<SysUserRole> countQuery = new LambdaQueryWrapper<>();
 			countQuery.eq(SysUserRole::getRoleId, role.getId());
@@ -598,6 +603,8 @@ public class SysRoleController {
 			countVo.setCount(count);
 			sysCountVoList.add(countVo);
 		}
+
+		// * 返回数量
 		sysRoleCountPage.setRecords(sysCountVoList);
 		sysRoleCountPage.setTotal(pageList.getTotal());
 		sysRoleCountPage.setSize(pageList.getSize());
