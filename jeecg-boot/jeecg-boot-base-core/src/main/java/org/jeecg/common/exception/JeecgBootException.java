@@ -49,7 +49,6 @@ public class JeecgBootException extends RuntimeException {
 	}
 
 	/**
-	 * TODO Throwable 未知如何使用
 	 * * 设置异常原因
 	 * 
 	 * @param cause 异常原因
@@ -59,7 +58,6 @@ public class JeecgBootException extends RuntimeException {
 	}
 
 	/**
-	 * TODO Throwable 未知如何使用
 	 * * 设置错误信息和异常原因
 	 * 
 	 * @param message 错误信息

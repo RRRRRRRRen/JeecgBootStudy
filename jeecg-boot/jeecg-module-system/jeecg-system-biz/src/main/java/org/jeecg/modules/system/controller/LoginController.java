@@ -33,7 +33,6 @@ import org.jeecg.config.JeecgBaseConfig;
 import org.jeecg.modules.base.service.BaseCommonService;
 import org.jeecg.modules.system.entity.SysDepart;
 import org.jeecg.modules.system.entity.SysRoleIndex;
-import org.jeecg.modules.system.entity.SysTenant;
 import org.jeecg.modules.system.entity.SysUser;
 import org.jeecg.modules.system.model.SysLoginModel;
 import org.jeecg.modules.system.service.*;
@@ -51,7 +50,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Author scott
@@ -647,7 +645,6 @@ public class LoginController {
 		/**
 		 * * 4.设置登录部门
 		 */
-		// TODO 获取用户部门，未知的作用
 		List<SysDepart> departs = sysDepartService.queryUserDeparts(sysUser.getId());
 		obj.put("departs", departs);
 		if (departs == null || departs.size() == 0) {
@@ -691,7 +688,7 @@ public class LoginController {
 	@GetMapping(value = "/getEncryptedString")
 	public Result<Map<String, String>> getEncryptedString() {
 		Result<Map<String, String>> result = new Result<Map<String, String>>();
-		Map<String, String> map = new HashMap(5);
+		Map<String, String> map = new HashMap<>(5);
 		map.put("key", EncryptedString.key);
 		map.put("iv", EncryptedString.iv);
 		result.setResult(map);
@@ -793,7 +790,6 @@ public class LoginController {
 		/**
 		 * * 4.设置登录部门
 		 */
-		// TODO 未知功能
 		String orgCode = sysUser.getOrgCode();
 		// * 如果当前用户无选择部门 查看部门关联信息
 		if (oConvertUtils.isEmpty(orgCode)) {
@@ -868,10 +864,10 @@ public class LoginController {
 	 */
 	@Operation(summary = "登录二维码")
 	@GetMapping("/getLoginQrcode")
-	public Result<?> getLoginQrcode() {
+	public Result<Map<String, String>> getLoginQrcode() {
 		String qrcodeId = CommonConstant.LOGIN_QRCODE_PRE + IdWorker.getIdStr();
 		// * 定义二维码参数
-		Map params = new HashMap(5);
+		Map<String, String> params = new HashMap<>(5);
 		params.put("qrcodeId", qrcodeId);
 		// * 存放二维码唯一标识30秒有效
 		redisUtil.set(CommonConstant.LOGIN_QRCODE + qrcodeId, qrcodeId, 30);
@@ -900,13 +896,13 @@ public class LoginController {
 	 */
 	@Operation(summary = "获取用户扫码后保存的token")
 	@GetMapping("/getQrcodeToken")
-	public Result getQrcodeToken(@RequestParam String qrcodeId) {
+	public Result<Map<String, Object>> getQrcodeToken(@RequestParam String qrcodeId) {
 		// * 获取token
 		Object token = redisUtil.get(CommonConstant.LOGIN_QRCODE_TOKEN + qrcodeId);
-		Map result = new HashMap(5);
+		Map<String, Object> result = new HashMap<>(5);
 		// * 获取redis存储的二维码id
 		Object qrcodeIdExpire = redisUtil.get(CommonConstant.LOGIN_QRCODE + qrcodeId);
-		
+
 		// * 二维码过期通知前台刷新
 		if (oConvertUtils.isEmpty(qrcodeIdExpire)) {
 			result.put("token", "-2");

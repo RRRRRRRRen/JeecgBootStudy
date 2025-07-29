@@ -12,14 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.PermissionData;
-import org.jeecg.common.base.BaseMap;
 import org.jeecg.common.config.TenantContext;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.constant.SymbolConstant;
-import org.jeecg.common.modules.redis.client.JeecgRedisClient;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.util.JwtUtil;
 import org.jeecg.common.system.vo.LoginUser;
@@ -111,9 +108,6 @@ public class SysUserController {
     @Autowired
     private ISysUserTenantService userTenantService;
 
-    @Autowired
-    private JeecgRedisClient jeecgRedisClient;
-
     /**
      * * 获取租户下用户数据
      * * （支持租户隔离）
@@ -133,7 +127,6 @@ public class SysUserController {
             HttpServletRequest req) {
         // * 生成查询器
         QueryWrapper<SysUser> queryWrapper = QueryGenerator.initQueryWrapper(user, req.getParameterMap());
-        // TODO 多租户数据隔离
         if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
             String tenantId = oConvertUtils.getString(TenantContext.getTenant(), "-1");
             List<String> userIds = userTenantService.getUserIdsByTenantId(Integer.valueOf(tenantId));
@@ -196,7 +189,7 @@ public class SysUserController {
             user.setStatus(1);
             // * 设置删除状态
             user.setDelFlag(CommonConstant.DEL_FLAG_0);
-            // TODO 用户表字段org_code不能在这里设置他的值
+            // * 用户表字段org_code不能在这里设置他的值
             user.setOrgCode(null);
             // * 获取租户ids
             String relTenantIds = jsonObject.getString("relTenantIds");
@@ -230,11 +223,11 @@ public class SysUserController {
         try {
             // * 根据id获取用户数据
             SysUser sysUser = sysUserService.getById(jsonObject.getString("id"));
-            baseCommonService.addLog("编辑用户，username： " + sysUser.getUsername(), CommonConstant.LOG_TYPE_2, 2);
-            // * 上方已经执行 sysUser.getUsername() 所有下方不会执行。
             if (sysUser == null) {
+                // * 上方已经执行 sysUser.getUsername() 所有下方不会执行。
                 result.error500("未找到对应实体");
             } else {
+                baseCommonService.addLog("编辑用户，username： " + sysUser.getUsername(), CommonConstant.LOG_TYPE_2, 2);
                 /**
                  * * 转化为java对象
                  * 
@@ -546,7 +539,7 @@ public class SysUserController {
     }
 
     /**
-     * TODO 导出excel
+     * * 导出excel
      *
      * @param request
      * @param sysUser
@@ -554,21 +547,17 @@ public class SysUserController {
     @RequiresPermissions("system:user:export")
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(SysUser sysUser, HttpServletRequest request) {
-        // Step.1 组装查询条件
+        // * Step.1 组装查询条件
         QueryWrapper<SysUser> queryWrapper = QueryGenerator.initQueryWrapper(sysUser, request.getParameterMap());
-        // Step.2 AutoPoi 导出Excel
+        // * Step.2 AutoPoi 导出Excel
         ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
-        // update-begin--Author:kangxiaolin Date:20180825
-        // for：[03]用户导出，如果选择数据则只导出相关数据--------------------
         String selections = request.getParameter("selections");
         if (!oConvertUtils.isEmpty(selections)) {
-            queryWrapper.in("id", selections.split(","));
+            queryWrapper.in("id", Arrays.asList(selections.split(",")));
         }
-        // update-end--Author:kangxiaolin Date:20180825
-        // for：[03]用户导出，如果选择数据则只导出相关数据----------------------
         List<SysUser> pageList = sysUserService.list(queryWrapper);
 
-        // 导出文件名称
+        // * 导出文件名称
         mv.addObject(NormalExcelConstants.FILE_NAME, "用户列表");
         mv.addObject(NormalExcelConstants.CLASS, SysUser.class);
         LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
@@ -580,7 +569,7 @@ public class SysUserController {
     }
 
     /**
-     * TODO 通过excel导入数据
+     * * 通过excel导入数据
      *
      * @param request
      * @param response
@@ -591,7 +580,7 @@ public class SysUserController {
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) throws IOException {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
-        // 错误信息
+        // * 错误信息
         List<String> errorMessage = new ArrayList<>();
         int successLines = 0, errorLines = 0;
         for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
@@ -1091,7 +1080,7 @@ public class SysUserController {
             LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
             // * 通过部门员工映射表链接部门表查询部门列表
             List<SysDepart> list = this.sysDepartService.queryUserDeparts(sysUser.getId());
-            Map<String, Object> map = new HashMap(5);
+            Map<String, Object> map = new HashMap<>(5);
             // * 返回部门详情列表和组织id集合
             map.put("list", list);
             map.put("orgCode", sysUser.getOrgCode());
@@ -1399,7 +1388,7 @@ public class SysUserController {
             if (oConvertUtils.isNotEmpty(username)) {
                 // * 用户名不为空查询
                 if (username.contains(",")) {
-                    query.in(SysUser::getUsername, username.split(","));
+                    query.in(SysUser::getUsername, Arrays.asList(username.split(",")));
                 } else {
                     query.eq(SysUser::getUsername, username);
                 }
@@ -1664,7 +1653,7 @@ public class SysUserController {
             // * 其次模糊查询
             queryWrapper.and(i -> i.like(SysUser::getUsername, keyword).or().like(SysUser::getRealname, keyword));
         }
-        // TODO 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
+        // * 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
         if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
             String tenantId = oConvertUtils.getString(TokenUtils.getTenantIdByRequest(request), "-1");
             List<String> userIds = userTenantService.getUserIdsByTenantId(Integer.valueOf(tenantId));
@@ -1859,7 +1848,7 @@ public class SysUserController {
     }
 
     /**
-     * TODO 更新刪除状态和离职状态
+     * * 更新刪除状态和离职状态
      * 
      * * - 低代码应用专用接口
      * 

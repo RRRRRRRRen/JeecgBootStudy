@@ -184,7 +184,7 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @param page       分页参数
 	 * @return
 	 */
-	IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage page);
+	IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage<SysUserSysDepartModel> page);
 
 	/**
 	 * * 根据角色Id查询用户列表
@@ -266,7 +266,7 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @param sysUser
 	 * @return
 	 */
-	Result<?> checkUserIsEffective(SysUser sysUser);
+	<T> Result<T> checkUserIsEffective(SysUser sysUser);
 
 	/**
 	 * * 查询被逻辑删除的用户

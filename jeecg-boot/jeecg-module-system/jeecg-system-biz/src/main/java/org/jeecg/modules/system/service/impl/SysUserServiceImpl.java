@@ -638,7 +638,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	 * @return
 	 */
 	@Override
-	public IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage page) {
+	public IPage<SysUserSysDepartModel> queryUserByOrgCode(String orgCode, SysUser userParams, IPage<SysUserSysDepartModel> page) {
 		// * 获取列表
 		List<SysUserSysDepartModel> list = baseMapper.getUserByOrgCode(page, orgCode, userParams);
 		// * 根据部门orgCode查询部门，设置职位
@@ -801,8 +801,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 	 * @return
 	 */
 	@Override
-	public Result<?> checkUserIsEffective(SysUser sysUser) {
-		Result<?> result = new Result<Object>();
+	public <T> Result<T> checkUserIsEffective(SysUser sysUser) {
+		Result<T> result = new Result<>();
 		// * 情况1：根据用户信息查询，该用户不存在
 		if (sysUser == null) {
 			result.error500("该用户不存在，请注册");
