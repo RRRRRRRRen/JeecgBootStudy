@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 /**
+ * * 角色首页配置
+ * 
  * @Description: 角色首页配置
  * @Author: jeecg-boot
  * @Date: 2022-03-25
@@ -37,7 +39,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     private ISysRoleIndexService sysRoleIndexService;
 
     /**
-     * 分页列表查询
+     * * 分页列表查询
      *
      * @param sysRoleIndex
      * @param pageNo
@@ -49,9 +51,9 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     @Operation(summary = "角色首页配置-分页列表查询")
     @GetMapping(value = "/list")
     public Result<?> queryPageList(SysRoleIndex sysRoleIndex,
-                                   @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
-                                   @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                   HttpServletRequest req) {
+            @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+            HttpServletRequest req) {
         QueryWrapper<SysRoleIndex> queryWrapper = QueryGenerator.initQueryWrapper(sysRoleIndex, req.getParameterMap());
         Page<SysRoleIndex> page = new Page<SysRoleIndex>(pageNo, pageSize);
         IPage<SysRoleIndex> pageList = sysRoleIndexService.page(page, queryWrapper);
@@ -59,7 +61,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 添加
+     * * 添加
      *
      * @param sysRoleIndex
      * @return
@@ -68,14 +70,13 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     @AutoLog(value = "角色首页配置-添加")
     @Operation(summary = "角色首页配置-添加")
     @PostMapping(value = "/add")
-    //@DynamicTable(value = DynamicTableConstant.SYS_ROLE_INDEX)
-    public Result<?> add(@RequestBody SysRoleIndex sysRoleIndex,HttpServletRequest request) {
+    public Result<?> add(@RequestBody SysRoleIndex sysRoleIndex, HttpServletRequest request) {
         sysRoleIndexService.save(sysRoleIndex);
         return Result.OK("添加成功！");
     }
 
     /**
-     * 编辑
+     * * 编辑
      *
      * @param sysRoleIndex
      * @return
@@ -83,15 +84,14 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     @RequiresPermissions("system:roleindex:edit")
     @AutoLog(value = "角色首页配置-编辑")
     @Operation(summary = "角色首页配置-编辑")
-    @RequestMapping(value = "/edit", method = {RequestMethod.PUT, RequestMethod.POST})
-    //@DynamicTable(value = DynamicTableConstant.SYS_ROLE_INDEX)
-    public Result<?> edit(@RequestBody SysRoleIndex sysRoleIndex,HttpServletRequest request) {
+    @RequestMapping(value = "/edit", method = { RequestMethod.PUT, RequestMethod.POST })
+    public Result<?> edit(@RequestBody SysRoleIndex sysRoleIndex, HttpServletRequest request) {
         sysRoleIndexService.updateById(sysRoleIndex);
         return Result.OK("编辑成功!");
     }
 
     /**
-     * 通过id删除
+     * * 通过id删除
      *
      * @param id
      * @return
@@ -105,7 +105,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 批量删除
+     * * 批量删除
      *
      * @param ids
      * @return
@@ -119,7 +119,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 通过id查询
+     * * 通过id查询
      *
      * @param id
      * @return
@@ -133,7 +133,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 导出excel
+     * * 导出excel
      *
      * @param request
      * @param sysRoleIndex
@@ -144,7 +144,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 通过excel导入数据
+     * * 通过excel导入数据
      *
      * @param request
      * @param response
@@ -156,7 +156,7 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 通过code查询
+     * * 通过code查询
      *
      * @param roleCode
      * @return
@@ -164,14 +164,15 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     @AutoLog(value = "角色首页配置-通过code查询")
     @Operation(summary = "角色首页配置-通过code查询")
     @GetMapping(value = "/queryByCode")
-    //@DynamicTable(value = DynamicTableConstant.SYS_ROLE_INDEX)
-    public Result<?> queryByCode(@RequestParam(name = "roleCode", required = true) String roleCode,HttpServletRequest request) {
-        SysRoleIndex sysRoleIndex = sysRoleIndexService.getOne(new LambdaQueryWrapper<SysRoleIndex>().eq(SysRoleIndex::getRoleCode, roleCode));
+    public Result<SysRoleIndex> queryByCode(@RequestParam(name = "roleCode", required = true) String roleCode,
+            HttpServletRequest request) {
+        SysRoleIndex sysRoleIndex = sysRoleIndexService
+                .getOne(new LambdaQueryWrapper<SysRoleIndex>().eq(SysRoleIndex::getRoleCode, roleCode));
         return Result.OK(sysRoleIndex);
     }
 
     /**
-     * 查询默认首页配置
+     * * 查询默认首页配置
      */
     @GetMapping("/queryDefIndex")
     public Result<SysRoleIndex> queryDefIndex() {
@@ -180,15 +181,14 @@ public class SysRoleIndexController extends JeecgController<SysRoleIndex, ISysRo
     }
 
     /**
-     * 更新默认首页配置
+     * * 更新默认首页配置
      */
     @RequiresPermissions("system:permission:setDefIndex")
     @PutMapping("/updateDefIndex")
     public Result<?> updateDefIndex(
             @RequestParam("url") String url,
             @RequestParam("component") String component,
-            @RequestParam("isRoute") Boolean isRoute
-    ) {
+            @RequestParam("isRoute") Boolean isRoute) {
         boolean success = sysRoleIndexService.updateDefaultIndex(url, component, isRoute);
         if (success) {
             return Result.OK("设置成功");
