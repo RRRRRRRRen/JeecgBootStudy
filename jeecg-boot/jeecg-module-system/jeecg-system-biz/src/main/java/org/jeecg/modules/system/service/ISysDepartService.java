@@ -46,7 +46,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartTreeModel> queryTreeList(String ids);
 
     /**
-     * 查询所有部门DepartId信息,并分节点进行显示
+     * * 查询所有部门树数据
      * 
      * @return
      */
@@ -70,15 +70,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     Boolean updateDepartDataById(SysDepart sysDepart, String username);
 
     /**
-     * 删除depart数据
-     * 
-     * @param id
-     * @return
-     */
-    /* boolean removeDepartDataById(String id); */
-
-    /**
-     * 根据关键字搜索相关的部门数据
+     * * 根据关键字搜索相关的部门数据
      * 
      * @param keyWord
      * @param myDeptSearch

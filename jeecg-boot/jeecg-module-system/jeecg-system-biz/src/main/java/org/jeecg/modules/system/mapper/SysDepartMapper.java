@@ -10,6 +10,9 @@ import org.jeecg.modules.system.entity.SysUser;
 import org.jeecg.modules.system.vo.SysDepartExportVo;
 import org.jeecg.modules.system.vo.SysUserDepVo;
 import org.jeecg.modules.system.vo.lowapp.ExportDepartVo;
+/**
+ * * spring的注解参数按照先后顺序传入，如[arg1, arg0, param1, param2]
+ */
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -83,7 +86,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	List<String> getSubDepIdsByDepId(@Param("departId") String departId);
 
 	/**
-	 * 根据部门编码获取部门下所有IDS
+	 * * 根据部门编码获取部门下所有IDS
 	 * 
 	 * @param orgCodes
 	 * @return
@@ -135,6 +138,12 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	List<SysDepart> queryBookDepTreeSync(@Param("parentId") String parentId, @Param("tenantId") Integer tenantId,
 			@Param("departName") String departName);
 
+	/**
+	 * * * 根据id获取部门信息
+	 * 
+	 * @param id
+	 * @return
+	 */
 	@InterceptorIgnore(tenantLine = "true")
 	@Select("SELECT * FROM sys_depart where id = #{id,jdbcType=VARCHAR}")
 	SysDepart getDepartById(@Param("id") String id);

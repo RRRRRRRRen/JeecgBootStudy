@@ -5,41 +5,51 @@ import java.util.Date;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.jeecgframework.poi.excel.annotation.Excel;
 
 /**
+ * * 部门权限表
+ * 
  * @Description: 部门权限表
  * @Author: jeecg-boot
- * @Date:   2020-02-11
+ * @Date: 2020-02-11
  * @Version: V1.0
  */
 @Data
 @TableName("sys_depart_permission")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@Schema(description="部门权限表")
+@Schema(description = "部门权限表")
 public class SysDepartPermission {
-    
-	/**id*/
+
+	/**
+	 * * id
+	 */
 	@TableId(type = IdType.ASSIGN_ID)
-    @Schema(description = "id")
+	@Schema(description = "id")
 	private java.lang.String id;
-	/**部门id*/
+
+	/**
+	 * * 部门id
+	 */
 	@Excel(name = "部门id", width = 15)
-    @Schema(description = "部门id")
+	@Schema(description = "部门id")
 	private java.lang.String departId;
-	/**权限id*/
+
+	/**
+	 * * 权限id
+	 */
 	@Excel(name = "权限id", width = 15)
-    @Schema(description = "权限id")
+	@Schema(description = "权限id")
 	private java.lang.String permissionId;
-	/**数据规则id*/
+
+	/**
+	 * * 数据规则id
+	 */
 	@Schema(description = "数据规则id")
 	private java.lang.String dataRuleIds;
 

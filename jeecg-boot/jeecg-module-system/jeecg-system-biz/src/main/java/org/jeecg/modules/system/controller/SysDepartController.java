@@ -268,7 +268,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 查询数据 添加或编辑页面对该方法发起请求,以树结构形式加载所有部门的名称,方便用户的操作
+	 * * 查询所有部门树数据
 	 * 
 	 * @return
 	 */
@@ -286,18 +286,24 @@ public class SysDepartController {
 	}
 
 	/**
-	 * <p>
-	 * 部门搜索功能方法,根据关键字模糊搜索相关部门
-	 * </p>
+	 * * 关键字模糊搜索相关部门树
 	 * 
 	 * @param keyWord
 	 * @return
 	 */
 	@RequestMapping(value = "/searchBy", method = RequestMethod.GET)
-	public Result<List<SysDepartTreeModel>> searchBy(@RequestParam(name = "keyWord", required = true) String keyWord,
+	public Result<List<SysDepartTreeModel>> searchBy(
+			@RequestParam(name = "keyWord", required = true) String keyWord,
 			@RequestParam(name = "myDeptSearch", required = false) String myDeptSearch) {
+		// * 初始化结果
 		Result<List<SysDepartTreeModel>> result = new Result<List<SysDepartTreeModel>>();
-		// 部门查询，myDeptSearch为1时为我的部门查询，登录用户为上级时查只查负责部门下数据
+
+		/**
+		 * * 部门查询
+		 * 
+		 * * - myDeptSearch为1时为我的部门查询
+		 * * - 登录用户为上级时查只查负责部门下数据
+		 */
 		LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 		String departIds = null;
 		if (oConvertUtils.isNotEmpty(user.getUserIdentity())

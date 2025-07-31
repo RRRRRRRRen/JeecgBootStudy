@@ -153,20 +153,21 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 
 	}
 
-	// @Cacheable(value = CacheConstant.SYS_DEPART_IDS_CACHE)
+	/**
+	 * * 查询所有部门树数据
+	 * 
+	 * @return
+	 */
 	@Override
 	public List<DepartIdModel> queryDepartIdTreeList() {
 		LambdaQueryWrapper<SysDepart> query = new LambdaQueryWrapper<SysDepart>();
 		query.eq(SysDepart::getDelFlag, CommonConstant.DEL_FLAG_0.toString());
-		// ------------------------------------------------------------------------------------------------
-		// 是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			query.eq(SysDepart::getTenantId, oConvertUtils.getInt(TenantContext.getTenant(), 0));
 		}
-		// ------------------------------------------------------------------------------------------------
 		query.orderByAsc(SysDepart::getDepartOrder);
 		List<SysDepart> list = this.list(query);
-		// 调用wrapTreeDataToTreeList方法生成树状数据
+		// * 调用wrapTreeDataToTreeList方法生成树状数据
 		List<DepartIdModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToDepartIdTreeList(list);
 		return listResult;
 	}
@@ -228,73 +229,6 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * saveDepartData 的调用方法,生成部门编码和部门类型（作废逻辑）
-	 * 
-	 * @deprecated
-	 * @param parentId
-	 * @return
-	 */
-	private String[] generateOrgCode(String parentId) {
-		// update-begin--Author:Steve Date:20190201 for：组织机构添加数据代码调整
-		LambdaQueryWrapper<SysDepart> query = new LambdaQueryWrapper<SysDepart>();
-		LambdaQueryWrapper<SysDepart> query1 = new LambdaQueryWrapper<SysDepart>();
-		String[] strArray = new String[2];
-		// 创建一个List集合,存储查询返回的所有SysDepart对象
-		List<SysDepart> departList = new ArrayList<>();
-		// 定义新编码字符串
-		String newOrgCode = "";
-		// 定义旧编码字符串
-		String oldOrgCode = "";
-		// 定义部门类型
-		String orgType = "";
-		// 如果是最高级,则查询出同级的org_code, 调用工具类生成编码并返回
-		if (StringUtil.isNullOrEmpty(parentId)) {
-			// 线判断数据库中的表是否为空,空则直接返回初始编码
-			query1.eq(SysDepart::getParentId, "").or().isNull(SysDepart::getParentId);
-			query1.orderByDesc(SysDepart::getOrgCode);
-			departList = this.list(query1);
-			if (departList == null || departList.size() == 0) {
-				strArray[0] = YouBianCodeUtil.getNextYouBianCode(null);
-				strArray[1] = "1";
-				return strArray;
-			} else {
-				SysDepart depart = departList.get(0);
-				oldOrgCode = depart.getOrgCode();
-				orgType = depart.getOrgType();
-				newOrgCode = YouBianCodeUtil.getNextYouBianCode(oldOrgCode);
-			}
-		} else { // 反之则查询出所有同级的部门,获取结果后有两种情况,有同级和没有同级
-			// 封装查询同级的条件
-			query.eq(SysDepart::getParentId, parentId);
-			// 降序排序
-			query.orderByDesc(SysDepart::getOrgCode);
-			// 查询出同级部门的集合
-			List<SysDepart> parentList = this.list(query);
-			// 查询出父级部门
-			SysDepart depart = this.getById(parentId);
-			// 获取父级部门的Code
-			String parentCode = depart.getOrgCode();
-			// 根据父级部门类型算出当前部门的类型
-			orgType = String.valueOf(Integer.valueOf(depart.getOrgType()) + 1);
-			// 处理同级部门为null的情况
-			if (parentList == null || parentList.size() == 0) {
-				// 直接生成当前的部门编码并返回
-				newOrgCode = YouBianCodeUtil.getSubYouBianCode(parentCode, null);
-			} else { // 处理有同级部门的情况
-				// 获取同级部门的编码,利用工具类
-				String subCode = parentList.get(0).getOrgCode();
-				// 返回生成的当前部门编码
-				newOrgCode = YouBianCodeUtil.getSubYouBianCode(parentCode, subCode);
-			}
-		}
-		// 返回最终封装了部门编码和部门类型的数组
-		strArray[0] = newOrgCode;
-		strArray[1] = orgType;
-		return strArray;
-		// update-end--Author:Steve Date:20190201 for：组织机构添加数据代码调整
-	}
-
-	/**
 	 * * 更新depart数据
 	 * 
 	 * @param sysDepart
@@ -318,7 +252,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * TODO 根据部门id批量删除并删除其可能存在的子级部门
+	 * * 批量删除
 	 * 
 	 * @param ids 多个部门id
 	 * @return
@@ -326,33 +260,32 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteBatchWithChildren(List<String> ids) {
-		// 存放子级的id
+		// * 存放子级的id
 		List<String> idList = new ArrayList<String>();
-		// 存放父级的id
+		// * 存放父级的id
 		List<String> parentIdList = new ArrayList<>();
+
 		for (String id : ids) {
+			// * 获取所有 子级和本身id
 			idList.add(id);
-			// 此步骤是为了删除子级
 			this.checkChildrenExists(id, idList);
-			// update-begin---author:wangshuai ---date:20230712
-			// for：【QQYUN-5757】批量删除部门时未正确置为叶子节点 ------------
+
+			// * 获取所有 父级id
 			SysDepart depart = this.getDepartById(id);
 			if (oConvertUtils.isNotEmpty(depart.getParentId())) {
 				if (!parentIdList.contains(depart.getParentId())) {
 					parentIdList.add(depart.getParentId());
 				}
 			}
-			// update-end---author:wangshuai ---date:20230712
-			// for：【QQYUN-5757】批量删除部门时未正确置为叶子节点 ------------
 		}
+
+		// * 执行删除
 		this.removeByIds(idList);
-		// update-begin---author:wangshuai ---date:20230712
-		// for：【QQYUN-5757】批量删除部门时未正确置为叶子节点 ------------
-		// 再删除前需要获取父级id，不然会一直为空
+
+		// * 设置父级为叶子节点
 		this.setParentDepartIzLeaf(parentIdList);
-		// update-end---author:wangshuai ---date:20230712
-		// for：【QQYUN-5757】批量删除部门时未正确置为叶子节点 ------------
-		// 根据部门id获取部门角色id
+
+		// * 根据部门id获取部门角色id
 		List<String> roleIdList = new ArrayList<>();
 		LambdaQueryWrapper<SysDepartRole> query = new LambdaQueryWrapper<>();
 		query.select(SysDepartRole::getId).in(SysDepartRole::getDepartId, idList);
@@ -360,18 +293,22 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		for (SysDepartRole deptRole : depRoleList) {
 			roleIdList.add(deptRole.getId());
 		}
-		// 根据部门id删除用户与部门关系
+
+		/**
+		 * * 参考单个删除的删除方式
+		 */
+		// * 根据部门id删除用户与部门关系
 		userDepartMapper.delete(new LambdaQueryWrapper<SysUserDepart>().in(SysUserDepart::getDepId, idList));
-		// 根据部门id删除部门授权
+		// * 根据部门id删除部门授权
 		departPermissionMapper
 				.delete(new LambdaQueryWrapper<SysDepartPermission>().in(SysDepartPermission::getDepartId, idList));
-		// 根据部门id删除部门角色
+		// * 根据部门id删除部门角色
 		sysDepartRoleMapper.delete(new LambdaQueryWrapper<SysDepartRole>().in(SysDepartRole::getDepartId, idList));
 		if (roleIdList != null && roleIdList.size() > 0) {
-			// 根据角色id删除部门角色授权
+			// * 根据角色id删除部门角色授权
 			departRolePermissionMapper
 					.delete(new LambdaQueryWrapper<SysDepartRolePermission>().in(SysDepartRolePermission::getRoleId, roleIdList));
-			// 根据角色id删除部门角色用户信息
+			// * 根据角色id删除部门角色用户信息
 			departRoleUserMapper
 					.delete(new LambdaQueryWrapper<SysDepartRoleUser>().in(SysDepartRoleUser::getDroleId, roleIdList));
 		}
@@ -389,14 +326,14 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 获取我的部门下级所有部门IDS
+	 * * 获取我的部门下级所有部门IDS
 	 * 
 	 * @param departIds 多个部门id
 	 * @return
 	 */
 	@Override
 	public List<String> getMySubDepIdsByDepId(String departIds) {
-		// 根据部门id获取所负责部门
+		// * 根据部门id获取所负责部门
 		String[] codeArr = this.getMyDeptParentOrgCode(departIds);
 		if (codeArr == null || codeArr.length == 0) {
 			return null;
@@ -405,24 +342,28 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * <p>
-	 * 根据关键字搜索相关的部门数据
-	 * </p>
+	 * * 根据关键字搜索相关的部门数据
+	 * 
+	 * @param keyWord
+	 * @param myDeptSearch
+	 * @param departIds    多个部门id
+	 * @return
 	 */
 	@Override
 	public List<SysDepartTreeModel> searchByKeyWord(String keyWord, String myDeptSearch, String departIds) {
 		LambdaQueryWrapper<SysDepart> query = new LambdaQueryWrapper<SysDepart>();
 		List<SysDepartTreeModel> newList = new ArrayList<>();
-		// myDeptSearch不为空时为我的部门搜索，只搜索所负责部门
+
+		// * myDeptSearch不为空时为我的部门搜索，只搜索所负责部门
 		if (!StringUtil.isNullOrEmpty(myDeptSearch)) {
-			// departIds 为空普通用户或没有管理部门
+			// * 没有管理部门直接返回空
 			if (StringUtil.isNullOrEmpty(departIds)) {
 				return newList;
 			}
-			// 根据部门id获取所负责部门
+
+			// * 根据部门id获取所负责部门
 			String[] codeArr = this.getMyDeptParentOrgCode(departIds);
-			// update-begin-author:taoyan date:20220104 for:/issues/3311
-			// 当用户属于两个部门的时候，且这两个部门没有上下级关系，我的部门-部门名称查询条件模糊搜索失效！
+			// * 查询所有子部门
 			if (codeArr != null && codeArr.length > 0) {
 				query.nested(i -> {
 					for (String s : codeArr) {
@@ -430,21 +371,19 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 					}
 				});
 			}
-			// update-end-author:taoyan date:20220104 for:/issues/3311
-			// 当用户属于两个部门的时候，且这两个部门没有上下级关系，我的部门-部门名称查询条件模糊搜索失效！
 			query.eq(SysDepart::getDelFlag, CommonConstant.DEL_FLAG_0.toString());
 		}
+
+		// * 过滤名称模糊搜索结果
 		query.like(SysDepart::getDepartName, keyWord);
-		// update-begin--Author:huangzhilin Date:20140417
-		// for：[bugfree号]组织机构搜索回显优化--------------------
+
+		// * 平铺返回
 		SysDepartTreeModel model = new SysDepartTreeModel();
 		List<SysDepart> departList = this.list(query);
 		if (departList.size() > 0) {
 			for (SysDepart depart : departList) {
 				model = new SysDepartTreeModel(depart);
 				model.setChildren(null);
-				// update-end--Author:huangzhilin Date:20140417
-				// for：[bugfree号]组织机构搜索功回显优化----------------------
 				newList.add(model);
 			}
 			return newList;
@@ -453,18 +392,28 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 根据部门id删除并且删除其可能存在的子级任何部门
+	 * * 根据部门id删除并且删除其可能存在的子级任何部门
+	 * 
+	 * * 删除内容：
+	 * * - SysDepart 部门表
+	 * * - SysUserDepart 部门用户表
+	 * * - SysDepartRole 部门角色表
+	 * 
+	 * * - SysDepartRoleUser 部门角色人员信息表
+	 * * - SysDepartRolePermission 部门角色权限表
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public boolean delete(String id) {
+		// * 获取子级所有id
 		List<String> idList = new ArrayList<>();
 		idList.add(id);
 		this.checkChildrenExists(id, idList);
-		// 清空部门树内存
-		// FindsDepartsChildrenUtil.clearDepartIdModel();
+
+		// * 执行删除
 		boolean ok = this.removeByIds(idList);
-		// 根据部门id获取部门角色id
+
+		// * 根据部门id获取部门角色id
 		List<String> roleIdList = new ArrayList<>();
 		LambdaQueryWrapper<SysDepartRole> query = new LambdaQueryWrapper<>();
 		query.select(SysDepartRole::getId).in(SysDepartRole::getDepartId, idList);
@@ -472,18 +421,21 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		for (SysDepartRole deptRole : depRoleList) {
 			roleIdList.add(deptRole.getId());
 		}
-		// 根据部门id删除用户与部门关系
+
+		// * 根据部门id 删除 用户与部门关系
 		userDepartMapper.delete(new LambdaQueryWrapper<SysUserDepart>().in(SysUserDepart::getDepId, idList));
-		// 根据部门id删除部门授权
+		// * 根据部门id 删除 部门授权
 		departPermissionMapper
 				.delete(new LambdaQueryWrapper<SysDepartPermission>().in(SysDepartPermission::getDepartId, idList));
-		// 根据部门id删除部门角色
+		// * 根据部门id删除部门角色
 		sysDepartRoleMapper.delete(new LambdaQueryWrapper<SysDepartRole>().in(SysDepartRole::getDepartId, idList));
+
+		// * 删除 角色 部门 关系
 		if (roleIdList != null && roleIdList.size() > 0) {
-			// 根据角色id删除部门角色授权
+			// * 根据角色id删除部门角色授权
 			departRolePermissionMapper
 					.delete(new LambdaQueryWrapper<SysDepartRolePermission>().in(SysDepartRolePermission::getRoleId, roleIdList));
-			// 根据角色id删除部门角色用户信息
+			// * 根据角色id删除部门角色用户信息
 			departRoleUserMapper
 					.delete(new LambdaQueryWrapper<SysDepartRoleUser>().in(SysDepartRoleUser::getDroleId, roleIdList));
 		}
@@ -491,7 +443,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * delete 方法调用
+	 * * 查找部门子级
 	 * 
 	 * @param id
 	 * @param idList
@@ -989,6 +941,9 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		return records;
 	}
 
+	/**
+	 * * * 根据id获取部门信息
+	 */
 	@Override
 	public SysDepart getDepartById(String id) {
 		return departMapper.getDepartById(id);
@@ -1309,18 +1264,18 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	// ==================================================================
 
 	/**
-	 * 清空部门id
+	 * * 设置父级为叶子节点
 	 *
 	 * @param parentIdList
 	 */
 	private void setParentDepartIzLeaf(List<String> parentIdList) {
 		if (CollectionUtil.isNotEmpty(parentIdList)) {
 			for (String parentId : parentIdList) {
-				// 查询父级id没有子级的时候跟新为叶子节点
+				// * 查询父级id没有子级的时候跟新为叶子节点
 				LambdaQueryWrapper<SysDepart> query = new LambdaQueryWrapper<>();
 				query.eq(SysDepart::getParentId, parentId);
 				Long count = departMapper.selectCount(query);
-				// 当子级都不存在时，设置当前部门为叶子节点
+				// * 当子级都不存在时，设置当前部门为叶子节点
 				if (count == 0) {
 					departMapper.setMainLeaf(parentId, CommonConstant.IS_LEAF);
 				}
