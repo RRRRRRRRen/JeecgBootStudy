@@ -67,7 +67,9 @@ public class SysDepartController {
 	private RedisUtil redisUtil;
 
 	/**
-	 * 查询数据 查出我的部门,并以树结构数据格式响应给前端
+	 * * 查询部门数据
+	 * 
+	 * * - 查出我的部门,并以树结构数据格式响应给前端
 	 *
 	 * @return
 	 */
@@ -78,13 +80,13 @@ public class SysDepartController {
 		try {
 			if (oConvertUtils.isNotEmpty(user.getUserIdentity())
 					&& user.getUserIdentity().equals(CommonConstant.USER_IDENTITY_2)) {
-				// update-begin--Author:liusq Date:20210624 for:部门查询ids为空后的前端显示问题 issues/I3UD06
+				// * 当前登录人为 上级
 				String departIds = user.getDepartIds();
 				if (StringUtils.isNotBlank(departIds)) {
 					List<SysDepartTreeModel> list = sysDepartService.queryMyDeptTreeList(departIds);
 					result.setResult(list);
 				}
-				// update-end--Author:liusq Date:20210624 for:部门查询ids为空后的前端显示问题 issues/I3UD06
+				// * 其他情况不返回
 				result.setMessage(CommonConstant.USER_IDENTITY_2.toString());
 				result.setSuccess(true);
 			} else {
@@ -98,7 +100,9 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 查询数据 查出所有部门,并以树结构数据格式响应给前端
+	 * * 查询部门数据
+	 * 
+	 * * - 查出所有部门,并以树结构数据格式响应给前端
 	 * 
 	 * @return
 	 */
@@ -106,12 +110,6 @@ public class SysDepartController {
 	public Result<List<SysDepartTreeModel>> queryTreeList(@RequestParam(name = "ids", required = false) String ids) {
 		Result<List<SysDepartTreeModel>> result = new Result<>();
 		try {
-			// 从内存中读取
-			// List<SysDepartTreeModel> list
-			// =FindsDepartsChildrenUtil.getSysDepartTreeList();
-			// if (CollectionUtils.isEmpty(list)) {
-			// list = sysDepartService.queryTreeList();
-			// }
 			if (oConvertUtils.isNotEmpty(ids)) {
 				List<SysDepartTreeModel> departList = sysDepartService.queryTreeList(ids);
 				result.setResult(departList);
@@ -127,7 +125,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 异步查询部门list
+	 * * 异步查询部门list
 	 * 
 	 * @param parentId   父节点 异步加载时传递
 	 * @param ids        前端回显是传递
@@ -153,7 +151,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 获取某个部门的所有父级部门的ID
+	 * * 获取某个部门的所有父级部门的ID
 	 *
 	 * @param departId 根据departId查
 	 * @param orgCode  根据orgCode查，departId和orgCode必须有一个不为空
@@ -165,8 +163,10 @@ public class SysDepartController {
 		try {
 			JSONObject data;
 			if (oConvertUtils.isNotEmpty(departId)) {
+				// * 根据departId查询
 				data = sysDepartService.queryAllParentIdByDepartId(departId);
 			} else if (oConvertUtils.isNotEmpty(orgCode)) {
+				// * 根据orgCode查询
 				data = sysDepartService.queryAllParentIdByOrgCode(orgCode);
 			} else {
 				return Result.error("departId 和 orgCode 不能都为空！");
@@ -179,7 +179,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 添加新数据 添加用户新建的部门对象数据,并保存到数据库
+	 * * 添加新数据
 	 * 
 	 * @param sysDepart
 	 * @return
@@ -193,9 +193,6 @@ public class SysDepartController {
 		try {
 			sysDepart.setCreateBy(username);
 			sysDepartService.saveDepartData(sysDepart, username);
-			// 清除部门树内存
-			// FindsDepartsChildrenUtil.clearSysDepartTreeList();
-			// FindsDepartsChildrenUtil.clearDepartIdModel();
 			result.success("添加成功！");
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -205,7 +202,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 编辑数据 编辑部门的部分数据,并保存到数据库
+	 * * 编辑数据
 	 * 
 	 * @param sysDepart
 	 * @return
@@ -223,9 +220,6 @@ public class SysDepartController {
 		} else {
 			boolean ok = sysDepartService.updateDepartDataById(sysDepart, username);
 			if (ok) {
-				// 清除部门树内存
-				// FindsDepartsChildrenUtil.clearSysDepartTreeList();
-				// FindsDepartsChildrenUtil.clearDepartIdModel();
 				result.success("修改成功!");
 			}
 		}
@@ -233,7 +227,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 通过id删除
+	 * * 通过id删除
 	 * 
 	 * @param id
 	 * @return
@@ -242,23 +236,19 @@ public class SysDepartController {
 	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
 	@CacheEvict(value = { CacheConstant.SYS_DEPARTS_CACHE, CacheConstant.SYS_DEPART_IDS_CACHE }, allEntries = true)
 	public Result<SysDepart> delete(@RequestParam(name = "id", required = true) String id) {
-
 		Result<SysDepart> result = new Result<SysDepart>();
 		SysDepart sysDepart = sysDepartService.getById(id);
 		if (sysDepart == null) {
 			result.error500("未找到对应实体");
 		} else {
 			sysDepartService.deleteDepart(id);
-			// 清除部门树内存
-			// FindsDepartsChildrenUtil.clearSysDepartTreeList();
-			// FindsDepartsChildrenUtil.clearDepartIdModel();
 			result.success("删除成功!");
 		}
 		return result;
 	}
 
 	/**
-	 * 批量删除 根据前端请求的多个ID,对数据库执行删除相关部门数据的操作
+	 * * 批量删除
 	 * 
 	 * @param ids
 	 * @return
@@ -267,7 +257,6 @@ public class SysDepartController {
 	@RequestMapping(value = "/deleteBatch", method = RequestMethod.DELETE)
 	@CacheEvict(value = { CacheConstant.SYS_DEPARTS_CACHE, CacheConstant.SYS_DEPART_IDS_CACHE }, allEntries = true)
 	public Result<SysDepart> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
-
 		Result<SysDepart> result = new Result<SysDepart>();
 		if (ids == null || "".equals(ids.trim())) {
 			result.error500("参数不识别！");

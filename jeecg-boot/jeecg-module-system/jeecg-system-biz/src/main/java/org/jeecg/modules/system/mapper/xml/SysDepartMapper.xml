@@ -88,7 +88,7 @@
         ORDER BY depart_order DESC
     </select>
 
-    <!--获取部门orgCode最大值的部门信息-->
+    <!-- * 获取部门orgCode最大值的部门信息 -->
     <select id="getMaxCodeDepart" resultType="org.jeecg.modules.system.entity.SysDepart">
         SELECT * FROM sys_depart
         WHERE

@@ -23,7 +23,7 @@ import java.util.List;
 public interface ISysDepartService extends IService<SysDepart> {
 
     /**
-     * 查询我的部门信息,并分节点进行显示
+     * * 查询我的部门信息,并分节点进行显示
      * 
      * @param departIds 部门id
      * @return
@@ -31,14 +31,14 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartTreeModel> queryMyDeptTreeList(String departIds);
 
     /**
-     * 查询所有部门信息,并分节点进行显示
+     * * 查询所有部门信息,并分节点进行显示
      * 
      * @return
      */
     List<SysDepartTreeModel> queryTreeList();
 
     /**
-     * 查询所有部门信息,并分节点进行显示
+     * * 查询所有部门信息,平铺显示
      * 
      * @param ids 多个部门id
      * @return
@@ -53,7 +53,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     public List<DepartIdModel> queryDepartIdTreeList();
 
     /**
-     * 保存部门数据
+     * * 保存部门数据
      * 
      * @param sysDepart
      * @param username  用户名
@@ -61,7 +61,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     void saveDepartData(SysDepart sysDepart, String username);
 
     /**
-     * 更新depart数据
+     * * 更新depart数据
      * 
      * @param sysDepart
      * @param username  用户名
@@ -120,7 +120,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<String> queryDepartsByUserId(String userId);
 
     /**
-     * 根据部门id批量删除并删除其可能存在的子级部门
+     * * 根据部门id批量删除并删除其可能存在的子级部门
      * 
      * @param ids 多个部门id
      * @return
@@ -152,7 +152,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartTreeModel> queryTreeByKeyWord(String keyWord);
 
     /**
-     * 获取我的部门下级所有部门
+     * * 获取部门下级所有部门
      * 
      * @param parentId   父id
      * @param ids        多个部门id
@@ -162,7 +162,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartTreeModel> queryTreeListByPid(String parentId, String ids, String primaryKey);
 
     /**
-     * 获取某个部门的所有父级部门的ID
+     * * 获取某个部门的所有父级部门的ID
      *
      * @param departId 根据departId查
      * @return JSONObject
@@ -170,7 +170,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     JSONObject queryAllParentIdByDepartId(String departId);
 
     /**
-     * 获取某个部门的所有父级部门的ID
+     * * 获取某个部门的所有父级部门的ID
      *
      * @param orgCode 根据orgCode查
      * @return JSONObject
@@ -201,7 +201,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepart> getMyDepartList();
 
     /**
-     * 删除部门
+     * * 删除部门
      * 
      * @param id
      */
@@ -226,7 +226,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     SysDepart getDepartById(String parentId);
 
     /**
-     * 根据id查询部门信息
+     * * 根据 parentId 查询部门信息
      * 
      * @param parentId
      * @return

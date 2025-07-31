@@ -139,11 +139,18 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	@Select("SELECT * FROM sys_depart where id = #{id,jdbcType=VARCHAR}")
 	SysDepart getDepartById(@Param("id") String id);
 
+	/**
+	 * * 获取部门orgCode最大值的部门信息
+	 * 
+	 * @param page
+	 * @param parentId
+	 * @return
+	 */
 	@InterceptorIgnore(tenantLine = "true")
 	List<SysDepart> getMaxCodeDepart(@Param("page") Page<SysDepart> page, @Param("parentId") String parentId);
 
 	/**
-	 * 修改部门状态字段： 是否子节点
+	 * * 修改部门状态字段： 是否子节点
 	 * 
 	 * @param id   部门id
 	 * @param leaf 叶子节点

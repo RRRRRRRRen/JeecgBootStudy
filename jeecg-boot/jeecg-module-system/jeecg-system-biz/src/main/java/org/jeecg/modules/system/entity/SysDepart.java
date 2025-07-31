@@ -84,7 +84,7 @@ public class SysDepart implements Serializable {
 	private String orgCode;
 
 	/**
-	 * 手机号
+	 * * 手机号
 	 */
 	@Excel(name = "手机号", width = 15)
 	private String mobile;

@@ -16,7 +16,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 public interface SysUserDepartMapper extends BaseMapper<SysUserDepart> {
 
 	/**
-	 * 通过用户id查询部门用户
+	 * * 通过用户id查询部门用户
 	 * 
 	 * @param userId 用户id
 	 * @return List<SysUserDepart>

@@ -3,27 +3,35 @@ package org.jeecg.common.util;
 import io.netty.util.internal.StringUtil;
 
 /**
- * 流水号生成规则(按默认规则递增，数字从1-99开始递增，数字到99，递增字母;位数不够增加位数)
- * A001
- * A001A002
+ * * 流水号生成规则(按默认规则递增，数字从1-99开始递增，数字到99，递增字母;位数不够增加位数)
+ * 
+ * * - A001
+ * * - A001A002
  * 
  * @Author zhangdaihao
  *
  */
 public class YouBianCodeUtil {
 
-	// 数字位数(默认生成3位的数字)
-
-	/** 代表数字位数 */
+	/**
+	 * * 数字位数
+	 */
 	private static final int NUM_LENGTH = 2;
 
+	/**
+	 * * 占位位数
+	 */
 	public static final int ZHANWEI_LENGTH = 1 + NUM_LENGTH;
 
+	/**
+	 * * 最大字母
+	 */
 	public static final char LETTER = 'Z';
 
 	/**
-	 * 根据前一个code，获取同级下一个code
-	 * 例如:当前最大code为D01A04，下一个code为：D01A05
+	 * * 根据前一个code，获取同级下一个code
+	 * 
+	 * * 例如 当前最大code为D01A04，下一个code为：D01A05
 	 * 
 	 * @param code
 	 * @return
@@ -31,34 +39,34 @@ public class YouBianCodeUtil {
 	public static synchronized String getNextYouBianCode(String code) {
 		String newcode = "";
 		if (oConvertUtils.isEmpty(code)) {
+			// * 直接 初始化 A01
 			String zimu = "A";
 			String num = getStrNum(1);
 			newcode = zimu + num;
 		} else {
 			String beforeCode = code.substring(0, code.length() - 1 - NUM_LENGTH);
 			String afterCode = code.substring(code.length() - 1 - NUM_LENGTH, code.length());
+			// * 截取字母
 			char afterCodeZimu = afterCode.substring(0, 1).charAt(0);
+			// * 截取数字
 			Integer afterCodeNum = Integer.parseInt(afterCode.substring(1));
-			// org.jeecgframework.core.util.LogUtil.info(after_code);
-			// org.jeecgframework.core.util.LogUtil.info(after_code_zimu);
-			// org.jeecgframework.core.util.LogUtil.info(after_code_num);
 
 			String nextNum = "";
 			char nextZimu = 'A';
-			// 先判断数字等于999*，则计数从1重新开始，递增
+			// * 先判断数字等于99*，则计数从1重新开始，递增
 			if (afterCodeNum == getMaxNumByLength(NUM_LENGTH)) {
 				nextNum = getNextStrNum(0);
 			} else {
 				nextNum = getNextStrNum(afterCodeNum);
 			}
-			// 先判断数字等于999*，则字母从A重新开始,递增
+			// * 先判断数字等于99*，则字母从A重新开始,递增
 			if (afterCodeNum == getMaxNumByLength(NUM_LENGTH)) {
 				nextZimu = getNextZiMu(afterCodeZimu);
 			} else {
 				nextZimu = afterCodeZimu;
 			}
 
-			// 例如Z99，下一个code就是Z99A01
+			// * 例如Z99，下一个code就是Z99A01
 			if (LETTER == afterCodeZimu && getMaxNumByLength(NUM_LENGTH) == afterCodeNum) {
 				newcode = code + (nextZimu + nextNum);
 			} else {
@@ -70,11 +78,11 @@ public class YouBianCodeUtil {
 	}
 
 	/**
-	 * 根据父亲code,获取下级的下一个code
+	 * * 根据父亲code,获取下级的下一个code
 	 * 
-	 * 例如：父亲CODE:A01
-	 * 当前CODE:A01B03
-	 * 获取的code:A01B04
+	 * * - 例如：父亲CODE:A01
+	 * * - 当前CODE:A01B03
+	 * * - 获取的code:A01B04
 	 * 
 	 * @param parentCode 上级code
 	 * @param localCode  同级code
@@ -82,10 +90,7 @@ public class YouBianCodeUtil {
 	 */
 	public static synchronized String getSubYouBianCode(String parentCode, String localCode) {
 		if (localCode != null && localCode != "") {
-
-			// return parentCode + getNextYouBianCode(localCode);
 			return getNextYouBianCode(localCode);
-
 		} else {
 			parentCode = parentCode + "A" + getNextStrNum(0);
 		}
@@ -93,7 +98,7 @@ public class YouBianCodeUtil {
 	}
 
 	/**
-	 * 将数字前面位数补零
+	 * * 将数字前面位数补零
 	 * 
 	 * @param num
 	 * @return
@@ -103,7 +108,9 @@ public class YouBianCodeUtil {
 	}
 
 	/**
-	 * 将数字前面位数补零
+	 * * 将数字前面位数补零
+	 * 
+	 * * String.format("%02d", 12) // 输出 "12"
 	 * 
 	 * @param num
 	 * @return
@@ -114,7 +121,7 @@ public class YouBianCodeUtil {
 	}
 
 	/**
-	 * 递增获取下个数字
+	 * * 递增获取下个数字
 	 * 
 	 * @param num
 	 * @return
@@ -125,7 +132,7 @@ public class YouBianCodeUtil {
 	}
 
 	/**
-	 * 递增获取下个字母
+	 * * 递增获取下个字母
 	 * 
 	 * @param num
 	 * @return
@@ -139,7 +146,7 @@ public class YouBianCodeUtil {
 	}
 
 	/**
-	 * 根据数字位数获取最大值
+	 * * 根据数字位数获取最大值
 	 * 
 	 * @param length
 	 * @return
@@ -155,6 +162,13 @@ public class YouBianCodeUtil {
 		return Integer.parseInt(maxNum.toString());
 	}
 
+	/**
+	 * * 获取当前节点的子节点
+	 * 
+	 * @param list
+	 * @param parentId
+	 * @return
+	 */
 	public static String[] cutYouBianCode(String code) {
 		if (code == null || StringUtil.isNullOrEmpty(code)) {
 			return null;
