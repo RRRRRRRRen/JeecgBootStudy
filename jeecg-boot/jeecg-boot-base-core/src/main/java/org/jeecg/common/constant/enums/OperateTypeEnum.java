@@ -3,6 +3,8 @@ package org.jeecg.common.constant.enums;
 import org.jeecg.common.constant.CommonConstant;
 
 /**
+ * * 操作类型
+ * 
  * @Description: 操作类型
  * @author: jeecg-boot
  * @date: 2022/3/31 10:05
@@ -10,45 +12,44 @@ import org.jeecg.common.constant.CommonConstant;
 public enum OperateTypeEnum {
 
     /**
-     * 列表
+     * * 列表
      */
     LIST(CommonConstant.OPERATE_TYPE_1, "list"),
 
     /**
-     * 新增
+     * * 新增
      */
     ADD(CommonConstant.OPERATE_TYPE_2, "add"),
 
     /**
-     * 编辑
+     * * 编辑
      */
     EDIT(CommonConstant.OPERATE_TYPE_3, "edit"),
 
     /**
-     * 删除
+     * * 删除
      */
     DELETE(CommonConstant.OPERATE_TYPE_4, "delete"),
 
     /**
-     * 导入
+     * * 导入
      */
     IMPORT(CommonConstant.OPERATE_TYPE_5, "import"),
 
     /**
-     * 导出
+     * * 导出
      */
     EXPORT(CommonConstant.OPERATE_TYPE_6, "export");
 
     /**
-     * 类型 1列表,2新增,3编辑,4删除,5导入,6导出
+     * * 类型 1列表,2新增,3编辑,4删除,5导入,6导出
      */
     int type;
 
     /**
-     * 编码(请求方式)
+     * * 编码(请求方式)
      */
     String code;
-
 
     public int getType() {
         return type;
@@ -67,7 +68,7 @@ public enum OperateTypeEnum {
     }
 
     /**
-     * 构造器
+     * * 构造器
      *
      * @param type 类型
      * @param code 编码(请求方式)
@@ -77,9 +78,8 @@ public enum OperateTypeEnum {
         this.code = code;
     }
 
-
     /**
-     * 根据请求名称匹配
+     * * 根据请求名称匹配
      *
      * @param methodName 请求名称
      * @return Integer 类型

@@ -252,7 +252,8 @@ public class Result<T> implements Serializable {
 	}
 
 	/**
-	 * TODO 未知功能的属性
+	 * * online日志内容拼接使用
+	 * 
 	 * * 该属性会在序列化过程中忽略
 	 */
 	@JsonIgnore
