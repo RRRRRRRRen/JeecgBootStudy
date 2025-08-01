@@ -13,12 +13,7 @@ import org.jeecg.modules.system.vo.lowapp.ExportDepartVo;
 import java.util.List;
 
 /**
- * <p>
- * 部门表 服务实现类
- * <p>
- * 
- * @Author:Steve
- *               @Since： 2019-01-22
+ * * 部门表 服务实现类
  */
 public interface ISysDepartService extends IService<SysDepart> {
 
@@ -80,7 +75,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartTreeModel> searchByKeyWord(String keyWord, String myDeptSearch, String departIds);
 
     /**
-     * 根据部门id删除并删除其可能存在的子级部门
+     * * 根据部门id删除并删除其可能存在的子级部门
      * 
      * @param id
      * @return
@@ -96,7 +91,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     public List<SysDepart> queryUserDeparts(String userId);
 
     /**
-     * 根据用户名查询部门
+     * * 根据用户名查询部门
      *
      * @param username
      * @return
@@ -104,7 +99,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepart> queryDepartsByUsername(String username);
 
     /**
-     * 根据用户ID查询部门
+     * * 根据用户ID查询部门
      *
      * @param userId
      * @return
@@ -136,7 +131,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<String> getMySubDepIdsByDepId(String departIds);
 
     /**
-     * 根据关键字获取部门信息（通讯录）
+     * * 根据关键字获取部门信息（通讯录）
      * 
      * @param keyWord 搜索词
      * @return
@@ -170,7 +165,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     JSONObject queryAllParentIdByOrgCode(String orgCode);
 
     /**
-     * 获取公司信息
+     * * 获取公司信息
      * 
      * @param orgCode 部门编码
      * @return
@@ -178,7 +173,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     SysDepart queryCompByOrgCode(String orgCode);
 
     /**
-     * 获取下级部门
+     * * 获取下级部门
      * 
      * @param pid
      * @return
@@ -186,7 +181,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepart> queryDeptByPid(String pid);
 
     /**
-     * 获取我的部门已加入的公司
+     * * 获取我的部门已加入的公司
      * 
      * @return
      */
@@ -200,7 +195,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     void deleteDepart(String id);
 
     /**
-     * 通讯录通过租户id查询部门数据
+     * * 通讯录通过租户id查询部门数据
      * 
      * @param parentId
      * @param tenantId
@@ -210,7 +205,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartTreeModel> queryBookDepTreeSync(String parentId, Integer tenantId, String departName);
 
     /**
-     * 根据id查询部门信息
+     * * 根据id查询部门信息
      * 
      * @param parentId
      * @return
@@ -226,7 +221,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     IPage<SysDepart> getMaxCodeDepart(Page<SysDepart> page, String parentId);
 
     /**
-     * 更新叶子节点
+     * * 更新叶子节点
      * 
      * @param id
      * @param izLeaf
@@ -234,7 +229,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     void updateIzLeaf(String id, Integer izLeaf);
 
     /**
-     * 获取导出部门的数据
+     * * 获取导出部门的数据
      * 
      * @param tenantId
      * @return
@@ -244,7 +239,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     void importExcel(List<ExportDepartVo> listSysDeparts, List<String> errorMessageList);
 
     /**
-     * 根据租户id导出部门
+     * * 根据租户id导出部门
      * 
      * @param tenantId
      * @param idList
@@ -253,7 +248,7 @@ public interface ISysDepartService extends IService<SysDepart> {
     List<SysDepartExportVo> getExportDepart(Integer tenantId, List<String> idList);
 
     /**
-     * 导出系统部门excel
+     * * 导出系统部门excel
      * 
      * @param listSysDeparts
      * @param errorMessageList

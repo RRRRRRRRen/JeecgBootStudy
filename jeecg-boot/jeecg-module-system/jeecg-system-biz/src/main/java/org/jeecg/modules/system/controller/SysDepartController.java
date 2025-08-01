@@ -44,9 +44,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * <p>
- * 部门表 前端控制器
- * <p>
+ * * 部门表 前端控制器
  * 
  * @Author: Steve @Since： 2019-01-22
  */
@@ -321,7 +319,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 导出excel
+	 * * 导出excel
 	 *
 	 * @param request
 	 */
@@ -357,9 +355,10 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 通过excel导入数据
-	 * 部门导入方案1: 通过机构编码来计算出部门的父级ID,维护上下级关系;
-	 * 部门导入方案2: 你也可以改造下程序,机构编码直接导入,先不设置父ID;全部导入后,写一个sql,补下父ID;
+	 * * 通过excel导入数据
+	 * 
+	 * * - 部门导入方案1: 通过机构编码来计算出部门的父级ID,维护上下级关系;
+	 * * - 部门导入方案2: 你也可以改造下程序,机构编码直接导入,先不设置父ID;全部导入后,写一个sql,补下父ID;
 	 *
 	 * @param request
 	 * @param response
@@ -371,24 +370,22 @@ public class SysDepartController {
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		List<String> errorMessageList = new ArrayList<>();
-		// List<SysDepart> listSysDeparts = null;
 		List<SysDepartExportVo> listSysDeparts = null;
 		Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
 		for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
-			// 获取上传文件对象
+			// * 获取上传文件对象
 			MultipartFile file = entity.getValue();
 			ImportParams params = new ImportParams();
 			params.setTitleRows(2);
 			params.setHeadRows(1);
 			params.setNeedSave(true);
-			try {
 
-				// update-begin---author:wangshuai---date:2023-10-19---for:【QQYUN-5482】系统的部门导入导出也可以改成敲敲云模式的部门路径---
+			try {
+				// * 系统的部门导入导出也可以改成敲敲云模式的部门路径
 				listSysDeparts = ExcelImportUtil.importExcel(file.getInputStream(), SysDepartExportVo.class, params);
 				sysDepartService.importSysDepart(listSysDeparts, errorMessageList);
-				// update-end---author:wangshuai---date:2023-10-19---for:【QQYUN-5482】系统的部门导入导出也可以改成敲敲云模式的部门路径---
 
-				// 清空部门缓存
+				// * 清空部门缓存
 				List<String> keys3 = redisUtil.scan(CacheConstant.SYS_DEPARTS_CACHE + "*");
 				List<String> keys4 = redisUtil.scan(CacheConstant.SYS_DEPART_IDS_CACHE + "*");
 				redisTemplate.delete(keys3);
@@ -410,7 +407,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 查询所有部门信息
+	 * * 查询所有部门信息
 	 * 
 	 * @return
 	 */
@@ -430,7 +427,10 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 查询数据 查出所有部门,并以树结构数据格式响应给前端
+	 * * 查询数据
+	 * 
+	 * * 关键字 查出所有部门
+	 * * 关键字 查出用户
 	 *
 	 * @return
 	 */
@@ -440,8 +440,10 @@ public class SysDepartController {
 		Result<Map<String, Object>> result = new Result<>();
 		try {
 			Map<String, Object> map = new HashMap<>(5);
+			// * 获取树
 			List<SysDepartTreeModel> list = sysDepartService.queryTreeByKeyWord(keyWord);
-			// 根据keyWord获取用户信息
+
+			// * 根据keyWord获取用户信息
 			LambdaQueryWrapper<SysUser> queryUser = new LambdaQueryWrapper<SysUser>();
 			queryUser.eq(SysUser::getDelFlag, CommonConstant.DEL_FLAG_0);
 			queryUser.and(i -> i.like(SysUser::getUsername, keyWord).or().like(SysUser::getRealname, keyWord));
@@ -457,7 +459,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 根据部门编码获取部门信息
+	 * * 根据部门编码获取部门信息
 	 *
 	 * @param orgCode
 	 * @return
@@ -474,7 +476,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 根据部门id获取用户信息
+	 * * 根据部门id获取用户信息
 	 *
 	 * @param id
 	 * @return
@@ -489,7 +491,8 @@ public class SysDepartController {
 	}
 
 	/**
-	 * @功能：根据id 批量查询
+	 * * 批量查询
+	 * 
 	 * @param deptIds
 	 * @return
 	 */
@@ -504,6 +507,9 @@ public class SysDepartController {
 		return result;
 	}
 
+	/**
+	 * * 获取我的部门已加入的公司
+	 */
 	@GetMapping("/getMyDepartList")
 	public Result<List<SysDepart>> getMyDepartList() {
 		List<SysDepart> list = sysDepartService.getMyDepartList();
@@ -511,7 +517,7 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 异步查询部门list
+	 * * 异步查询部门list
 	 * 
 	 * @param parentId 父节点 异步加载时传递
 	 * @return
@@ -533,7 +539,9 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 通过部门id和租户id获取用户 【低代码应用: 用于选择部门负责人】
+	 * * 通过部门id和租户id获取用户
+	 * 
+	 * * - 低代码应用: 用于选择部门负责人
 	 * 
 	 * @param departId
 	 * @return
@@ -546,18 +554,19 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 导出excel【低代码应用: 用于导出部门】
+	 * * 导出excel
+	 * 
+	 * * - 低代码应用: 用于导出部门
 	 *
 	 * @param request
 	 */
 	@RequestMapping(value = "/appExportXls")
 	public ModelAndView appExportXls(SysDepart sysDepart, HttpServletRequest request) {
-		// Step.1 组装查询条件
+		// * Step.1 组装查询条件
 		int tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
 		ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
 		List<ExportDepartVo> pageList = sysDepartService.getExcelDepart(tenantId);
-		// Step.2 AutoPoi 导出Excel
-		// 导出文件名称
+		// * Step.2 AutoPoi 导出Excel
 		mv.addObject(NormalExcelConstants.FILE_NAME, "部门列表");
 		mv.addObject(NormalExcelConstants.CLASS, ExportDepartVo.class);
 		LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
@@ -567,7 +576,9 @@ public class SysDepartController {
 	}
 
 	/**
-	 * 导入excel【低代码应用: 用于导出部门】
+	 * * 导入excel
+	 * 
+	 * * - 低代码应用: 用于导入部门
 	 *
 	 * @param request
 	 */
@@ -579,7 +590,7 @@ public class SysDepartController {
 		List<ExportDepartVo> listSysDeparts = null;
 		Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
 		for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
-			// 获取上传文件对象
+			// * 获取上传文件对象
 			MultipartFile file = entity.getValue();
 			ImportParams params = new ImportParams();
 			params.setTitleRows(2);
@@ -588,7 +599,7 @@ public class SysDepartController {
 			try {
 				listSysDeparts = ExcelImportUtil.importExcel(file.getInputStream(), ExportDepartVo.class, params);
 				sysDepartService.importExcel(listSysDeparts, errorMessageList);
-				// 清空部门缓存
+				// * 清空部门缓存
 				List<String> keys3 = redisUtil.scan(CacheConstant.SYS_DEPARTS_CACHE + "*");
 				List<String> keys4 = redisUtil.scan(CacheConstant.SYS_DEPART_IDS_CACHE + "*");
 				redisTemplate.delete(keys3);

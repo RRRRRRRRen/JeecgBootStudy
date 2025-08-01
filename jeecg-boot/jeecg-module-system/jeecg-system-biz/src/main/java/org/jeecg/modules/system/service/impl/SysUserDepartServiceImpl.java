@@ -94,7 +94,7 @@ public class SysUserDepartServiceImpl extends ServiceImpl<SysUserDepartMapper, S
 	}
 
 	/**
-	 * 根据部门id查询用户信息
+	 * * 根据部门id查询用户信息
 	 */
 	@Override
 	public List<SysUser> queryUserByDepId(String depId) {
@@ -106,13 +106,11 @@ public class SysUserDepartServiceImpl extends ServiceImpl<SysUserDepartMapper, S
 			for (SysUserDepart uDep : uDepList) {
 				userIdList.add(uDep.getUserId());
 			}
-			List<SysUser> userList = (List<SysUser>) sysUserMapper.selectBatchIds(userIdList);
-			// update-begin-author:taoyan date:201905047 for:接口调用查询返回结果不能返回密码相关信息
+			List<SysUser> userList = sysUserMapper.selectBatchIds(userIdList);
 			for (SysUser sysUser : userList) {
 				sysUser.setSalt("");
 				sysUser.setPassword("");
 			}
-			// update-end-author:taoyan date:201905047 for:接口调用查询返回结果不能返回密码相关信息
 			return userList;
 		}
 		return new ArrayList<SysUser>();
@@ -353,6 +351,13 @@ public class SysUserDepartServiceImpl extends ServiceImpl<SysUserDepartMapper, S
 		return pageList;
 	}
 
+	/**
+	 * * 通过部门id和租户id获取多个用户
+	 * 
+	 * @param departId
+	 * @param tenantId
+	 * @return
+	 */
 	@Override
 	public List<SysUser> getUsersByDepartTenantId(String departId, Integer tenantId) {
 		return baseMapper.getUsersByDepartTenantId(departId, tenantId);

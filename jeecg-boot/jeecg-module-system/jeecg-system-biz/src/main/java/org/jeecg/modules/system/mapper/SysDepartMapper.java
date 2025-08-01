@@ -36,7 +36,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	public List<SysDepart> queryUserDeparts(@Param("userId") String userId);
 
 	/**
-	 * 根据用户名查询部门
+	 * * 根据用户名查询部门
 	 *
 	 * @param username
 	 * @return
@@ -44,7 +44,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	public List<SysDepart> queryDepartsByUsername(@Param("username") String username);
 
 	/**
-	 * 根据用户名查询部门
+	 * * 根据用户名查询部门
 	 *
 	 * @param userId
 	 * @return
@@ -52,7 +52,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	public List<String> queryDepartsByUserId(@Param("userId") String userId);
 
 	/**
-	 * 通过部门编码获取部门id
+	 * * 通过部门编码获取部门id
 	 * 
 	 * @param orgCode 部门编码
 	 * @return String
@@ -61,7 +61,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	public String queryDepartIdByOrgCode(@Param("orgCode") String orgCode);
 
 	/**
-	 * 通过部门id，查询部门下的用户的账号
+	 * * 通过部门id，查询部门下的用户的账号
 	 * 
 	 * @param departIds 部门ID集合
 	 * @return String
@@ -69,7 +69,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	public List<String> queryUserAccountByDepartIds(@Param("departIds") List<String> departIds);
 
 	/**
-	 * 通过部门id 查询部门id,父id
+	 * * 通过部门id 查询部门id,父id
 	 * 
 	 * @param departId 部门id
 	 * @return
@@ -94,7 +94,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	List<String> getSubDepIdsByOrgCodes(@org.apache.ibatis.annotations.Param("orgCodes") String[] orgCodes);
 
 	/**
-	 * 根据parent_id查询下级部门
+	 * * 根据parent_id查询下级部门
 	 * 
 	 * @param parentId 父id
 	 * @return List<SysDepart>
@@ -102,7 +102,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	List<SysDepart> queryTreeListByPid(@Param("parentId") String parentId);
 
 	/**
-	 * 根据id下级部门数量
+	 * * 根据id下级部门数量
 	 * 
 	 * @param parentId
 	 * @return
@@ -111,7 +111,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	Integer queryCountByPid(@Param("parentId") String parentId);
 
 	/**
-	 * 根据OrgCod查询所属公司信息
+	 * * 根据OrgCod查询所属公司信息
 	 * 
 	 * @param orgCode
 	 * @return
@@ -119,7 +119,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	SysDepart queryCompByOrgCode(@Param("orgCode") String orgCode);
 
 	/**
-	 * 根据id下级部门
+	 * * 根据id下级部门
 	 * 
 	 * @param parentId
 	 * @return
@@ -128,7 +128,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	List<SysDepart> queryDeptByPid(@Param("parentId") String parentId);
 
 	/**
-	 * 通过父级id和租户id查询部门
+	 * * 通过父级id和租户id查询部门
 	 * 
 	 * @param parentId
 	 * @param tenantId
@@ -169,7 +169,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	int setMainLeaf(@Param("id") String id, @Param("leaf") Integer leaf);
 
 	/**
-	 * 获取租户id和部门父id获取的部门数据
+	 * * 获取租户id和部门父id获取的部门数据
 	 * 
 	 * @param tenantId
 	 * @param parentId
@@ -178,7 +178,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 	List<ExportDepartVo> getDepartList(@Param("parentId") String parentId, @Param("tenantId") Integer tenantId);
 
 	/**
-	 * 根据部门名称和租户id获取部门数据
+	 * * 根据部门名称和租户id获取部门数据
 	 * 
 	 * @param departName
 	 * @param tenantId
@@ -188,7 +188,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 			@Param("parentId") String parentId);
 
 	/**
-	 * 根据部门id获取用户id和部门名称
+	 * * 根据部门id获取用户id和部门名称
 	 * 
 	 * @param userList
 	 * @return
@@ -197,7 +197,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 			@Param("tenantId") Integer tenantId);
 
 	/**
-	 * 根据部门名称和租户id获取分页部门数据
+	 * * 根据部门名称和租户id获取分页部门数据
 	 * 
 	 * @param page
 	 * @param departName
@@ -209,7 +209,7 @@ public interface SysDepartMapper extends BaseMapper<SysDepart> {
 			@Param("tenantId") Integer tenantId, @Param("parentId") String parentId);
 
 	/**
-	 * 获取租户id和部门父id获取的部门数据
+	 * * 获取租户id和部门父id获取的部门数据
 	 * 
 	 * @param tenantId
 	 * @param parentId

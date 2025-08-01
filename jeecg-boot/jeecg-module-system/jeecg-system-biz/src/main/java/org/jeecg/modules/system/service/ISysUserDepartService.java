@@ -26,7 +26,7 @@ public interface ISysUserDepartService extends IService<SysUserDepart> {
 	List<DepartIdModel> queryDepartIdsOfUser(String userId);
 
 	/**
-	 * 根据部门id查询用户信息
+	 * * 根据部门id查询用户信息
 	 * 
 	 * @param depId
 	 * @return
@@ -85,7 +85,7 @@ public interface ISysUserDepartService extends IService<SysUserDepart> {
 			Integer pageNo, String excludeUserIdList);
 
 	/**
-	 * 通过部门id和租户id获取多个用户
+	 * * 通过部门id和租户id获取多个用户
 	 * 
 	 * @param departId
 	 * @param tenantId

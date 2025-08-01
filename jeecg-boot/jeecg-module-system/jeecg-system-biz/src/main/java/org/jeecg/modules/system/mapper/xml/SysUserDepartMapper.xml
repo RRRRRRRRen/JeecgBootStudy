@@ -107,7 +107,7 @@
 		)
 	</select>
 
-	<!--通过部门id和租户id获取用户-->
+	<!-- * 通过部门id和租户id获取用户 -->
 	<select id="getUsersByDepartTenantId" resultType="org.jeecg.modules.system.entity.SysUser">
 		select su.id,su.realname from sys_user_depart sud
 		INNER JOIN sys_user su ON sud.user_id = su.id

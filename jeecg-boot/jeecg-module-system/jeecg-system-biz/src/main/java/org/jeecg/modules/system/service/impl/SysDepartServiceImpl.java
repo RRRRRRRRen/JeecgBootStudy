@@ -40,9 +40,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * <p>
- * 部门表 服务实现类
- * <p>
+ * * 部门表 服务实现类
  * 
  * @Author Steve
  * @Since 2019-01-22
@@ -471,11 +469,23 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		return baseMapper.queryUserDeparts(userId);
 	}
 
+	/**
+	 * * 根据用户名查询部门
+	 *
+	 * @param username
+	 * @return
+	 */
 	@Override
 	public List<SysDepart> queryDepartsByUsername(String username) {
 		return baseMapper.queryDepartsByUsername(username);
 	}
 
+	/**
+	 * * 根据用户ID查询部门
+	 *
+	 * @param userId
+	 * @return
+	 */
 	@Override
 	public List<String> queryDepartsByUserId(String userId) {
 		List<String> list = baseMapper.queryDepartsByUserId(userId);
@@ -567,7 +577,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 获取部门树信息根据关键字
+	 * * 获取部门树信息根据关键字
 	 * 
 	 * @param keyWord
 	 * @return
@@ -578,9 +588,10 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		query.eq(SysDepart::getDelFlag, CommonConstant.DEL_FLAG_0.toString());
 		query.orderByAsc(SysDepart::getDepartOrder);
 		List<SysDepart> list = this.list(query);
-		// 调用wrapTreeDataToTreeList方法生成树状数据
+		// * 调用wrapTreeDataToTreeList方法生成树状数据
 		List<SysDepartTreeModel> listResult = FindsDepartsChildrenUtil.wrapTreeDataToTreeList(list);
 		List<SysDepartTreeModel> treelist = new ArrayList<>();
+		// * 过滤（会破坏树结构）
 		if (StringUtils.isNotBlank(keyWord)) {
 			this.getTreeByKeyWord(keyWord, listResult, treelist);
 		} else {
@@ -712,6 +723,12 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		}
 	}
 
+	/**
+	 * * 获取公司信息
+	 * 
+	 * @param orgCode 部门编码
+	 * @return
+	 */
 	@Override
 	public SysDepart queryCompByOrgCode(String orgCode) {
 		int length = YouBianCodeUtil.ZHANWEI_LENGTH;
@@ -720,7 +737,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 根据id查询下级部门
+	 * * 根据id查询下级部门
 	 * 
 	 * @param pid
 	 * @return
@@ -731,7 +748,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 根据关键字筛选部门信息
+	 * * 根据关键字筛选部门树信息
 	 * 
 	 * @param keyWord
 	 * @return
@@ -879,7 +896,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 获取我的部门已加入的公司
+	 * * 获取我的部门的一级部门
 	 * 
 	 * @return
 	 */
@@ -887,12 +904,12 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	public List<SysDepart> getMyDepartList() {
 		LoginUser user = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 		String userId = user.getId();
-		// 字典code集合
+		// * org_code集合
 		List<String> list = new ArrayList<>();
-		// 查询我加入的部门
+		// * 查询我加入的部门
 		List<SysDepart> sysDepartList = this.baseMapper.queryUserDeparts(userId);
 		for (SysDepart sysDepart : sysDepartList) {
-			// 获取一级部门编码
+			// * 获取一级部门编码
 			String orgCode = sysDepart.getOrgCode();
 			if (YouBianCodeUtil.ZHANWEI_LENGTH <= orgCode.length()) {
 				int length = YouBianCodeUtil.ZHANWEI_LENGTH;
@@ -900,9 +917,9 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 				list.add(companyOrgCode);
 			}
 		}
-		// 字典code集合不为空
+		// * 字典code集合不为空
 		if (oConvertUtils.isNotEmpty(list)) {
-			// 查询一级部门的数据
+			// * 查询一级部门的数据
 			LambdaQueryWrapper<SysDepart> query = new LambdaQueryWrapper<>();
 			query.select(SysDepart::getDepartName, SysDepart::getId, SysDepart::getOrgCode);
 			query.eq(SysDepart::getDelFlag, String.valueOf(CommonConstant.DEL_FLAG_0));
@@ -929,6 +946,14 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		this.userDepartMapper.delete(query);
 	}
 
+	/**
+	 * * 通讯录通过租户id查询部门数据
+	 * 
+	 * @param parentId
+	 * @param tenantId
+	 * @param departName
+	 * @return
+	 */
 	@Override
 	public List<SysDepartTreeModel> queryBookDepTreeSync(String parentId, Integer tenantId, String departName) {
 		List<SysDepart> list = departMapper.queryBookDepTreeSync(parentId, tenantId, departName);
@@ -985,27 +1010,30 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		}
 	}
 
-	// ========================begin 零代码下部门与人员导出
-	// ==================================================================
-
+	/**
+	 * * 获取导出部门的数据
+	 * 
+	 * @param tenantId
+	 * @return
+	 */
 	@Override
 	public List<ExportDepartVo> getExcelDepart(int tenantId) {
-		// 获取父级部门
+		// * 获取父级部门
 		List<ExportDepartVo> parentDepart = departMapper.getDepartList("", tenantId);
-		// 子部门
+		// * 子部门
 		List<ExportDepartVo> childrenDepart = new ArrayList<>();
-		// 把一级部门名称放在里面
+		// * 把一级部门名称放在里面
 		List<ExportDepartVo> exportDepartVoList = new ArrayList<>();
-		// 存放部门一级id避免重复
+		// * 存放部门一级id避免重复
 		List<String> departIdList = new ArrayList<>();
 		for (ExportDepartVo departVo : parentDepart) {
 			departIdList.add(departVo.getId());
 			departVo.setDepartNameUrl(departVo.getDepartName());
 			exportDepartVoList.add(departVo);
-			// 创建路径
+			// * 创建路径
 			List<String> path = new ArrayList<>();
 			path.add(departVo.getDepartName());
-			// 创建子部门路径
+			// * 创建子部门路径
 			findPath(departVo, path, tenantId, childrenDepart, departIdList);
 			path.clear();
 		}
@@ -1016,7 +1044,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 寻找部门路径
+	 * * 寻找部门路径
 	 * 
 	 * @param departVo       部门vo
 	 * @param path           部门路径
@@ -1024,11 +1052,14 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	 * @param childrenDepart 子部门
 	 * @param departIdList   部门id集合
 	 */
-	private void findPath(ExportDepartVo departVo, List<String> path, Integer tenantId,
-			List<ExportDepartVo> childrenDepart, List<String> departIdList) {
-		// 获取租户id和部门父id获取的部门数据
+	private void findPath(
+			ExportDepartVo departVo,
+			List<String> path, Integer tenantId,
+			List<ExportDepartVo> childrenDepart,
+			List<String> departIdList) {
+		// * 获取租户id和部门父id获取的部门数据
 		List<ExportDepartVo> departList = departMapper.getDepartList(departVo.getId(), tenantId);
-		// 部门为空判断
+		// * 部门为空判断
 		if (departList == null || departList.size() <= 0) {
 			if (!departIdList.contains(departVo.getId())) {
 				departVo.setDepartNameUrl(String.join(SymbolConstant.SINGLE_SLASH, path));
@@ -1039,7 +1070,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 
 		for (int i = 0; i < departList.size(); i++) {
 			ExportDepartVo exportDepartVo = departList.get(i);
-			// 存放子级路径
+			// * 存放子级路径
 			List<String> cPath = new ArrayList<>();
 			cPath.addAll(path);
 			cPath.add(exportDepartVo.getDepartName());
@@ -1051,17 +1082,20 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 			findPath(exportDepartVo, cPath, tenantId, childrenDepart, departIdList);
 		}
 	}
-	// ========================end 零代码下部门与人员导出
-	// ==================================================================
 
-	// ========================begin 零代码下部门与人员导入
-	// ==================================================================
+	/**
+	 * * 导入
+	 *
+	 * @param tenantId
+	 * @param idList
+	 * @return
+	 */
 	@Override
 	public void importExcel(List<ExportDepartVo> listSysDeparts, List<String> errorMessageList) {
 		int num = 0;
 		int tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
 
-		// 部门路径排序
+		// * 部门路径排序
 		Collections.sort(listSysDeparts, new Comparator<ExportDepartVo>() {
 			@Override
 			public int compare(ExportDepartVo o1, ExportDepartVo o2) {
@@ -1074,21 +1108,21 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 				}
 			}
 		});
-		// 存放部门数据的map
+		// * 存放部门数据的map
 		Map<String, SysDepart> departMap = new HashMap<>();
-		// 循环第二遍导入数据
+		// * 循环第二遍导入数据
 		for (ExportDepartVo exportDepartVo : listSysDeparts) {
 			SysDepart sysDepart = new SysDepart();
-			// orgCode编码长度
+			// * orgCode编码长度
 			int codeLength = YouBianCodeUtil.ZHANWEI_LENGTH;
 			Boolean izExport = false;
 			try {
 				izExport = this.addDepartByName(exportDepartVo.getDepartNameUrl(), exportDepartVo.getDepartName(), sysDepart,
 						errorMessageList, tenantId, departMap, num);
 			} catch (Exception e) {
-				// 没有查找到parentDept
+				// * 没有查找到parentDept
 			}
-			// 没有错误的时候才会导入数据
+			// * 没有错误的时候才会导入数据
 			if (izExport) {
 				sysDepart.setOrgType(sysDepart.getOrgCode().length() / codeLength + "");
 				sysDepart.setDelFlag(CommonConstant.DEL_FLAG_0.toString());
@@ -1103,7 +1137,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 添加部门
+	 * * 添加部门
 	 * 
 	 * @param departNameUrl    部门路径
 	 * @param departName       部门名称
@@ -1113,83 +1147,86 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	 * @param departMap        部门数组。避免存在部门信息再次查询 key 存放部门路径 value 存放部门对象
 	 * @param num              判断第几行有错误信息
 	 */
-	private Boolean addDepartByName(String departNameUrl, String departName, SysDepart sysDepart,
-			List<String> errorMessageList, Integer tenantId, Map<String, SysDepart> departMap, int num) {
+	private Boolean addDepartByName(
+			String departNameUrl,
+			String departName,
+			SysDepart sysDepart,
+			List<String> errorMessageList,
+			Integer tenantId,
+			Map<String, SysDepart> departMap,
+			int num) {
 		int lineNumber = num + 1;
 		if (oConvertUtils.isEmpty(departNameUrl) && oConvertUtils.isEmpty(departName)) {
-			// 部门路径为空
+			// * 部门路径为空
 			errorMessageList.add("第 " + lineNumber + " 行：记录部门路径或者部门名称为空禁止导入");
 			return false;
 		}
-		// 获取部门名称路径
+		// * 获取部门名称路径
 		String name = "";
 		if (departNameUrl.contains(SymbolConstant.SINGLE_SLASH)) {
-			// 获取分割的部门名称
+			// * 获取分割的部门名称
 			name = departNameUrl.substring(departNameUrl.lastIndexOf(SymbolConstant.SINGLE_SLASH) + 1);
 		} else {
 			name = departNameUrl;
 		}
 
 		if (!name.equals(departName)) {
-			// 部门名称已存在
+			// * 部门名称已存在
 			errorMessageList
 					.add("第 " + lineNumber + " 行：记录部门路径:”" + departNameUrl + "“" + "和部门名称：“" + departName + "“不一致，请检查！");
 			return false;
 		} else {
 			String parentId = "";
-			// 判断是否包含“/”
+			// * 判断是否包含“/”
 			if (departNameUrl.contains(SymbolConstant.SINGLE_SLASH)) {
-				// 获取最后一个斜杠之前的路径
+				// * 获取最后一个斜杠之前的路径
 				String departNames = departNameUrl.substring(0, departNameUrl.lastIndexOf(SymbolConstant.SINGLE_SLASH));
-				// 判断是否已经包含部门路径
+				// * 判断是否已经包含部门路径
 				if (departMap.containsKey(departNames)) {
 					SysDepart depart = departMap.get(departNames);
 					if (null != depart) {
 						parentId = depart.getId();
 					}
 				} else {
-					// 分割斜杠路径，查看数据库中是否存在此路径
+					// * 分割斜杠路径，查看数据库中是否存在此路径
 					String[] departNameUrls = departNameUrl.split(SymbolConstant.SINGLE_SLASH);
 					String departUrlName = departNameUrls[0];
-					// 判断是否为最后一位
+					// * 判断是否为最后一位
 					int count = 0;
 					SysDepart depart = new SysDepart();
 					depart.setId("");
 					String parentIdByName = this.getDepartListByName(departUrlName, tenantId, depart, departNameUrls, count,
 							departNameUrls.length - 1, name, departMap);
-					// 如果parentId不为空
+					// * 如果parentId不为空
 					if (oConvertUtils.isNotEmpty(parentIdByName)) {
 						parentId = parentIdByName;
 					} else {
-						// 部门名称已存在
+						// * 部门名称已存在
 						errorMessageList.add("第 " + lineNumber + " 行：记录部门名称“" + departName + "”上级不存在，请检查！");
 						return false;
 					}
 				}
 			}
-			// 查询部门名称是否已存在
+			// * 查询部门名称是否已存在
 			SysDepart parentDept = null;
-			// update-begin---author:wangshuai ---date:20230721
-			// for：一个租户部门名称可能有多个------------
 			List<SysDepart> sysDepartList = departMapper.getDepartByName(departName, tenantId, parentId);
 			if (CollectionUtil.isNotEmpty(sysDepartList)) {
 				parentDept = sysDepartList.get(0);
 			}
-			// update-end---author:wangshuai ---date:20230721 for：一个租户部门名称可能有多个------------
 			if (null != parentDept) {
-				// 部门名称已存在
+				// * 部门名称已存在
 				errorMessageList.add("第 " + lineNumber + " 行：记录部门名称“" + departName + "”已存在，请检查！");
 				return false;
 			} else {
 				Page<SysDepart> page = new Page<>(1, 1);
-				// 需要获取父级id，查看父级是否已经存在
-				// 获取一级部门的最大orgCode
+				// * 需要获取父级id，查看父级是否已经存在
+				// * 获取一级部门的最大orgCode
 				List<SysDepart> records = departMapper.getMaxCodeDepart(page, parentId);
 				String newOrgCode = "";
 				if (CollectionUtil.isNotEmpty(records)) {
 					newOrgCode = YouBianCodeUtil.getNextYouBianCode(records.get(0).getOrgCode());
 				} else {
-					// 查询父id
+					// * 查询父id
 					if (oConvertUtils.isNotEmpty(parentId)) {
 						SysDepart departById = departMapper.getDepartById(parentId);
 						newOrgCode = YouBianCodeUtil.getSubYouBianCode(departById.getOrgCode(), null);
@@ -1210,7 +1247,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 获取部门名称url（下级）
+	 * * 获取部门名称url（下级）
 	 * 
 	 * @param departName     部门名称
 	 * @param tenantId       租户id
@@ -1223,30 +1260,27 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	 */
 	private String getDepartListByName(String departName, Integer tenantId, SysDepart sysDepart, String[] departNameUrls,
 			int count, int departNum, String name, Map<String, SysDepart> departMap) {
-		// 递归查找下一级
-		// update-begin---author:wangshuai ---date:20230721
-		// for：一个租户部门名称可能有多个------------
+		// * 递归查找下一级
 		SysDepart parentDept = null;
 		List<SysDepart> departList = departMapper.getDepartByName(departName, tenantId, sysDepart.getId());
 		if (CollectionUtil.isNotEmpty(departList)) {
 			parentDept = departList.get(0);
 		}
-		// update-end---author:wangshuai ---date:20230721 for：一个租户部门名称可能有多个------------
-		// 判断是否包含/
+		// * 判断是否包含/
 		if (oConvertUtils.isNotEmpty(name)) {
 			name = name + SymbolConstant.SINGLE_SLASH + departName;
 		} else {
 			name = departName;
 		}
 		if (null != parentDept) {
-			// 如果名称路径key不再在，添加一个，避免再次查询
+			// * 如果名称路径key不再在，添加一个，避免再次查询
 			if (!departMap.containsKey(name)) {
 				departMap.put(name, parentDept);
 			}
-			// 查询出来的部门名称和部门路径中的部门名称作比较，如果不存在直接返回空
+			// * 查询出来的部门名称和部门路径中的部门名称作比较，如果不存在直接返回空
 			if (parentDept.getDepartName().equals(departNameUrls[count])) {
 				count = count + 1;
-				// 数量和部门数量相等说明已经到最后一位了，直接返回部门id
+				// * 数量和部门数量相等说明已经到最后一位了，直接返回部门id
 				if (count == departNum) {
 					return parentDept.getId();
 				} else {
@@ -1260,8 +1294,6 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 			return "";
 		}
 	}
-	// ========================end 零代码下部门与人员导入
-	// ==================================================================
 
 	/**
 	 * * 设置父级为叶子节点
@@ -1283,10 +1315,8 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		}
 	}
 
-	// ========================begin 系统下部门与人员导入
-	// ==================================================================
 	/**
-	 * 系统部门导出
+	 * * 系统部门导出
 	 * 
 	 * @param tenantId
 	 * @param idList   需要查询部门sql的id集合
@@ -1294,24 +1324,25 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	 */
 	@Override
 	public List<SysDepartExportVo> getExportDepart(Integer tenantId, List<String> idList) {
-		// 获取父级部门
+		// * 获取父级部门
 		List<SysDepartExportVo> parentDepart = departMapper.getSysDepartList("", tenantId, idList);
-		// 子部门
+
+		// * 子部门
 		List<SysDepartExportVo> childrenDepart = new ArrayList<>();
-		// 把一级部门名称放在里面
+
+		// * 一级部门
 		List<SysDepartExportVo> exportDepartVoList = new ArrayList<>();
-		// 存放部门一级id避免重复
+		// * 一级id
 		List<String> departIdList = new ArrayList<>();
 		for (SysDepartExportVo sysDepart : parentDepart) {
-			// step 1.添加第一级部门
+			// * step 1.添加第一级部门
 			departIdList.add(sysDepart.getId());
 			sysDepart.setDepartNameUrl(sysDepart.getDepartName());
 			exportDepartVoList.add(sysDepart);
-			// step 2.添加自己部门路径，用/分离
-			// 创建路径
+
+			// * step 2.添加自己部门路径，用/分离
 			List<String> path = new ArrayList<>();
 			path.add(sysDepart.getDepartName());
-			// 创建子部门路径
 			findSysDepartPath(sysDepart, path, tenantId, childrenDepart, departIdList, idList);
 			path.clear();
 		}
@@ -1322,7 +1353,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 系统部门导入
+	 * * 系统部门导入
 	 * 
 	 * @param listSysDeparts
 	 * @param errorMessageList
@@ -1334,7 +1365,8 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
 		}
-		// 部门路径排序
+
+		// * listSysDeparts 部门路径排序
 		Collections.sort(listSysDeparts, new Comparator<SysDepartExportVo>() {
 			@Override
 			public int compare(SysDepartExportVo o1, SysDepartExportVo o2) {
@@ -1347,58 +1379,67 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 				}
 			}
 		});
-		// 存放部门数据的map
+
+		// * 存放部门数据的map
 		Map<String, SysDepart> departMap = new HashMap<>();
-		// orgCode编码长度
+
+		// * orgCode编码长度
 		int codeLength = YouBianCodeUtil.ZHANWEI_LENGTH;
-		// 循环第二遍导入数据
+
+		// * 循环第二遍导入数据
 		for (SysDepartExportVo departExportVo : listSysDeparts) {
 			SysDepart sysDepart = new SysDepart();
 			boolean izExport = false;
 			try {
-				izExport = this.addDepartByName(departExportVo.getDepartNameUrl(), departExportVo.getDepartName(), sysDepart,
-						errorMessageList, tenantId, departMap, num);
+				izExport = this.addDepartByName(
+						departExportVo.getDepartNameUrl(),
+						departExportVo.getDepartName(),
+						sysDepart,
+						errorMessageList,
+						tenantId,
+						departMap,
+						num);
 			} catch (Exception e) {
-				// 没有查找到parentDept
+				// * 没有查找到parentDept
 			}
-			// 没有错误的时候才会导入数据
+
+			// * 没有错误的时候才会导入数据
 			if (izExport) {
 				if (oConvertUtils.isNotEmpty(departExportVo.getOrgCode())) {
+					// * 判断是否已经存在相同编码
 					SysDepart depart = this.baseMapper.queryCompByOrgCode(departExportVo.getOrgCode());
 					if (null != depart) {
 						if (oConvertUtils.isNotEmpty(sysDepart.getParentId())) {
-							// 更新上级部门为叶子节点
 							this.updateIzLeaf(sysDepart.getParentId(), CommonConstant.IS_LEAF);
 						}
-						// 部门名称已存在
 						errorMessageList.add("第 " + num + " 行：记录部门名称“" + departExportVo.getDepartName() + "”部门编码重复，请检查！");
 						continue;
 					}
+
+					// * 判断编码规则
 					String departNameUrl = departExportVo.getDepartNameUrl();
-					// 包含/说明是多级
 					if (departNameUrl.contains(SymbolConstant.SINGLE_SLASH)) {
-						// 判断添加部门的规则是否和生成的一致
 						if (!sysDepart.getOrgCode().equals(departExportVo.getOrgCode())) {
 							if (oConvertUtils.isNotEmpty(sysDepart.getParentId())) {
-								// 更新上级部门为叶子节点
 								this.updateIzLeaf(sysDepart.getParentId(), CommonConstant.IS_LEAF);
 							}
-							// 部门名称已存在
 							errorMessageList.add("第 " + num + " 行：记录部门名称“" + departExportVo.getDepartName() + "”部门编码规则不匹配，请检查！");
 							continue;
 						}
 					}
+
+					// * 设置上下级
 					sysDepart.setOrgCode(departExportVo.getOrgCode());
 					if (oConvertUtils.isNotEmpty(sysDepart.getParentId())) {
-						// 上级
 						sysDepart.setOrgType("2");
 					} else {
-						// 下级
 						sysDepart.setOrgType("1");
 					}
 				} else {
+					// * 根据编码长度设置机构类型
 					sysDepart.setOrgType(sysDepart.getOrgCode().length() / codeLength + "");
 				}
+
 				sysDepart.setDelFlag(CommonConstant.DEL_FLAG_0.toString());
 				sysDepart.setDepartNameEn(departExportVo.getDepartNameEn());
 				sysDepart.setDepartOrder(departExportVo.getDepartOrder());
@@ -1407,7 +1448,10 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 				sysDepart.setFax(departExportVo.getFax());
 				sysDepart.setAddress(departExportVo.getAddress());
 				sysDepart.setMemo(departExportVo.getMemo());
-				ImportExcelUtil.importDateSaveOne(sysDepart, ISysDepartService.class, errorMessageList, num,
+				ImportExcelUtil.importDateSaveOne(
+						sysDepart, ISysDepartService.class,
+						errorMessageList,
+						num,
 						CommonConstant.SQL_INDEX_UNIQ_DEPART_ORG_CODE);
 				departMap.put(departExportVo.getDepartNameUrl(), sysDepart);
 			}
@@ -1416,7 +1460,7 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	}
 
 	/**
-	 * 寻找部门路径
+	 * * 寻找部门路径
 	 *
 	 * @param departVo       部门vo
 	 * @param path           部门路径
@@ -1425,14 +1469,20 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 	 * @param departIdList   部门id集合
 	 * @param idList         需要查询sql的部门id集合
 	 */
-	private void findSysDepartPath(SysDepartExportVo departVo, List<String> path, Integer tenantId,
-			List<SysDepartExportVo> childrenDepart, List<String> departIdList, List<String> idList) {
-		// step 1.查询子部门的数据
-		// 获取租户id和部门父id获取的部门数据
+	private void findSysDepartPath(
+			SysDepartExportVo departVo,
+			List<String> path,
+			Integer tenantId,
+			List<SysDepartExportVo> childrenDepart,
+			List<String> departIdList,
+			List<String> idList) {
+
+		// * step 1.查询子部门的数据
+		// * 获取租户id和部门父id获取的部门数据
 		List<SysDepartExportVo> departList = departMapper.getSysDepartList(departVo.getId(), tenantId, idList);
-		// 部门为空判断
+		// * 部门为空判断
 		if (departList == null || departList.size() <= 0) {
-			// 判断最后一个子部门是否已拼接
+			// * 判断最后一个子部门是否已拼接
 			if (!departIdList.contains(departVo.getId())) {
 				departVo.setDepartNameUrl(String.join(SymbolConstant.SINGLE_SLASH, path));
 				childrenDepart.add(departVo);
@@ -1441,19 +1491,17 @@ public class SysDepartServiceImpl extends ServiceImpl<SysDepartMapper, SysDepart
 		}
 
 		for (SysDepartExportVo exportDepartVo : departList) {
-			// 存放子级路径
+			// * 存放子级路径
 			List<String> cPath = new ArrayList<>(path);
 			cPath.add(exportDepartVo.getDepartName());
-			// step 2.拼接子部门路径
+			// * step 2.拼接子部门路径
 			if (!departIdList.contains(departVo.getId())) {
 				departIdList.add(departVo.getId());
 				departVo.setDepartNameUrl(String.join(SymbolConstant.SINGLE_SLASH, path));
 				childrenDepart.add(departVo);
 			}
-			// step 3.递归查询子路径，直到找不到为止
+			// * step 3.递归查询子路径，直到找不到为止
 			findSysDepartPath(exportDepartVo, cPath, tenantId, childrenDepart, departIdList, idList);
 		}
 	}
-	// ========================end 系统下部门与人员导入
-	// ==================================================================
 }

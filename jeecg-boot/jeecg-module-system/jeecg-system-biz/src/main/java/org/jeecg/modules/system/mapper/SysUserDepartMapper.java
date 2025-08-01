@@ -94,7 +94,7 @@ public interface SysUserDepartMapper extends BaseMapper<SysUserDepart> {
 	void deleteUserDepart(@Param("userId") String userId, @Param("tenantId") String tenantId);
 
 	/**
-	 * 通过部门id和租户id获取用户
+	 * * 通过部门id和租户id获取用户
 	 * 
 	 * @param departId
 	 * @param tenantId

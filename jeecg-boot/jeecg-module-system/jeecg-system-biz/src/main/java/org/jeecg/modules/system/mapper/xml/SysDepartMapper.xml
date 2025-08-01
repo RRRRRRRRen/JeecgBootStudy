@@ -2,11 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.modules.system.mapper.SysDepartMapper">
 
+    <!-- * 根据用户ID查询部门集合 -->
 	<select id="queryUserDeparts" parameterType="String" resultType="org.jeecg.modules.system.entity.SysDepart">
 	   select * from sys_depart where id IN ( select dep_id from sys_user_depart where user_id = #{userId} )
 	</select>
 
-    <!-- 根据username查询所拥有的部门 -->
+    <!-- * 根据username查询所拥有的部门 -->
     <select id="queryDepartsByUsername" parameterType="String" resultType="org.jeecg.modules.system.entity.SysDepart">
         SELECT *
         FROM sys_depart
@@ -21,7 +22,7 @@
         )
     </select>
     
-    <!-- 根据username查询所拥有的部门 -->
+    <!-- * 根据username查询所拥有的部门 -->
     <select id="queryDepartsByUserId" parameterType="String" resultType="java.lang.String">
         SELECT id
         FROM sys_depart
@@ -32,7 +33,7 @@
         )
     </select>
 
-    <!-- 根据部门Id查询,当前和下级所有部门IDS -->
+    <!-- * 根据部门Id查询,当前和下级所有部门IDS -->
     <select id="getSubDepIdsByDepId" resultType="java.lang.String">
 		select id from sys_depart where del_flag = '0' and org_code like concat((select org_code from sys_depart where id=#{departId}),'%')
 	</select>
@@ -44,7 +45,8 @@
             org_code LIKE CONCAT(#{item},'%')
         </foreach>
 	</select>
-     <!--根据parent_id查询下级部门-->
+
+    <!-- * 根据parent_id查询下级部门 -->
     <select id="queryTreeListByPid" parameterType="Object"  resultType="org.jeecg.modules.system.entity.SysDepart">
         SELECT * FROM  sys_depart where del_flag = '0'
         <choose>
@@ -58,12 +60,12 @@
         order by depart_order
     </select>
 
-    <!-- 根据OrgCod查询公司信息 -->
+    <!-- * 根据OrgCod查询公司信息 -->
     <select id="queryCompByOrgCode" resultType="org.jeecg.modules.system.entity.SysDepart">
 		select * from sys_depart where del_flag = '0' and org_category='1' and org_code= #{orgCode,jdbcType=VARCHAR}
 	</select>
     
-    <!--通过父级id和租户id查询部门-->
+    <!-- * 通过父级id和租户id查询部门 -->
     <select id="queryBookDepTreeSync" resultType="org.jeecg.modules.system.entity.SysDepart">
         SELECT * FROM sys_depart
         WHERE
@@ -103,7 +105,7 @@
         ORDER BY org_code DESC
     </select>
     
-    <!--获取父级部门的数据-->
+    <!-- * 获取父级部门的数据 -->
     <select id="getDepartList" resultType="org.jeecg.modules.system.vo.lowapp.ExportDepartVo">
         SELECT id,depart_name,parent_id FROM sys_depart
         WHERE
@@ -120,7 +122,7 @@
         ORDER BY depart_order DESC
     </select>
     
-    <!--根据部门名称和租户id获取部门数据-->
+    <!-- * 根据部门名称和租户id获取部门数据 -->
     <select id="getDepartByName" resultType="org.jeecg.modules.system.entity.SysDepart">
         SELECT id,depart_name,org_code,parent_id FROM sys_depart 
         where
@@ -134,7 +136,7 @@
         order by create_time desc
     </select>
     
-    <!--根据用户id获取用户id和部门名称-->
+    <!-- * 根据用户id获取用户id和部门名称 -->
     <select id="getUserDepartByTenantUserId" resultType="org.jeecg.modules.system.vo.SysUserDepVo">
         SELECT sd.depart_name, sud.user_id, sd.id as deptId, sd.parent_id
         FROM sys_depart sd
@@ -147,7 +149,7 @@
         order by sd.org_code;
     </select>
     
-    <!--根据部门名称和租户id获取分页部门数据-->
+    <!-- * 根据部门名称和租户id获取分页部门数据 -->
     <select id="getDepartPageByName" resultType="org.jeecg.modules.system.entity.SysDepart">
         SELECT id,depart_name,org_code,parent_id FROM sys_depart
         where
@@ -159,7 +161,7 @@
         ORDER BY create_time DESC
     </select>
     
-    <!--通过部门id，查询部门下的用户的账号 -->
+    <!-- * 通过部门id，查询部门下的用户的账号 -->
     <select id="queryUserAccountByDepartIds" resultType="java.lang.String">
         select username from sys_user where id in (select user_id from sys_user_depart where dep_id in
         <foreach  item="item" index="index" collection="departIds" open="(" separator="," close=" )">
@@ -168,7 +170,7 @@
         )
     </select>
     
-    <!--系统后台导出，根据父级id和租户id查询部门数据-->
+    <!-- * 系统后台导出，根据父级id和租户id查询部门数据 -->
     <select id="getSysDepartList" resultType="org.jeecg.modules.system.vo.SysDepartExportVo">
         SELECT id,depart_name,parent_id,depart_name_en,depart_order,description,org_category,org_code,mobile,fax,address,memo FROM sys_depart
         WHERE
