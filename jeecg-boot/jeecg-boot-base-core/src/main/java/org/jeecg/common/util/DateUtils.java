@@ -7,6 +7,9 @@ import java.beans.PropertyEditorSupport;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
+/**
+ * * 线程不安全的格式化，需要配合 ThreadLocal 使用
+ */
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -79,6 +82,7 @@ public class DateUtils extends PropertyEditorSupport {
 
     /**
      * 指定模式的时间格式
+     * 
      * @param pattern
      * @return
      */
@@ -121,8 +125,7 @@ public class DateUtils extends PropertyEditorSupport {
     public static Date getDate() {
         return new Date();
     }
-    
-    
+
     /**
      * 当前日期
      *
@@ -227,7 +230,7 @@ public class DateUtils extends PropertyEditorSupport {
     /**
      * 日期转换为字符串
      *
-     * @param date     日期
+     * @param date    日期
      * @param dateSdf 日期格式
      * @return 字符串
      */
@@ -689,13 +692,14 @@ public class DateUtils extends PropertyEditorSupport {
 
     /**
      * 将字符串转成时间
+     * 
      * @param str
      * @return
      */
-    public static Date parseDatetime(String str){
+    public static Date parseDatetime(String str) {
         try {
             return datetimeFormat.get().parse(str);
-        }catch (Exception e){
+        } catch (Exception e) {
         }
         return null;
     }
